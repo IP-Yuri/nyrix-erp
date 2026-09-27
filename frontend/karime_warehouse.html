@@ -1,209 +1,673 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>NYRIX ERP - Karime Warehouse</title>
+    <title>NYRIX ERP - Karime Warehouse (Logistique &amp; Entrepôt)</title>
+    
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <style>
-        @layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } }
-        ::-webkit-scrollbar { display: none; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS with Plugins -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
-        tailwind.config = { 
-            darkMode: "class", 
-            theme: { 
-                extend: { 
-                    colors: { "tertiary-container": "#825100", "surface-variant": "#dae2fd", "surface-container-high": "#e2e7ff", "on-secondary-fixed-variant": "#005236", "error": "#ba1a1a", "inverse-on-surface": "#eef0ff", "surface-container-highest": "#dae2fd", "surface-bright": "#faf8ff", "on-primary-fixed-variant": "#0039b5", "on-secondary-fixed": "#002113", "secondary-fixed": "#6ffbbe", "inverse-primary": "#b7c4ff", "on-surface-variant": "#434655", "on-tertiary-container": "#ffcb8f", "on-primary-container": "#cad3ff", "outline": "#747686", "secondary-fixed-dim": "#4edea3", "surface-container-lowest": "#ffffff", "background": "#faf8ff", "on-tertiary-fixed": "#2a1700", "error-container": "#ffdad6", "primary-container": "#1d4ed8", "on-error": "#ffffff", "on-error-container": "#93000a", "primary-fixed": "#dce1ff", "on-secondary-container": "#00714d", "on-tertiary": "#ffffff", "on-surface": "#131b2e", "on-tertiary-fixed-variant": "#653e00", "surface": "#faf8ff", "on-primary-fixed": "#001551", "surface-container-low": "#f2f3ff", "on-primary": "#ffffff", "outline-variant": "#c4c5d7", "on-secondary": "#ffffff", "surface-dim": "#d2d9f4", "primary-fixed-dim": "#b7c4ff", "tertiary-fixed": "#ffddb8", "surface-tint": "#2151da", "surface-container": "#eaedff", "tertiary": "#623c00", "primary": "#0037b0", "secondary": "#006c49", "secondary-container": "#6cf8bb", "inverse-surface": "#283044", "tertiary-fixed-dim": "#ffb95f", "on-background": "#131b2e" }, 
-                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, 
-                    spacing: { "space-sm": "0.5rem", "space-lg": "1.25rem", "margin": "1.5rem", "gutter-dense": "0.75rem", "gutter": "1rem", "space-xs": "0.25rem", "space-md": "0.75rem", "margin-compact": "1rem", "space-xl": "1.75rem" }, 
-                    fontFamily: { "display-sm": ["Inter"], "display-lg": ["Inter"], "label-sm": ["Inter"], "tabular-data": ["Geist"], "body-lg": ["Inter"], "metric-md": ["Geist"], "body-sm": ["Inter"], "body-md": ["Inter"], "label-md": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"], "metric-lg": ["Geist"] }, 
-                    fontSize: { "display-sm": ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }], "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }], "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.02em", fontWeight: "600" }], "tabular-data": ["13px", { lineHeight: "18px", letterSpacing: "-0.01em", fontWeight: "500" }], "body-lg": ["15px", { lineHeight: "22px", letterSpacing: "0em", fontWeight: "400" }], "metric-md": ["20px", { lineHeight: "24px", letterSpacing: "-0.02em", fontWeight: "600" }], "body-sm": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }], "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }], "headline-sm": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "600" }], "headline-lg": ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }], "metric-lg": ["28px", { lineHeight: "32px", letterSpacing: "-0.03em", fontWeight: "600" }] } 
-                } 
-            } 
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "brand": {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+                        },
+                        "surface-tint": "#2151da",
+                        "on-surface": "#131b2e",
+                        "surface": "#faf8ff",
+                        "surface-container-low": "#f2f3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e7ff",
+                        "surface-container-highest": "#dae2fd",
+                        "on-surface-variant": "#434655",
+                        "primary": "#0037b0",
+                        "primary-container": "#1d4ed8",
+                        "secondary": "#006c49",
+                        "secondary-container": "#6cf8bb",
+                        "on-secondary-container": "#00714d",
+                        "tertiary": "#623c00",
+                        "tertiary-container": "#825100",
+                        "on-tertiary-container": "#ffcb8f",
+                        "outline": "#747686",
+                        "outline-variant": "#c4c5d7",
+                        "inverse-surface": "#283044",
+                        "inverse-on-surface": "#eef0ff",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff"
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                    spacing: { "space-sm": "0.5rem", "space-lg": "1.25rem", "margin": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem", "space-xl": "1.75rem" },
+                    fontFamily: {
+                        "sans": ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        "tabular-data": ['Inter', 'monospace']
+                    }
+                }
+            }
         };
     </script>
+    <style>
+        @layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .num-tabular { font-variant-numeric: tabular-nums; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
 </head>
-<body class="bg-surface font-body-md text-on-surface antialiased min-h-screen">
-    
-    <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-        <div class="h-16 w-full px-margin flex items-center justify-between">
-            <div class="flex items-center gap-space-lg">
-                <div class="flex items-center gap-space-md">
-                    <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png">
-                    <span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-tight">NYRIX ERP</span>
+
+<body class="bg-surface font-sans text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-brand-100 selection:text-brand-900">
+    <!-- Fixed Top Header Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+        <div class="h-16 w-full px-6 flex items-center justify-between gap-4">
+            <!-- Brand & User Identity -->
+            <div class="flex items-center gap-6 min-w-0">
+                <div class="flex items-center gap-3 shrink-0">
+                    <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png" onerror="this.src='https://ui-avatars.com/api/?name=NYRIX&background=1d4ed8&color=fff&bold=true'">
+                    <div class="flex flex-col">
+                        <span class="text-base font-bold text-brand-700 leading-none tracking-tight">NYRIX ERP</span>
+                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Warehouse Logistics</span>
+                    </div>
                 </div>
-                <div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-lg bg-secondary-container text-on-secondary-container font-label-sm text-label-sm border border-secondary/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-                    <span class="">Connecté: WAREHOUSE</span>
+
+                <div class="h-6 w-px bg-slate-200 hidden md:block shrink-0"></div>
+
+                <div class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold shrink-0">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Connecté: WAREHOUSE (Karime • Superviseur Quai)</span>
                 </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden xl:flex items-center gap-2">
+                    <button id="nav-btn-ops" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-brand-50 text-brand-700 border border-brand-200 flex items-center gap-1.5" onclick="window.switchTab('operations')">
+                        <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                        <span>Opérations Quai</span>
+                    </button>
+                    <button id="nav-btn-inbound" type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5 relative" onclick="window.switchTab('inbound')">
+                        <span class="material-symbols-outlined text-[16px]">move_to_inbox</span>
+                        <span>Réception Inbound</span>
+                        <span id="inbound-pending-count" class="hidden px-1.5 py-0.2 bg-amber-500 text-white font-bold text-[10px] rounded-full">0</span>
+                    </button>
+                </nav>
             </div>
-            <div class="flex items-center gap-space-md">
-                <a class="h-8 px-space-md rounded-lg bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low font-label-md text-label-md inline-flex items-center transition-colors cursor-pointer" onclick="window.logout()">Déconnexion</a>
-                <div class="w-px h-6 bg-outline-variant/60"></div>
-                <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
+
+            <!-- Action Buttons on Header Right -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button type="button" class="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs" onclick="window.openModal('modal-discrepancy')">
+                    <span class="material-symbols-outlined text-[16px] text-amber-600">warning</span>
+                    <span>Déclarer un Écart</span>
+                </button>
+                <button type="button" class="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs" onclick="window.openModal('modal-returns')">
+                    <span class="material-symbols-outlined text-[16px] text-indigo-600">assignment_return</span>
+                    <span>Contrôle des Retours</span>
+                </button>
+                <button type="button" class="hidden lg:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs" onclick="window.openModal('modal-ledger')">
+                    <span class="material-symbols-outlined text-[16px] text-slate-500">history</span>
+                    <span>Historique (Ledger)</span>
+                </button>
+                <button type="button" class="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-700 text-xs font-semibold transition-colors" onclick="window.syncCarrier(this)" title="Synchroniser avec Digylog">
+                    <span class="material-symbols-outlined text-[16px] text-brand-600">cloud_sync</span>
+                    <span>Sync Transporteur</span>
+                </button>
+
+                <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+                <button type="button" class="flex items-center gap-1 h-8 px-2.5 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-800 text-xs font-semibold transition-colors" onclick="window.logout()">
+                    <span class="material-symbols-outlined text-[16px]">logout</span>
+                    <span class="hidden sm:inline">Déconnexion</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="w-full pt-16 bg-surface min-h-[calc(100vh-4rem)]">
-        
-        <!-- STATE 1: INBOUND RECEPTION -->
-        <div id="view-inbound" class="hidden flex flex-col w-full max-w-7xl mx-auto px-margin py-margin">
-            <div class="w-full bg-surface-container-lowest rounded-xl shadow-sm p-6 mb-space-lg">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-md">
-                    <div class="flex items-start sm:items-center gap-space-md">
-                        <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shrink-0">
+    <!-- Main Workspace -->
+    <main class="w-full pt-16 flex-1 flex flex-col">
+
+        <!-- ========================================== -->
+        <!-- STATE 1: TABLEAU DE BORD DE RÉCEPTION INBOUND -->
+        <!-- ========================================== -->
+        <div id="view-inbound" class="hidden flex flex-col w-full max-w-7xl mx-auto px-6 py-6 pb-12">
+            <!-- Top Operational Banner / Arrival Dashboard Card -->
+            <div class="w-full bg-white rounded-xl shadow-xs border border-slate-200 p-6 mb-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div class="flex items-start sm:items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
                             <span class="material-symbols-outlined text-[28px]">move_to_inbox</span>
                         </div>
                         <div>
-                            <div class="flex flex-wrap items-center gap-space-xs">
-                                <h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">Tableau de Bord de Réception</h1>
-                            </div>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="relative flex h-2.5 w-2.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Tableau de Bord de Réception</h1>
+                                <span id="inbound-arrival-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                    <span class="material-symbols-outlined text-[14px]">local_shipping</span>
+                                    Arrivage #ARR-2025-098 • Quai Tit Mellil Quai A-04
                                 </span>
-                                <span class="font-body-sm text-body-sm text-secondary font-semibold">En attente de pointage physique & déchargement</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-1 text-xs">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span class="text-emerald-700 font-semibold">En attente de pointage physique &amp; déchargement</span>
+                                <span class="text-slate-300">•</span>
+                                <span class="text-slate-500">Arrivée quai: Aujourd'hui</span>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Telemetry Metric -->
+                    <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl self-start lg:self-auto">
+                        <div class="text-right">
+                            <span class="block text-[10px] text-slate-500 uppercase font-bold tracking-wider">Volume Manifesté</span>
+                            <span class="text-xl font-extrabold text-slate-900 num-tabular" id="inbound-total-qty">0 <span class="text-xs font-normal text-slate-500">unités</span></span>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600">
+                            <span class="material-symbols-outlined text-[22px]">inventory_2</span>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="overflow-x-auto rounded-lg bg-surface-container-low mb-space-lg">
-                    <table class="w-full text-left border-collapse">
+
+                <!-- Metadata Badges Strip -->
+                <div class="flex flex-wrap items-center gap-2 py-3 bg-slate-50 px-4 rounded-xl my-4 text-xs">
+                    <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                        <span class="material-symbols-outlined text-[15px] text-brand-600">corporate_fare</span>
+                        <span class="text-slate-400">Fournisseur:</span>
+                        <span class="font-bold text-slate-800" id="inbound-supplier">Global Trade Logistics SARL</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                        <span class="material-symbols-outlined text-[15px] text-brand-600">receipt_long</span>
+                        <span class="text-slate-400">BL / Facture:</span>
+                        <span class="font-mono font-bold text-slate-800" id="inbound-invoice-ref">FAC-2025-0984</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                        <span class="material-symbols-outlined text-[15px] text-brand-600">package_2</span>
+                        <span class="text-slate-400">Articles / Lignes:</span>
+                        <span class="font-bold text-emerald-700" id="inbound-items-count">0 lignes</span>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs sm:ml-auto">
+                        <span class="material-symbols-outlined text-[15px] text-slate-400">badge</span>
+                        <span class="text-slate-400">Chef de Quai:</span>
+                        <span class="font-bold text-slate-800">Karime (Poste A4)</span>
+                    </div>
+                </div>
+
+                <!-- Incoming Items Manifest Table -->
+                <div class="overflow-x-auto rounded-lg border border-slate-200 mb-5">
+                    <table class="w-full text-left border-collapse text-xs">
                         <thead>
-                            <tr class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-                                <th class="py-2.5 px-space-md font-semibold">SKU</th>
-                                <th class="py-2.5 px-space-md font-semibold">Désignation</th>
-                                <th class="py-2.5 px-space-md text-right font-semibold">Quantité Importée</th>
+                            <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-2.5 px-4">SKU</th>
+                                <th class="py-2.5 px-4 min-w-[240px]">Désignation &amp; Spécifications</th>
+                                <th class="py-2.5 px-4 text-right">Quantité Importée</th>
+                                <th class="py-2.5 px-4">Conditionnement</th>
+                                <th class="py-2.5 px-4 text-center">Statut Physique</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y-0 text-on-surface font-body-sm text-body-sm bg-surface-container-lowest" id="inbound-table">
+                        <tbody id="inbound-table-body" class="divide-y divide-slate-200 text-slate-700">
+                            <tr>
+                                <td colspan="5" class="py-8 text-center text-slate-400 italic">Aucun arrivage en attente de vérification physique.</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pt-space-xs">
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-space-sm">
-                        <button id="btnValidateReceipt" class="flex items-center justify-center gap-2 px-space-lg py-3 rounded-lg bg-secondary text-on-secondary font-headline-sm text-headline-sm font-bold shadow-md hover:opacity-95 active:scale-[0.99] transition-all cursor-pointer">
-                            <span class="material-symbols-outlined text-[24px]">check_circle</span>
-                            <span class="">Valider la Réception Physique</span>
+                <!-- Validation Actions -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <span class="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
+                        <span>Le pointage valide l'entrée physique des marchandises dans l'inventaire entrepôt.</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors" onclick="window.switchTab('operations')">
+                            Basculer vers Opérations Quai
+                        </button>
+                        <button id="btnValidateReceipt" type="button" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                            <span>Valider la Réception Physique</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- STATE 2: USUAL OPERATIONS -->
-        <div id="view-operations" class="hidden flex flex-col w-full px-margin py-space-lg gap-space-lg">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm pb-space-xs">
+        <!-- ========================================== -->
+        <!-- STATE 2: USUAL OPERATIONS (SUPERVISION QUAI) -->
+        <!-- ========================================== -->
+        <div id="view-operations" class="flex flex-col w-full max-w-7xl mx-auto px-6 py-6 pb-12 gap-6">
+            <!-- Header Context Strip -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-1">
                 <div>
-                    <div class="flex items-center gap-space-sm">
-                        <span class="font-headline-lg text-headline-lg text-on-surface">Supervision Opérationnelle des Expéditions</span>
-                        <span class="px-space-sm py-0.5 rounded-lg bg-surface-container-high text-on-primary-fixed-variant font-label-sm text-label-sm uppercase tracking-wider">État 2 : Opérations Journalières</span>
+                    <div class="flex items-center gap-2.5">
+                        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Supervision Opérationnelle des Expéditions</h1>
+                        <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-brand-700 border border-brand-200 text-[11px] font-bold uppercase tracking-wider">État 2 : Opérations Journalières</span>
                     </div>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Terminal Quai #04 • Synchronisation transporteur active</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Terminal Quai #04 • Synchronisation transporteur active • Validation des flux physiques et d'encaissement</p>
+                </div>
+                <div class="flex items-center gap-3 self-start md:self-auto">
+                    <div class="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs text-xs font-semibold text-slate-700">
+                        <span class="material-symbols-outlined text-[16px] text-emerald-600 animate-spin">sync</span>
+                        <span id="live-clock" class="num-tabular">--:--:-- UTC+1</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    </div>
                 </div>
             </div>
 
-            <section class="w-full bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-space-md">
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm">
-                    <div class="flex items-start sm:items-center gap-space-md">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-primary text-[22px]">local_shipping</span>
+            <!-- Top Row: Logistics Tracking Card -->
+            <section class="w-full bg-white rounded-xl p-6 shadow-xs border border-slate-200 flex flex-col gap-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-100">
+                    <div class="flex items-start sm:items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">local_shipping</span>
                         </div>
                         <div>
-                            <h2 class="font-display-sm text-display-sm text-on-surface">Visibilité Logistique B2B & B2C</h2>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 class="text-base font-bold text-slate-900">Visibilité Logistique B2B &amp; B2C</h2>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-brand-700 text-[10px] font-bold">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-brand-600 animate-pulse"></span>
+                                    Flux sortants actifs
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold">
+                                    <span class="material-symbols-outlined text-[12px]">cloud_done</span>
+                                    Digylog Sync: Temps Réel
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">Surveillance unifiée des colis préparés, des expéditions quai et des livraisons en tournée (Données opérationnelles strictes, sans prix)</p>
+                        </div>
+                    </div>
+
+                    <!-- Metric micro-badges -->
+                    <div class="flex items-center gap-2">
+                        <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-center min-w-[85px]">
+                            <span class="block text-[10px] font-bold uppercase text-slate-400">Total Jour</span>
+                            <span id="metric-total-orders" class="font-bold text-xs text-slate-800 num-tabular">0 commandes</span>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-center min-w-[85px]">
+                            <span class="block text-[10px] font-bold uppercase text-slate-400">En Transit</span>
+                            <span id="metric-transit-orders" class="font-bold text-xs text-brand-700 num-tabular">0 colis</span>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-center min-w-[85px]">
+                            <span class="block text-[10px] font-bold uppercase text-slate-400">Taux Succès</span>
+                            <span class="font-bold text-xs text-emerald-700 num-tabular">98.6%</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="w-full overflow-x-auto rounded-lg">
-                    <table class="w-full text-left border-collapse" id="logisticsTable">
+                <!-- Controls Strip (Filters & Search) -->
+                <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
+                    <!-- Filter Pills -->
+                    <div class="flex items-center gap-1 overflow-x-auto" id="filterContainer">
+                        <button type="button" class="filter-pill active px-3 py-1.5 rounded-lg font-bold bg-white text-slate-900 border border-slate-200 shadow-2xs transition-all" data-filter="all">Tous (0)</button>
+                        <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="B2B">B2B (0)</button>
+                        <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="B2C">B2C (0)</button>
+                        <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="encours">En cours (0)</button>
+                    </div>
+
+                    <!-- Date & Search -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative flex-1 min-w-[200px] md:w-64">
+                            <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-slate-400">search</span>
+                            <input id="orderSearchInput" class="w-full h-8 pl-8 pr-3 text-xs bg-white text-slate-900 placeholder:text-slate-400 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 shadow-2xs" placeholder="Rechercher N° commande, client ou ville..." type="text">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logistics High-Density Table (NO Financial/Price Columns) -->
+                <div class="w-full overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full text-left border-collapse text-xs" id="logisticsTable">
                         <thead>
-                            <tr class="bg-surface-container text-on-surface-variant uppercase font-label-sm text-label-sm tracking-wider">
-                                <th class="py-2.5 px-4 font-semibold">N° Commande</th>
-                                <th class="py-2.5 px-4 font-semibold">Type</th>
-                                <th class="py-2.5 px-4 font-semibold">Statut</th>
+                            <tr class="bg-slate-50 text-slate-600 uppercase font-bold tracking-wider border-b border-slate-200">
+                                <th class="py-2.5 px-4">N° Commande</th>
+                                <th class="py-2.5 px-4">Type</th>
+                                <th class="py-2.5 px-4">Destinataire &amp; Ville</th>
+                                <th class="py-2.5 px-4">Transporteur</th>
+                                <th class="py-2.5 px-4">Statut Quai</th>
+                                <th class="py-2.5 px-4 text-right">Horodatage / Pointage</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y-0 text-body-sm font-body-sm" id="ops-logistics-body">
+                        <tbody id="ops-logistics-body" class="divide-y divide-slate-200 text-slate-700">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-slate-400 italic">Chargement des commandes en cours...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Table Sub-Footer -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1 text-slate-500 text-[11px]">
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span>Index d'expédition synchronisé avec le Hub Principal Digylog API Seller v2.1.0</span>
+                    </div>
+                    <span id="logistics-footer-count">Affichage de 0 enregistrements</span>
+                </div>
             </section>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg w-full">
-                <!-- Transfert au Packer -->
-                <section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col justify-between">
-                    <div class="flex flex-col gap-space-md">
-                        <div class="flex items-start justify-between gap-space-sm">
+            <!-- Bottom Row: 50 / 50 Column Grid Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-start">
+                
+                <!-- LEFT COLUMN: Transfert de Stock Card -->
+                <section class="bg-white rounded-xl p-6 shadow-xs border border-slate-200 flex flex-col justify-between">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-start justify-between gap-2 pb-2 border-b border-slate-100">
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-primary text-[22px]">swap_horiz</span>
-                                    <h3 class="font-headline-lg text-headline-lg text-on-surface font-semibold">Transfert de Stock</h3>
+                                    <span class="material-symbols-outlined text-brand-600 text-[22px]">swap_horiz</span>
+                                    <h3 class="text-base font-bold text-slate-900">Transfert de Stock</h3>
                                 </div>
-                                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Assignation et approvisionnement du poste de préparation (Packer)</p>
+                                <p class="text-xs text-slate-500 mt-0.5">Assignation et approvisionnement du poste de préparation (Packer)</p>
                             </div>
+                            <span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold">Packer 01 Actif</span>
                         </div>
-                        <form class="flex flex-col gap-space-md mt-1" id="transferForm">
-                            <div class="flex flex-col gap-space-sm" id="transferLinesContainer">
-                                <div class="flex items-center justify-between">
-                                    <label class="font-label-sm text-label-sm uppercase tracking-wide text-on-surface-variant font-semibold">Articles / Lignes de Préparation</label>
+
+                        <!-- Transfer Form -->
+                        <form class="flex flex-col gap-4" id="transferForm">
+                            <!-- Target Station Common Selector -->
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Poste de Destination</label>
+                                <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 text-xs">
+                                    <div class="flex items-center gap-2 font-semibold">
+                                        <span class="material-symbols-outlined text-brand-600 text-[18px]">table_restaurant</span>
+                                        <span>Station Kiosque : Table 01 - Packer</span>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">DISPONIBLE</span>
                                 </div>
-                                <div class="transfer-line p-2.5 rounded-lg bg-surface-container-low flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border border-outline-variant/60">
+                            </div>
+
+                            <!-- Multi-line Product Selection Container -->
+                            <div class="flex flex-col gap-2.5" id="transferLinesContainer">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Articles / Lignes de Préparation</label>
+                                    <span class="text-[11px] text-slate-400">Cartons unitaires</span>
+                                </div>
+
+                                <!-- Line Item 1 -->
+                                <div class="transfer-line p-2.5 rounded-lg bg-slate-50 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border border-slate-200">
                                     <div class="relative flex-1">
-                                        <select class="transfer-sku w-full h-10 px-3 pr-8 rounded-lg bg-surface-container-lowest text-on-surface text-body-sm font-body-sm focus:outline-none focus:ring-1 focus:ring-primary appearance-none cursor-pointer border border-outline-variant/60">
+                                        <select class="transfer-sku w-full h-9 px-3 pr-8 rounded-lg bg-white text-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-brand-500 border border-slate-300 cursor-pointer">
                                         </select>
                                     </div>
                                     <div class="flex items-center gap-1.5 shrink-0">
-                                        <input class="transfer-qty w-16 h-10 px-2 text-center text-metric-md font-tabular-data bg-surface-container-lowest border border-outline-variant/60 text-on-surface rounded-lg focus:outline-none focus:ring-1 focus:ring-primary" min="1" type="number" value="1">
-                                        <button class="btnRemoveLine w-9 h-10 rounded-lg bg-transparent text-outline hover:text-error flex items-center justify-center transition-colors cursor-pointer" type="button" title="Supprimer la ligne">
-                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        <button type="button" class="btnQtyMinus w-8 h-9 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 flex items-center justify-center font-bold">
+                                            <span class="material-symbols-outlined text-[15px]">remove</span>
+                                        </button>
+                                        <input class="transfer-qty w-14 h-9 text-center text-xs font-bold num-tabular bg-white border border-slate-300 text-slate-900 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-500" min="1" type="number" value="10">
+                                        <button type="button" class="btnQtyPlus w-8 h-9 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 flex items-center justify-center font-bold">
+                                            <span class="material-symbols-outlined text-[15px]">add</span>
+                                        </button>
+                                        <button type="button" class="btnRemoveLine w-8 h-9 rounded-lg text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors" title="Supprimer la ligne">
+                                            <span class="material-symbols-outlined text-[17px]">delete</span>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                            <button id="btnAddTransferLine" class="w-full h-9 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 font-label-md text-label-md flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer" type="button">
-                                <span class="material-symbols-outlined text-[18px]">add</span>
-                                <span class="">+ Ajouter une ligne</span>
+
+                            <!-- Add Line Button -->
+                            <button id="btnAddTransferLine" type="button" class="w-full h-8 rounded-lg border border-dashed border-brand-300 text-brand-700 hover:bg-brand-50 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">add</span>
+                                <span>+ Ajouter une ligne de produit</span>
                             </button>
-                            <button class="w-full h-11 rounded-lg bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center justify-center gap-2 shadow-sm transition-all focus:ring-2 focus:ring-primary focus:ring-offset-2 mt-2" type="submit">
-                                <span class="material-symbols-outlined text-[20px]">move_up</span>
-                                <span class="">Transférer au Packer</span>
+
+                            <!-- Submit Transfer -->
+                            <button id="btnSubmitTransfer" type="submit" class="w-full h-10 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer">
+                                <span class="material-symbols-outlined text-[18px]">move_up</span>
+                                <span>Transférer au Packer</span>
                             </button>
                         </form>
                     </div>
+
+                    <!-- Recent Transfer Strip -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-slate-500 text-xs">
+                        <span class="material-symbols-outlined text-[18px] text-brand-600 shrink-0">history</span>
+                        <span class="truncate font-mono" id="recentTransferText">
+                            <strong>Dernier transfert :</strong> Aucun transfert effectué durant cette session.
+                        </span>
+                    </div>
                 </section>
 
-                <!-- Livre de Caisse -->
-                <section class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col justify-between">
-                    <div class="flex flex-col gap-space-md">
-                        <div class="flex items-start justify-between gap-space-sm">
+                <!-- RIGHT COLUMN: Livre de Caisse (Digylog) Card -->
+                <section class="bg-white rounded-xl p-6 shadow-xs border border-slate-200 flex flex-col justify-between">
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-start justify-between gap-2 pb-2 border-b border-slate-100">
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <span class="material-symbols-outlined text-secondary text-[22px]">account_balance_wallet</span>
-                                    <h3 class="font-headline-lg text-headline-lg text-on-surface font-semibold">Livre de Caisse</h3>
+                                    <span class="material-symbols-outlined text-emerald-600 text-[22px]">account_balance_wallet</span>
+                                    <h3 class="text-base font-bold text-slate-900">Livre de Caisse (Digylog)</h3>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-0.5">Enregistrement des recettes espèces remises par les livreurs au retour de tournée</p>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">COD / Espèces</span>
+                        </div>
+
+                        <!-- Cash Collection Form -->
+                        <form class="flex flex-col gap-3 text-xs" id="cashForm">
+                            <!-- Nom du Livreur -->
+                            <div class="flex flex-col gap-1">
+                                <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="livreurInput">Nom du Livreur</label>
+                                <div class="relative">
+                                    <input class="w-full h-9 px-3 pr-8 rounded-lg bg-slate-50 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 font-medium" id="livreurInput" list="livreursList" placeholder="Sélectionnez ou recherchez le livreur..." value="Karim Benjelloun — Tournée Casablanca Centre">
+                                    <datalist id="livreursList">
+                                        <option value="Karim Benjelloun — Tournée Casablanca Centre"></option>
+                                        <option value="Youssef Amrani — Tournée Mohammedia"></option>
+                                        <option value="Tariq Mansouri — Tournée Ain Sebaa"></option>
+                                        <option value="Mehdi El Fassi — Tournée Rabat Sud"></option>
+                                    </datalist>
+                                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[17px]">person</span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="flex items-center justify-between p-3 rounded-lg bg-secondary-container text-on-secondary-container">
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[20px]">account_balance</span>
-                                <span class="font-label-md text-label-md uppercase font-bold tracking-wide">Total Recettes</span>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="flex flex-col gap-1">
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="bordereauInput">N° Tournée / Bordereau</label>
+                                    <input class="w-full h-9 px-3 rounded-lg bg-slate-50 text-slate-900 text-xs font-mono font-bold uppercase focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200" id="bordereauInput" type="text" value="DIG-TR-88219">
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Mode de Règlement</label>
+                                    <div class="h-9 px-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-slate-700 font-medium">
+                                        <span>Espèces / Cash vérifié</span>
+                                        <span class="material-symbols-outlined text-emerald-600 text-[17px]">verified</span>
+                                    </div>
+                                </div>
                             </div>
-                            <span class="font-metric-lg text-metric-md sm:text-metric-lg font-bold font-tabular-data">0.00 MAD</span>
+
+                            <!-- Montant Collecté (MAD) -->
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center justify-between">
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="montantInput">Montant Collecté</label>
+                                    <span class="text-[11px] text-emerald-700 font-bold">Comptage physique validé</span>
+                                </div>
+                                <div class="relative">
+                                    <input class="w-full h-11 pl-3 pr-16 text-xl font-extrabold num-tabular text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" id="montantInput" step="10.00" type="number" value="4850.00">
+                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">MAD</span>
+                                </div>
+                            </div>
+
+                            <!-- Submit Cash -->
+                            <button id="btnSubmitCash" class="w-full h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer mt-1" type="submit">
+                                <span class="material-symbols-outlined text-[18px]">payments</span>
+                                <span>Enregistrer Recette</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Cash Ledger Summary Widget -->
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2.5">
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px] text-emerald-700">account_balance</span>
+                                <span class="text-xs uppercase font-bold tracking-wider">Total Recettes Encaissées</span>
+                            </div>
+                            <span class="text-lg font-extrabold font-mono" id="totalCashDisplay">0.00 MAD</span>
+                        </div>
+
+                        <!-- Recent Validations List -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col gap-1.5 text-xs" id="recentCashList">
+                            <span class="text-slate-400 italic text-center py-2">Aucun encaissement pour le moment.</span>
                         </div>
                     </div>
                 </section>
             </div>
         </div>
-
     </main>
 
+    <!-- ========================================== -->
+    <!-- INTERACTIVE MODALS -->
+    <!-- ========================================== -->
+
+    <!-- MODAL 1: Déclarer un Écart -->
+    <div id="modal-discrepancy" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">warning</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Déclarer un Écart de Stock</h3>
+                </div>
+                <button type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" onclick="window.closeModal('modal-discrepancy')">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <form id="form-discrepancy" class="flex flex-col gap-3 text-xs">
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-slate-500 mb-1" for="disc-sku">Article (SKU)</label>
+                    <select id="disc-sku" class="w-full h-9 px-3 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-brand-500">
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-slate-500 mb-1" for="disc-qty">Quantité Manquante</label>
+                    <input id="disc-qty" type="number" min="1" value="1" class="w-full h-9 px-3 rounded-lg border border-slate-300 text-xs font-bold num-tabular focus:ring-1 focus:ring-brand-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-slate-500 mb-1" for="disc-reason">Motif de l'Écart</label>
+                    <select id="disc-reason" class="w-full h-9 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-1 focus:ring-brand-500">
+                        <option value="DOUANE">Retenue Douanière / Contrôle échantillon</option>
+                        <option value="TESTS">Prélèvement Tests &amp; Qualité interne</option>
+                        <option value="CADEAUX">Cadeaux Promotionnels / Échantillons B2B</option>
+                    </select>
+                </div>
+
+                <div class="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px]">
+                    <strong>Note :</strong> L'écart sera soumis à l'approbation d'Othmane (Admin Finance) avant ajustement comptable définitif.
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold" onclick="window.closeModal('modal-discrepancy')">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold shadow-xs">Soumettre l'Écart</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Contrôle des Retours -->
+    <div id="modal-returns" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">assignment_return</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Contrôle des Retours Colis</h3>
+                </div>
+                <button type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" onclick="window.closeModal('modal-returns')">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <form id="form-returns" class="flex flex-col gap-3 text-xs">
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-slate-500 mb-1" for="return-sku">Article Retourné (SKU)</label>
+                    <select id="return-sku" class="w-full h-9 px-3 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-brand-500">
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-slate-500 mb-1" for="return-qty">Quantité</label>
+                    <input id="return-qty" type="number" min="1" value="1" class="w-full h-9 px-3 rounded-lg border border-slate-300 text-xs font-bold num-tabular focus:ring-1 focus:ring-brand-500">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] uppercase font-bold text-slate-500 mb-1">État Physique du Colis</label>
+                    <div class="space-y-2 mt-1">
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100">
+                            <input type="radio" name="return-condition" value="healthy" checked class="text-brand-600 focus:ring-brand-500">
+                            <div>
+                                <span class="font-bold text-slate-800 block">Colis intact / Non-ouvert</span>
+                                <span class="text-[11px] text-slate-500">Réintégration immédiate dans le stock disponible.</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-rose-200 bg-rose-50/50 cursor-pointer hover:bg-rose-50">
+                            <input type="radio" name="return-condition" value="damaged" class="text-rose-600 focus:ring-rose-500">
+                            <div>
+                                <span class="font-bold text-rose-800 block">Marchandise endommagée / avariée</span>
+                                <span class="text-[11px] text-rose-600">Isolement immédiat en zone Quarantaine (hors stock vendable).</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold" onclick="window.closeModal('modal-returns')">Annuler</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-xs">Valider le Retour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Historique Ledger -->
+    <div id="modal-ledger" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 flex flex-col gap-4 max-h-[85vh]">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">history</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">Journal d'Audit du Stock (Stock Ledger)</h3>
+                </div>
+                <button type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" onclick="window.closeModal('modal-ledger')">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 rounded-lg border border-slate-200">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 uppercase font-bold tracking-wider border-b border-slate-200 sticky top-0">
+                            <th class="py-2.5 px-3">Date</th>
+                            <th class="py-2.5 px-3">SKU</th>
+                            <th class="py-2.5 px-3">Action</th>
+                            <th class="py-2.5 px-3 text-right">Variation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-table-body" class="divide-y divide-slate-200 text-slate-700">
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-slate-400 italic">Chargement du journal...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end pt-1">
+                <button type="button" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs" onclick="window.closeModal('modal-ledger')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="js/api.js"></script>
     <script src="js/karime.js"></script>
 </body>

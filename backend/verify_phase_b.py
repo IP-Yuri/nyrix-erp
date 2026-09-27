@@ -21,12 +21,12 @@ def run_tests():
         assert data["username"] == user
         assert data["role"] in ["ADMIN", "WAREHOUSE", "PACKER", "B2B"]
         tokens[user] = data["access_token"]
-        print(f"✅ Success login for {user} (Role: {data['role']})")
+        print(f"[OK] Success login for {user} (Role: {data['role']})")
 
     # 2. Test failed login
     response = client.post("/api/auth/login", json={"username": "othmane", "password": "wrongpassword"})
     assert response.status_code == 401, f"Expected 401, got {response.status_code}"
-    print("✅ Success: 401 Unauthorized for wrong password")
+    print("[OK] Success: 401 Unauthorized for wrong password")
 
     # 3. Test RBAC dummy route
     # Using PACKER token to access ADMIN route
@@ -34,16 +34,16 @@ def run_tests():
     headers = {"Authorization": f"Bearer {packer_token}"}
     response = client.get("/api/test-admin-only", headers=headers)
     assert response.status_code == 403, f"Expected 403, got {response.status_code}"
-    print("✅ Success: 403 Forbidden when PACKER accesses ADMIN route")
+    print("[OK] Success: 403 Forbidden when PACKER accesses ADMIN route")
     
     # Using OTHMANE (ADMIN) token to access ADMIN route
     othmane_token = tokens["othmane"]
     headers = {"Authorization": f"Bearer {othmane_token}"}
     response = client.get("/api/test-admin-only", headers=headers)
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
-    print("✅ Success: 200 OK when ADMIN accesses ADMIN route")
+    print("[OK] Success: 200 OK when ADMIN accesses ADMIN route")
     
-    print("\n🎉 Phase B Verification Passed Successfully!")
+    print("\nPhase B Verification Passed Successfully!")
 
 if __name__ == "__main__":
     run_tests()

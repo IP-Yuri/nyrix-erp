@@ -49,6 +49,14 @@ def verify_inbound(id: str, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success"}
 
+@router.post("/inbound/accept")
+def accept_inbound_latest(db: Session = Depends(get_db)):
+    shipments = db.query(InboundShipment).filter(InboundShipment.status == ShipmentStatusEnum.EN_ATTENTE_RECEPTION).all()
+    for s in shipments:
+        s.status = ShipmentStatusEnum.RECEPTIONNE
+    db.commit()
+    return {"status": "success", "count": len(shipments)}
+
 @router.get("/inventory", response_model=List[ProductOperationalOut])
 def get_inventory(db: Session = Depends(get_db)):
     products = db.query(Product).all()
