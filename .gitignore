@@ -38,3 +38,5 @@ desktop.ini
 # Temporary scratch & test artifacts
 scratch/
 .pytest_cache/
+.neon
+node_modules/
