@@ -8,6 +8,7 @@ load_dotenv()
 DIGYLOG_BASE_URL = os.getenv("DIGYLOG_BASE_URL", "https://api.digylog.com/api/v2/seller")
 DIGYLOG_REFERER = os.getenv("DIGYLOG_REFERER", "https://apiseller.digylog.com")
 DIGYLOG_API_TOKEN = os.getenv("DIGYLOG_API_TOKEN", "")
+DIGYLOG_STORE_NAME = os.getenv("DIGYLOG_STORE_NAME", "Nyrix")
 
 class DigylogClient:
     """
@@ -60,15 +61,16 @@ class DigylogClient:
     def create_standard_orders(
         self,
         orders: List[Dict[str, Any]],
-        store: str = "default",
+        store: Optional[str] = None,
         network: int = 1,
         sent_type: int = 1,
         check_duplicate: int = 0
     ) -> Dict[str, Any]:
         """POST /api/v2/seller/orders/standard"""
+        target_store = store or DIGYLOG_STORE_NAME
         payload = {
             "network": network,
-            "store": store,
+            "store": target_store,
             "sentType": sent_type,
             "checkDuplicate": check_duplicate,
             "orders": orders

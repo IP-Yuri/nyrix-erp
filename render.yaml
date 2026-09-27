@@ -17,3 +17,9 @@ services:
         value: 1ZIZrxWkbIbcqNjkccaTlU0te6QL8Ui9iNSZlxfRwMao
       - key: DIGYLOG_BASE_URL
         value: https://api.digylog.com/api/v2/seller
+      - key: DIGYLOG_REFERER
+        value: https://apiseller.digylog.com
+      - key: DIGYLOG_STORE_NAME
+        value: Nyrix
+      - key: DIGYLOG_API_TOKEN
+        sync: false
