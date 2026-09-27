@@ -79,7 +79,7 @@ class Product(Base):
 class Order(Base):
     __tablename__ = "orders"
     tracking_number = Column(String(255), primary_key=True, index=True)
-    sheet_order_id = Column(String(255), unique=True, nullable=True)
+    sheet_order_id = Column(String(255), index=True, nullable=True)
     type = Column(Enum(OrderTypeEnum), nullable=False)
     owner_id = Column(String(36), ForeignKey("users.id"), nullable=True)
     client_name = Column(String(255), nullable=False)
