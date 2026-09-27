@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>NYRIX ERP - Packer Tablet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        @layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } }
+        ::-webkit-scrollbar { display: none; }
+    </style>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "background": "#faf8ff", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#2a1700", "on-tertiary": "#ffffff", "outline-variant": "#c4c5d7", "outline": "#747686", "tertiary-fixed-dim": "#ffb95f", "surface-dim": "#d2d9f4", "primary": "#0037b0", "surface": "#faf8ff", "surface-container": "#eaedff", "primary-container": "#1d4ed8", "on-surface": "#131b2e", "secondary": "#006c49", "on-tertiary-container": "#ffcb8f", "on-secondary-container": "#00714d", "surface-variant": "#dae2fd", "error": "#ba1a1a", "primary-fixed-dim": "#b7c4ff", "on-surface-variant": "#434655", "on-secondary-fixed-variant": "#005236", "secondary-fixed-dim": "#4edea3", "on-primary-fixed": "#001551", "surface-bright": "#faf8ff", "on-background": "#131b2e", "inverse-primary": "#b7c4ff", "surface-tint": "#2151da", "on-primary": "#ffffff", "on-primary-container": "#cad3ff", "on-secondary-fixed": "#002113", "tertiary-container": "#825100", "on-tertiary-fixed-variant": "#653e00", "secondary-container": "#6cf8bb", "tertiary": "#623c00", "error-container": "#ffdad6", "on-primary-fixed-variant": "#0039b5", "surface-container-low": "#f2f3ff", "inverse-surface": "#283044", "on-secondary": "#ffffff", "on-error": "#ffffff", "surface-container-highest": "#dae2fd", "tertiary-fixed": "#ffddb8", "on-error-container": "#93000a", "inverse-on-surface": "#eef0ff", "surface-container-high": "#e2e7ff", "primary-fixed": "#dce1ff", "secondary-fixed": "#6ffbbe" },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                    spacing: { "margin": "1.5rem", "margin-compact": "1rem", "space-sm": "0.5rem", "space-xl": "1.75rem", "space-lg": "1.25rem", "space-xs": "0.25rem", "space-md": "0.75rem", "gutter": "1rem", "gutter-dense": "0.75rem" },
+                    fontFamily: { "headline-sm": ["Inter"], "label-md": ["Inter"], "label-sm": ["Inter"], "body-sm": ["Inter"], "tabular-data": ["Geist"], "headline-lg": ["Inter"], "metric-lg": ["Geist"], "body-md": ["Inter"], "display-sm": ["Inter"], "body-lg": ["Inter"], "display-lg": ["Inter"], "metric-md": ["Geist"] },
+                    fontSize: { "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "tabular-data": ["13px", { "lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-lg": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "metric-lg": ["28px", { "lineHeight": "32px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "display-sm": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "metric-md": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "600" }] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-body-md text-on-surface select-none antialiased min-h-screen">
+    <header class="fixed top-0 w-full z-50 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+        <div class="h-16 w-full px-margin flex items-center justify-between">
+            <div class="flex items-center gap-space-lg">
+                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png">
+                <div class="flex items-center gap-space-sm">
+                    <span class="font-headline-sm text-headline-sm text-on-surface">NYRIX ERP</span>
+                    <span class="font-label-md text-label-md text-on-surface-variant bg-surface-container px-space-sm py-space-xs rounded">Station Pack #01</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-space-md">
+                <div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-secondary-container text-on-secondary-container">
+                    <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                    <span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Connecté: PACKER</span>
+                </div>
+                <a class="flex items-center gap-space-xs h-10 px-space-md bg-error-container text-on-error-container rounded-lg font-label-md text-label-md hover:bg-error hover:text-on-error transition-colors cursor-pointer" onclick="window.logout()">
+                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                    <span class="hidden sm:inline font-semibold">Déconnexion</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full pt-16 bg-background px-margin min-h-[calc(100vh-4rem)] flex flex-col justify-start">
+        <div class="flex flex-col w-full pb-6 space-y-4">
+            <!-- Tablet Pill Switcher -->
+            <div class="w-full flex justify-center mt-4 mb-4">
+                <div class="w-full max-w-3xl grid grid-cols-2 p-1.5 bg-surface-container rounded-2xl shadow-sm gap-2">
+                    <button id="btn-tab-receptionner" class="h-[58px] rounded-xl bg-primary-container text-on-primary flex items-center justify-center gap-3 px-5 transition-transform shadow-md" onclick="window.switchTab('receptionner')">
+                        <span class="material-symbols-outlined text-[22px]">inventory_2</span>
+                        <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">[1] À Réceptionner</span>
+                        <span id="badge-receptionner" class="px-2.5 py-1 rounded-full bg-on-primary text-primary-container font-tabular-data text-label-sm font-bold shadow-sm">0 lots</span>
+                    </button>
+                    <button id="btn-tab-preparer" class="h-[58px] rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-bright flex items-center justify-center gap-3 px-5 transition-all shadow-sm" onclick="window.switchTab('preparer')">
+                        <span class="material-symbols-outlined text-[22px] text-outline">package_2</span>
+                        <span class="font-headline-sm text-headline-sm font-medium tracking-tight">[2] À Préparer (Commandes)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIEW: RECEPTIONNER -->
+            <div id="view-receptionner" class="w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                <div class="w-full bg-surface-container px-6 py-3.5 flex items-center justify-between text-on-surface-variant select-none">
+                    <div class="w-28 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-outline">pin</span>
+                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Qté reçue</span>
+                    </div>
+                    <div class="flex-1 px-6 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-outline">category</span>
+                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Article & Spécifications</span>
+                    </div>
+                    <div class="text-right flex items-center justify-end gap-1.5">
+                        <span class="material-symbols-outlined text-[16px] text-outline">rule</span>
+                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Actions</span>
+                    </div>
+                </div>
+                <div class="w-full flex flex-col divide-y divide-surface-container" id="reception-items-list">
+                    <!-- Javascript will populate rows here -->
+                </div>
+            </div>
+
+            <!-- VIEW: PREPARER -->
+            <div id="view-preparer" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-space-lg w-full items-stretch">
+                <!-- CARD 1 -->
+                <div class="flex flex-col justify-between bg-surface-container-lowest rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between gap-2 pb-3 bg-surface-container-low p-3.5 rounded-lg">
+                            <div class="flex flex-col">
+                                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Bordereau Logistique</span>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="material-symbols-outlined text-primary text-[24px]">barcode_scanner</span>
+                                    <span class="font-tabular-data text-headline-sm font-bold text-on-surface tracking-tight">S4001940AA</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-bold">
+                                <span class="material-symbols-outlined text-[18px] text-secondary">check_circle</span>
+                                Standard B2C • Prêt
+                            </span>
+                        </div>
+                        <div class="space-y-2.5 pt-1">
+                            <div class="p-3.5 bg-surface-container-low rounded-lg flex items-start gap-3.5 select-none active:bg-surface-container transition-colors cursor-pointer" onclick="window.togglePackCheck(this)">
+                                <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-on-secondary shrink-0 mt-0.5 shadow-sm">
+                                    <span class="material-symbols-outlined text-[22px] font-bold">check</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-baseline justify-between gap-1">
+                                        <span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Exemple Article 1</span>
+                                        <span class="font-tabular-data text-headline-sm text-on-surface font-extrabold px-2 py-0.5 bg-surface-container-lowest rounded">1x</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pt-5">
+                        <button class="w-full h-16 bg-primary-container hover:bg-primary active:scale-[0.98] text-on-primary rounded-xl font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-3 shadow-md transition-all">
+                            <span class="material-symbols-outlined text-[28px]">print</span>
+                            <span class="">✓ Colis Terminé</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/packer.js"></script>
+</body>
+</html>

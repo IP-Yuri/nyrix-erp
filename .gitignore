@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables & secrets (CONFIDENTIAL - DO NOT COMMIT)
+.env
+.env.*
+!.env.example
+
+# Local SQLite databases (confidential local data)
+*.db
+*.sqlite3
+nyrix_dev.db
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary scratch & test artifacts
+scratch/
+.pytest_cache/

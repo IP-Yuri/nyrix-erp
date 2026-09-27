@@ -1,0 +1,544 @@
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-tint":"#2151da","on-surface":"#131b2e","surface":"#faf8ff","surface-container-low":"#f2f3ff","on-error-container":"#93000a","surface-variant":"#dae2fd","primary-fixed":"#dce1ff","on-tertiary-fixed-variant":"#653e00","secondary-container":"#6cf8bb","tertiary":"#623c00","on-tertiary-fixed":"#2a1700","on-secondary-fixed-variant":"#005236","on-surface-variant":"#434655","primary-container":"#1d4ed8","tertiary-fixed":"#ffddb8","secondary":"#006c49","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-tertiary":"#ffffff","on-tertiary-container":"#ffcb8f","error":"#ba1a1a","on-primary-container":"#cad3ff","inverse-surface":"#283044","inverse-on-surface":"#eef0ff","surface-dim":"#d2d9f4","on-secondary":"#ffffff","primary-fixed-dim":"#b7c4ff","surface-container-highest":"#dae2fd","on-background":"#131b2e","on-primary-fixed-variant":"#0039b5","primary":"#0037b0","outline":"#747686","on-primary":"#ffffff","outline-variant":"#c4c5d7","surface-container-high":"#e2e7ff","background":"#faf8ff","surface-bright":"#faf8ff","on-secondary-fixed":"#002113","on-error":"#ffffff","surface-container":"#eaedff","secondary-fixed":"#6ffbbe","inverse-primary":"#b7c4ff","on-primary-fixed":"#001551","secondary-fixed-dim":"#4edea3","tertiary-container":"#825100","tertiary-fixed-dim":"#ffb95f","on-secondary-container":"#00714d"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin":"1.5rem","space-sm":"0.5rem","gutter":"1rem","space-xs":"0.25rem","margin-compact":"1rem","space-md":"0.75rem","space-lg":"1.25rem","gutter-dense":"0.75rem","space-xl":"1.75rem"},fontFamily:{"headline-lg":["Inter"],"body-md":["Inter"],"label-sm":["Inter"],"label-md":["Inter"],"body-lg":["Inter"],"metric-lg":["Geist"],"display-sm":["Inter"],"metric-md":["Geist"],"display-lg":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"tabular-data":["Geist"]},fontSize:{"headline-lg":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",letterSpacing:"0em",fontWeight:"400"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"500"}],"body-lg":["15px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],"metric-lg":["28px",{lineHeight:"32px",letterSpacing:"-0.03em",fontWeight:"600"}],"display-sm":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],"metric-md":["20px",{lineHeight:"24px",letterSpacing:"-0.02em",fontWeight:"600"}],"display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],"body-sm":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}],"tabular-data":["13px",{lineHeight:"18px",letterSpacing:"-0.01em",fontWeight:"500"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-[240px] bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-14 px-space-md border-b border-outline-variant flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #1d4ed8
+- Font: inter
+- Mode: light
+- Roundness: rounded-sm
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VkNtiugzK-i08DAAWiUxCaVBTXLLvRHY6ArFY-MdaaB_L2QMojNQiiM5LoiHcXCdFv5C-uhaRdK5N5lWi-ZftYyMTFmggl8DQ6vrh2ZE2DfOf8yHHtUxurygo0M_if0M-JNck6EQJrVCmvQFLtjkmubgB5lKD9Dtd-KGW1jkpbX2SExhFNIMzikN16utDnwsPhTePIJLpp1656_0Oof4HKEL5CEagdQj3YIuwtpjT2Mu2dREaCO7GvM_Fh"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-none tracking-tight">NYRIX</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">ERP System</span></div></div><div class="px-space-md pt-space-md"><span class="font-label-sm text-label-sm uppercase text-outline tracking-wider block px-space-xs mb-space-xs">Navigation</span><nav class="flex flex-col gap-space-xs" data-active-classes="bg-surface-container-low text-primary font-semibold border-l-4 border-primary rounded-none"><a class="group flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-body-sm text-body-sm transition-colors" data-path="importation" href="#"><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">move_to_inbox</span><span class="">Importation</span></a><a aria-current="page" class="group flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-surface-container-low text-primary font-semibold border-l-4 border-primary rounded-none" data-path="stock" href="#"><span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">inventory_2</span><span class="">Stock</span></a></nav></div></div><div class="border-t border-outline-variant p-space-md bg-surface-container-lowest"><div class="flex items-center gap-space-sm mb-space-md"><img alt="Profile" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-outline-variant" src="https://lh3.googleusercontent.com/aida/AEtjO1X0RsKbUFsORobQ5QglQNAcgd4D5qpuRS9XrDDqZ9l7IOHZ3xiJagGd_ZYjvG2rnTi6KWYA9x4FHTLr3Q2RkdHbRuf3FFVh8ILDqYTQ9KHy_fAp19VD8oAY3rSjxK7WKLYjJjUtNMUTi_lbVEuz5yztNTHt_N9Wgmwcb7-tbMMw72LHvgyjYh6t3OERw_Wt55XSCGsbt5DR5VhkiPax_vYyzfAZBrjJjBOgWuZEygmpgqKMOslaYSqLZjI"><div class="flex flex-col min-w-0 flex-1"><span class="font-label-sm text-label-sm text-on-surface font-semibold truncate">CONNECTÉ: ADMIN</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Finance &amp; Logistique</span></div></div><a class="flex items-center justify-center gap-space-xs w-full py-space-xs px-space-sm rounded-lg bg-surface-container-low hover:bg-error-container hover:text-on-error-container text-on-surface-variant font-label-md text-label-md transition-colors" data-path="login" href="#"><span class="material-symbols-outlined text-[16px]">logout</span><span class="">Déconnexion</span></a></div></aside><div class="pl-[240px] flex flex-col min-h-screen"><header class="fixed top-0 left-[240px] right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant z-40 px-margin flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="font-label-md text-label-md text-primary font-semibold">NYRIX</span><span class="">/</span><span class="text-on-surface">Portail Entreprise</span></div></div><div class="flex items-center gap-space-md"><button class="h-8 w-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"><span class="material-symbols-outlined text-[20px]">notifications</span></button><button class="h-8 w-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"><span class="material-symbols-outlined text-[20px]">help_outline</span></button></div></header><main class="flex-1 pt-14 bg-surface-container-low w-full px-margin py-margin"><div class="flex flex-col w-full">
+<!-- Top Header Row: Asymmetric executive overview with contextual KPIs -->
+<div class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
+<div class="flex flex-col max-w-2xl">
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="px-space-xs py-0.5 rounded bg-primary/10 text-primary font-label-sm text-label-sm uppercase tracking-wider font-semibold">Module WMS &amp; Clôture Mensuelle</span>
+<span class="w-1 h-1 rounded-full bg-outline"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Devise: MAD (Dirham Marocain)</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Stock Global &amp; Valorisation Financière</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs leading-relaxed">
+        Audit d'inventaire physique entrepôt, traçabilité des réceptions fournisseurs et valorisation rigoureuse au coût de revient unitaire pondéré (Landed Cost).
+      </p>
+</div>
+<!-- 3 Compact Executive KPI Blocks -->
+
+</div>
+<!-- Operational Distribution Ribbon: Visual Density Break -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md mb-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">inventory</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Karime (Entrepôt Palettes)</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">2,150 <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">pcs (87.7%)</span></span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">shelves</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Packer (Tablettes Picking)</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">300 <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">pcs (12.3%)</span></span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">price_change</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Coût Moyen / Unité</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">59.18 <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">MAD net</span></span>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-space-md flex items-center gap-space-md shadow-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">sync</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-semibold">Dernière Synchronisation</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">14:02:18 <span class="font-body-sm text-body-sm text-secondary font-medium">Direct live</span></span>
+</div>
+</div>
+</div>
+<!-- Main Content Card: Structured Full-Width Table Layout -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col">
+<!-- Table Controls Toolbar -->
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md mb-space-lg">
+<!-- Search Field -->
+<div class="relative w-full lg:w-96">
+<span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full h-10 pl-10 pr-space-md rounded-lg bg-surface-container-low focus:bg-surface-container-lowest font-body-sm text-body-sm text-on-surface placeholder:text-outline outline-none transition-all" id="stock-search-input" placeholder="Rechercher par SKU, produit ou N° facture..." type="text">
+</div>
+<!-- Filters & Actions -->
+<div class="flex flex-wrap items-center gap-space-sm justify-between lg:justify-end">
+<!-- Filter Dropdown -->
+<div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded-lg">
+<span class="material-symbols-outlined text-outline text-[16px]">filter_alt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">Facture Source:</span>
+<select class="bg-transparent font-label-md text-label-md text-on-surface font-semibold py-1 pr-2 outline-none cursor-pointer" id="invoice-filter">
+<option value="ALL">Toutes les factures</option>
+<option value="INV-2026-042">INV-2026-042 (Dernière)</option>
+<option value="INV-2026-039">INV-2026-039</option>
+<option value="INV-2026-035">INV-2026-035</option>
+</select>
+</div>
+<!-- Sync Button -->
+<button class="h-10 px-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors flex items-center gap-space-xs" id="btn-sync-wms">
+<span class="material-symbols-outlined text-[16px] text-outline">sync</span>
+<span class="">Synchroniser WMS</span>
+</button>
+<!-- Export Button -->
+
+</div>
+</div>
+<!-- Data Table Container with Horizontal Scroll Barrier -->
+<div class="overflow-x-auto w-full rounded-lg">
+<table class="w-full border-collapse text-left" id="inventory-table">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant">
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold rounded-tl-lg">SKU</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold min-w-[260px]">Désignation de l'Article</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Facture Source</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Stock Entrepôt (Karime)</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Stock Tablette (Packer)</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Coût Revient (Landed)</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Valeur Immobilisée (MAD)</th>
+<th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-center rounded-tr-lg">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high/60" id="inventory-tbody">
+<!-- Row 1 -->
+<tr class="h-14 hover:bg-primary/5 transition-colors group" data-invoice="INV-2026-042" data-sku="AW-01">
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-1 rounded bg-inverse-surface text-inverse-on-surface font-tabular-data text-tabular-data font-bold">AW-01</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors">Air Wallet Aluminium</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Finition Argent Brossé • Lot 2026-A</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-medium">
+                INV-2026-042
+              </span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">850</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">87.6%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">120</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">12.4%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data text-on-surface-variant font-medium">48.50 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-primary">47,045.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-center whitespace-nowrap">
+<button class="h-8 px-space-sm rounded bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md font-semibold transition-all inline-flex items-center gap-1" onclick="openDetailDrawer('AW-01', 'Air Wallet Aluminium', 'INV-2026-042', 970, '48.50', '47,045.00')">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="">Détail Coûts</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-14 hover:bg-primary/5 transition-colors group" data-invoice="INV-2026-042" data-sku="WL-CUIR-001">
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-1 rounded bg-inverse-surface text-inverse-on-surface font-tabular-data text-tabular-data font-bold">WL-CUIR-001</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors">Portefeuille Slim Cuir Noir</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Cuir Véritable Nappa • Écrin Luxe</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-medium">
+                INV-2026-042
+              </span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">620</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">88.6%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">80</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">11.4%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data text-on-surface-variant font-medium">64.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-primary">44,800.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-center whitespace-nowrap">
+<button class="h-8 px-space-sm rounded bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md font-semibold transition-all inline-flex items-center gap-1" onclick="openDetailDrawer('WL-CUIR-001', 'Portefeuille Slim Cuir Noir', 'INV-2026-042', 700, '64.00', '44,800.00')">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="">Détail Coûts</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-14 hover:bg-primary/5 transition-colors group" data-invoice="INV-2026-039" data-sku="HYD-HP400">
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-1 rounded bg-inverse-surface text-inverse-on-surface font-tabular-data text-tabular-data font-bold">HYD-HP400</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors">Pompe Hydraulique HP-400</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Pression Industrielle • Pal. 882</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-medium">
+                INV-2026-039
+              </span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">180</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">92.3%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">15</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">7.7%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data text-on-surface-variant font-medium">142.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-primary">27,690.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-center whitespace-nowrap">
+<button class="h-8 px-space-sm rounded bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md font-semibold transition-all inline-flex items-center gap-1" onclick="openDetailDrawer('HYD-HP400', 'Pompe Hydraulique HP-400', 'INV-2026-039', 195, '142.00', '27,690.00')">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="">Détail Coûts</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-14 hover:bg-primary/5 transition-colors group" data-invoice="INV-2026-039" data-sku="CB-MAG-65">
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-1 rounded bg-inverse-surface text-inverse-on-surface font-tabular-data text-tabular-data font-bold">CB-MAG-65</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors">Câble Blindé Magnétique 65W</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Nylon Tressé • Connecteur Or</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-medium">
+                INV-2026-039
+              </span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">340</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">88.3%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">45</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">11.7%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data text-on-surface-variant font-medium">28.20 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-primary">10,857.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-center whitespace-nowrap">
+<button class="h-8 px-space-sm rounded bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md font-semibold transition-all inline-flex items-center gap-1" onclick="openDetailDrawer('CB-MAG-65', 'Câble Blindé Magnétique 65W', 'INV-2026-039', 385, '28.20', '10,857.00')">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="">Détail Coûts</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="h-14 hover:bg-primary/5 transition-colors group" data-invoice="INV-2026-035" data-sku="TG-PRO-10">
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-1 rounded bg-inverse-surface text-inverse-on-surface font-tabular-data text-tabular-data font-bold">TG-PRO-10</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors">Kit Traçabilité RFID Pro</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Puces Ultra-HF • Lot Sécurisé</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md font-medium">
+                INV-2026-035
+              </span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">160</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">80.0%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">40</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">20.0%</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data text-on-surface-variant font-medium">73.04 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-primary">14,608.00 MAD</span>
+</td>
+<td class="py-space-sm px-space-md text-center whitespace-nowrap">
+<button class="h-8 px-space-sm rounded bg-surface-container-low hover:bg-primary hover:text-on-primary text-on-surface font-label-md text-label-md font-semibold transition-all inline-flex items-center gap-1" onclick="openDetailDrawer('TG-PRO-10', 'Kit Traçabilité RFID Pro', 'INV-2026-035', 200, '73.04', '14,608.00')">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span class="">Détail Coûts</span>
+</button>
+</td>
+</tr>
+</tbody>
+<!-- Executive Summary Totals Row -->
+<tfoot>
+<tr class="bg-surface-container-low font-semibold text-on-surface">
+<td class="py-space-md px-space-md rounded-bl-lg" colspan="3">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface">TOTAL VALORISATION INVENTAIRE (5 RÉFÉRENCES ACTIVES)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-on-surface">2,150</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Entrepôt</span>
+</td>
+<td class="py-space-md px-space-md text-right whitespace-nowrap">
+<span class="font-tabular-data text-tabular-data font-bold text-on-surface">300</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Picking</span>
+</td>
+<td class="py-space-md px-space-md text-right whitespace-nowrap text-on-surface-variant">
+<span class="font-label-sm text-label-sm">Global: 2,450 pcs</span>
+</td>
+<td class="py-space-md px-space-md text-right whitespace-nowrap">
+<span class="font-metric-md text-metric-md font-bold text-primary">145,000.00 MAD</span>
+</td>
+<td class="py-space-md px-space-md text-center rounded-br-lg">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-secondary/10 text-secondary">
+                Équilibré à 100%
+              </span>
+</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<!-- Table Pagination / Status Bar -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-sm pt-space-md mt-space-md text-on-surface-variant">
+<div class="flex items-center gap-space-xs font-body-sm text-body-sm">
+<span class="">Affichage de <strong class="text-on-surface">1 à 5</strong> sur <strong class="text-on-surface">5</strong> références enregistrées</span>
+<span class="mx-1">•</span>
+<span class="flex items-center gap-1 text-secondary font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+          Synchronisé avec ERP Finance
+        </span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded flex items-center justify-center bg-surface-container-low text-outline cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="w-8 h-8 rounded flex items-center justify-center bg-primary text-on-primary font-label-md text-label-md font-semibold">1</span>
+<button class="w-8 h-8 rounded flex items-center justify-center bg-surface-container-low text-outline cursor-not-allowed" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Operational Audit & Discrepancy Note Strip -->
+<div class="mt-space-lg bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-variant flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">policy</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Politique d'évaluation du stock &amp; Landed Cost</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+          Les coûts de revient incluent le prix d'achat FOB, le fret international, l'assurance de transport, les droits de douane et les frais de débarquement au Port de Casablanca.
+        </span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs flex-shrink-0">
+<a class="px-space-md py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" href="#">
+<span class="">Consulter Journal Comptable</span>
+<span class="material-symbols-outlined text-[14px]">north_east</span>
+</a>
+</div>
+</div>
+<!-- Slide-Over Cost Breakdown Drawer (Interactive Flyout) -->
+<div class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 hidden transition-opacity" id="cost-drawer-backdrop" onclick="closeDetailDrawer()"></div>
+<div class="fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-surface-container-lowest shadow-2xl z-50 translate-x-full transition-transform duration-300 flex flex-col justify-between" id="cost-drawer">
+<div class="flex flex-col h-full overflow-y-auto">
+<!-- Drawer Header -->
+<div class="p-space-lg bg-surface-container-low flex items-center justify-between sticky top-0 z-10">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="px-2 py-0.5 rounded bg-inverse-surface text-inverse-on-surface font-tabular-data text-tabular-data font-bold" id="drawer-sku">SKU-00</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold" id="drawer-invoice">INV-000</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface leading-tight" id="drawer-title">Détail Coûts &amp; Décomposition</h2>
+</div>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-container-highest hover:bg-surface-variant text-on-surface" onclick="closeDetailDrawer()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Content Body -->
+<div class="p-space-lg flex flex-col gap-space-lg">
+<!-- Main Landed Cost Metric Block -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Coût de Revient Pondéré Unitaire</span>
+<div class="flex items-baseline justify-between mt-1">
+<span class="font-metric-lg text-metric-lg font-bold text-primary" id="drawer-landed-cost">00.00 MAD</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold bg-secondary/10 px-2 py-0.5 rounded">Rapprochement validé</span>
+</div>
+<div class="mt-space-sm pt-space-xs border-t border-surface-container-high flex justify-between font-body-sm text-body-sm">
+<span class="text-on-surface-variant">Quantité Total Enregistrée :</span>
+<span class="font-semibold text-on-surface" id="drawer-qty">0 pcs</span>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm mt-1">
+<span class="text-on-surface-variant">Valeur Totale Immobilisée :</span>
+<span class="font-bold text-primary" id="drawer-total-val">00.00 MAD</span>
+</div>
+</div>
+<!-- Breakdown Step Items -->
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold mb-space-sm">Composantes du Coût (Landed Cost Analysis)</span>
+<div class="flex flex-col gap-space-xs">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-[18px]">shopping_cart</span>
+<span class="font-body-sm text-body-sm text-on-surface">Prix d'Achat Fournisseur (FOB unitaire)</span>
+</div>
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">62.5%</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-[18px]">flight_takeoff</span>
+<span class="font-body-sm text-body-sm text-on-surface">Fret Maritime &amp; Aérien proratisé</span>
+</div>
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">15.0%</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-[18px]">gavel</span>
+<span class="font-body-sm text-body-sm text-on-surface">Droits de Douane &amp; Taxes d'Import</span>
+</div>
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">16.5%</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-outline text-[18px]">local_shipping</span>
+<span class="font-body-sm text-body-sm text-on-surface">Transit Portuaire &amp; Transport Local</span>
+</div>
+<span class="font-tabular-data text-tabular-data font-semibold text-on-surface">6.0%</span>
+</div>
+</div>
+</div>
+<!-- Stock Localization Breakdown -->
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold mb-space-sm">Emplacement Physique Actuel</span>
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Zone Karime (Vrac)</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface mt-1">Palette A-12</span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Contrôle physique OK</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Zone Packer (Tablette)</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface mt-1">Rayon R-04</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Prêt pour commande</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Footer -->
+<div class="p-space-md bg-surface-container-low sticky bottom-0 mt-auto flex items-center gap-space-sm">
+<button class="flex-1 py-space-sm px-space-md rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold transition-colors" onclick="closeDetailDrawer()">
+          Fermer
+        </button>
+<button class="flex-1 py-space-sm px-space-md rounded-lg bg-primary hover:bg-surface-tint text-on-primary font-label-md text-label-md font-semibold transition-colors flex items-center justify-center gap-1" onclick="alert('Exportation de la fiche de valorisation SKU générée.')">
+<span class="material-symbols-outlined text-[16px]">print</span>
+<span class="">Fiche Article</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple Filter & Search Interaction
+  const searchInput = document.getElementById('stock-search-input');
+  const invoiceSelect = document.getElementById('invoice-filter');
+  const tableRows = document.querySelectorAll('#inventory-tbody tr');
+
+  function applyFilters() {
+    const query = searchInput.value.toLowerCase().trim();
+    const selectedInvoice = invoiceSelect.value;
+
+    tableRows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      const invoice = row.getAttribute('data-invoice');
+      
+      const matchesSearch = text.includes(query);
+      const matchesInvoice = (selectedInvoice === 'ALL' || invoice === selectedInvoice);
+
+      if (matchesSearch && matchesInvoice) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+  }
+
+  if (searchInput && invoiceSelect) {
+    searchInput.addEventListener('input', applyFilters);
+    invoiceSelect.addEventListener('change', applyFilters);
+  }
+
+  // Drawer Interactions
+  function openDetailDrawer(sku, title, invoice, qty, landedCost, totalVal) {
+    document.getElementById('drawer-sku').textContent = sku;
+    document.getElementById('drawer-title').textContent = title;
+    document.getElementById('drawer-invoice').textContent = invoice;
+    document.getElementById('drawer-qty').textContent = qty + ' pcs';
+    document.getElementById('drawer-landed-cost').textContent = landedCost + ' MAD';
+    document.getElementById('drawer-total-val').textContent = totalVal + ' MAD';
+
+    const backdrop = document.getElementById('cost-drawer-backdrop');
+    const drawer = document.getElementById('cost-drawer');
+
+    backdrop.classList.remove('hidden');
+    setTimeout(() => {
+      drawer.classList.remove('translate-x-full');
+    }, 10);
+  }
+
+  function closeDetailDrawer() {
+    const backdrop = document.getElementById('cost-drawer-backdrop');
+    const drawer = document.getElementById('cost-drawer');
+
+    drawer.classList.add('translate-x-full');
+    setTimeout(() => {
+      backdrop.classList.add('hidden');
+    }, 250);
+  }
+
+  // Toast / Action Triggers
+  document.getElementById('btn-sync-wms').addEventListener('click', function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Synchronisation...</span>';
+    setTimeout(() => {
+      btn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-secondary">check</span><span>À jour (100%)</span>';
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+      }, 2000);
+    }, 900);
+  });
+
+  document.getElementById('btn-export-csv').addEventListener('click', function() {
+    alert('Rapport de valorisation NYRIX au format Excel (.xlsx) exporté avec succès.');
+  });
+</script></main></div>
+
+</body></html>

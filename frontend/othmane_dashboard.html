@@ -1,0 +1,272 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>NYRIX ERP - Othmane Dashboard</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config={
+            darkMode:"class",
+            theme:{
+                extend:{
+                    colors:{
+                        "brand": {
+                          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+                        },
+                        "surface-tint":"#2151da","on-surface":"#131b2e","surface":"#faf8ff","surface-container-low":"#f2f3ff","on-error-container":"#93000a","surface-variant":"#dae2fd","primary-fixed":"#dce1ff","on-tertiary-fixed-variant":"#653e00","secondary-container":"#6cf8bb","tertiary":"#623c00","on-tertiary-fixed":"#2a1700","on-secondary-fixed-variant":"#005236","on-surface-variant":"#434655","primary-container":"#1d4ed8","tertiary-fixed":"#ffddb8","secondary":"#006c49","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-tertiary":"#ffffff","on-tertiary-container":"#ffcb8f","error":"#ba1a1a","on-primary-container":"#cad3ff","inverse-surface":"#283044","inverse-on-surface":"#eef0ff","surface-dim":"#d2d9f4","on-secondary":"#ffffff","primary-fixed-dim":"#b7c4ff","surface-container-highest":"#dae2fd","on-background":"#131b2e","on-primary-fixed-variant":"#0039b5","primary":"#0037b0","outline":"#747686","on-primary":"#ffffff","outline-variant":"#c4c5d7","surface-container-high":"#e2e7ff","background":"#faf8ff","surface-bright":"#faf8ff","on-secondary-fixed":"#002113","on-error":"#ffffff","surface-container":"#eaedff","secondary-fixed":"#6ffbbe","inverse-primary":"#b7c4ff","on-primary-fixed":"#001551","secondary-fixed-dim":"#4edea3","tertiary-container":"#825100","tertiary-fixed-dim":"#ffb95f","on-secondary-container":"#00714d"
+                    },
+                    borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
+                    spacing:{"margin":"1.5rem","space-sm":"0.5rem","gutter":"1rem","space-xs":"0.25rem","margin-compact":"1rem","space-md":"0.75rem","space-lg":"1.25rem","gutter-dense":"0.75rem","space-xl":"1.75rem"},
+                    fontFamily:{
+                        "sans":['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        "headline-lg":["Inter"],"body-md":["Inter"],"label-sm":["Inter"],"label-md":["Inter"],"body-lg":["Inter"],"metric-lg":["Geist"],"display-sm":["Inter"],"metric-md":["Geist"],"display-lg":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"tabular-data":["Geist"]
+                    },
+                    fontSize:{
+                        "headline-lg":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+                        "body-md":["14px",{lineHeight:"20px",letterSpacing:"0em",fontWeight:"400"}],
+                        "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+                        "label-md":["12px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"500"}],
+                        "body-lg":["15px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],
+                        "metric-lg":["28px",{lineHeight:"32px",letterSpacing:"-0.03em",fontWeight:"600"}],
+                        "display-sm":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],
+                        "metric-md":["20px",{lineHeight:"24px",letterSpacing:"-0.02em",fontWeight:"600"}],
+                        "display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],
+                        "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+                        "body-sm":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}],
+                        "tabular-data":["13px",{lineHeight:"18px",letterSpacing:"-0.01em",fontWeight:"500"}]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}
+        ::-webkit-scrollbar{display:none;}
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .num-tabular { font-variant-numeric: tabular-nums; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased">
+    <aside class="fixed left-0 top-0 h-screen w-[240px] bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none">
+        <div class="flex flex-col">
+            <div class="h-14 px-space-md border-b border-outline-variant flex items-center gap-space-sm">
+                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png">
+                <div class="flex flex-col">
+                    <span class="font-headline-sm text-headline-sm text-on-surface leading-none tracking-tight">NYRIX</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">ERP System</span>
+                </div>
+            </div>
+            <div class="px-space-md pt-space-md">
+                <span class="font-label-sm text-label-sm uppercase text-outline tracking-wider block px-space-xs mb-space-xs">Navigation</span>
+                <nav class="flex flex-col gap-space-xs">
+                    <a class="group flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-surface-container-low text-primary font-semibold border-l-4 border-primary rounded-none nav-link" data-path="importation" href="#" onclick="window.switchView('importation', this)">
+                        <span class="material-symbols-outlined text-[18px] text-primary">move_to_inbox</span>
+                        <span class="">Importation</span>
+                    </a>
+                    <a class="group flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-body-sm text-body-sm transition-colors nav-link border-l-4 border-transparent" data-path="stock" href="#" onclick="window.switchView('stock', this)">
+                        <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">inventory_2</span>
+                        <span class="">Stock</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+        <div class="border-t border-outline-variant p-space-md bg-surface-container-lowest">
+            <div class="flex items-center gap-space-sm mb-space-md">
+                <div class="flex flex-col min-w-0 flex-1">
+                    <span class="font-label-sm text-label-sm text-on-surface font-semibold truncate">CONNECTÉ: ADMIN</span>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant truncate">Finance & Logistique</span>
+                </div>
+            </div>
+            <a class="flex items-center justify-center gap-space-xs w-full py-space-xs px-space-sm rounded-lg bg-surface-container-low hover:bg-error-container hover:text-on-error-container text-on-surface-variant font-label-md text-label-md transition-colors" href="#" onclick="window.logout()">
+                <span class="material-symbols-outlined text-[16px]">logout</span>
+                <span class="">Déconnexion</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="pl-[240px] flex flex-col min-h-screen">
+        <header class="fixed top-0 left-[240px] right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant z-40 px-margin flex items-center justify-between">
+            <div class="flex items-center gap-space-md">
+                <div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+                    <span class="font-label-md text-label-md text-primary font-semibold">NYRIX</span>
+                    <span class="">/</span>
+                    <span class="text-on-surface">Portail Entreprise</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW IMPORTATION -->
+        <main id="view-importation" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 mt-14">
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Arrivage & Détermination Coût de Revient</h1>
+                    <p class="text-xs text-slate-500 mt-1">Saisie des factures fournisseurs, ventilation analytique des frais d'approche et valorisation d'entrée en stock.</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- KPI 1 -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Valeur Totale Immobilisée</span><div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div></div>
+                    <div class="mt-4"><div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular"><span id="kpi-val">0.00</span> <span class="text-lg font-semibold text-slate-500">MAD</span></div></div>
+                </div>
+                <!-- KPI 2 -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Global</span><div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div></div>
+                    <div class="mt-4"><div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular"><span id="kpi-stock">0</span> <span class="text-lg font-semibold text-slate-500">Unités</span></div></div>
+                </div>
+                <!-- KPI 3 -->
+                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Commandes du Jour</span><div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div></div>
+                    <div class="mt-4"><div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular"><span id="kpi-orders">0</span></div></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-6 items-start">
+                <section class="flex flex-col gap-6 w-full">
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
+                            <div>
+                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span><h2 class="text-xs font-bold uppercase tracking-wider text-slate-800">Saisie des Données de Facturation & Marchandises</h2></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="ref-facture">Référence de facture <span class="text-rose-500">*</span></label><input class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500 uppercase" id="ref-facture" type="text" placeholder="Ex: FAC-001"></div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">JSON Payload <span class="text-rose-500">*</span></label>
+                                <input class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="lines_json" type="text" placeholder='[{"sku":"AW-01","quantity":100,"unit_price_usd":10,"weight_kg":0.5}]'>
+                            </div>
+                            <div class="col-span-1">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fichier Excel (Optionnel)</label>
+                                <input type="file" id="file" accept=".xlsx" class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="taux-change">Taux (Devise / MAD)</label><input class="w-full text-sm font-bold text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="taux-change" step="0.01" type="number" value="10.00"></div>
+                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="cle-repartition">Clé de répartition</label><select class="w-full text-sm font-semibold text-brand-700 bg-brand-50/50 rounded-lg border-brand-300 focus:border-brand-500 focus:ring-brand-500" id="cle-repartition"><option value="VALUE">Pro-rata Valeur</option><option value="WEIGHT">Pro-rata Poids</option><option value="QUANTITY">Pro-rata Quantité</option></select></div>
+                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Douane (%)</label><input class="w-full text-sm font-bold text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="douane" step="0.1" type="number" value="5.0"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between h-full">
+                        <div class="flex flex-col gap-4">
+                            <div class="border-b border-slate-200 pb-2"><h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-500"></span>Décomposition des Frais</h3></div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Transport Int.</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="transport-inter" step="0.01" type="number" value="0.00"></div>
+                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Transport Local</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="transport-local" step="0.01" type="number" value="0.00"></div>
+                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Assurance</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="assurance" step="0.01" type="number" value="0.00"></div>
+                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Dédouanement</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="frais-dedouanement" step="0.01" type="number" value="0.00"></div>
+                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Portnet</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="portnet" step="0.01" type="number" value="0.00"></div>
+                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Autres Frais</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="autres-frais" step="0.01" type="number" value="0.00"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
+                            <div><p class="text-xs font-semibold text-slate-900">Prêt pour validation comptable et intégration logistique</p></div>
+                        </div>
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <button id="import-btn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg shadow-md shadow-emerald-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="">Ajouter au stock</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- RECAP PREVIEW TABLE -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between h-full">
+                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                            <div><h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">Preview Recap Financier</h3></div>
+                        </div>
+                        <div class="overflow-x-auto flex-1">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
+                                    <tr>
+                                        <th class="py-3 px-4">SKU</th>
+                                        <th class="py-3 px-4 text-right">FOB MAD</th>
+                                        <th class="py-3 px-4 text-right">Douane MAD</th>
+                                        <th class="py-3 px-4 text-right">Coût de Revient U (MAD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 text-slate-700" id="recap-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- VIEW STOCK -->
+        <main id="view-stock" class="hidden flex-1 pt-14 bg-surface-container-low w-full px-margin py-margin mt-14">
+            <div class="flex flex-col w-full">
+                <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
+                    <div class="flex flex-col max-w-2xl">
+                        <h1 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Stock Global & Valorisation Financière</h1>
+                    </div>
+                </div>
+
+                <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col mb-8">
+                    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md mb-space-lg">
+                        <div class="relative w-full lg:w-96">
+                            <span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+                            <input class="w-full h-10 pl-10 pr-space-md rounded-lg bg-surface-container-low focus:bg-surface-container-lowest font-body-sm text-body-sm text-on-surface placeholder:text-outline outline-none transition-all" id="stock-search-input" placeholder="Rechercher par SKU, produit ou N° facture..." type="text">
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto w-full rounded-lg">
+                        <table class="w-full border-collapse text-left">
+                            <thead>
+                                <tr class="bg-surface-container-low text-on-surface-variant">
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold rounded-tl-lg">SKU</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold min-w-[260px]">Désignation de l'Article</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Facture Source</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Stock Entrepôt (Karime)</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Stock Tablette (Packer)</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Coût Revient (Landed)</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Valeur Immobilisée (MAD)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-surface-container-high/60" id="inventory-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Discrepancies Panel -->
+                <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col">
+                    <h2 class="font-display-sm text-display-sm text-on-surface font-bold tracking-tight mb-4">Approbation des Écarts</h2>
+                    <div class="overflow-x-auto w-full rounded-lg">
+                        <table class="w-full border-collapse text-left">
+                            <thead>
+                                <tr class="bg-surface-container-low text-on-surface-variant">
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold rounded-tl-lg">ID</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">SKU</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Manquant</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Raison</th>
+                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-surface-container-high/60" id="disc-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script imports -->
+    <script src="js/api.js"></script>
+    <script src="js/othmane.js"></script>
+</body>
+</html>
