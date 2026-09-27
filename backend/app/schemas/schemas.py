@@ -32,6 +32,7 @@ class ProductOperationalOut(ProductBase):
 
 class ProductAdminOut(ProductBase):
     landed_cost: float
+    last_invoice_ref: Optional[str] = None
     model_config = {"from_attributes": True}
 
 # --- Order Schemas ---

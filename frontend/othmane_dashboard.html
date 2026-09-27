@@ -1,268 +1,837 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>NYRIX ERP - Othmane Dashboard</title>
+    <title>NYRIX ERP - Othmane Dashboard (Landed Cost & Stock)</title>
     
+    <!-- Google Fonts & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- Tailwind CSS with Plugins -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
-        tailwind.config={
-            darkMode:"class",
-            theme:{
-                extend:{
-                    colors:{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
                         "brand": {
-                          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
                         },
-                        "surface-tint":"#2151da","on-surface":"#131b2e","surface":"#faf8ff","surface-container-low":"#f2f3ff","on-error-container":"#93000a","surface-variant":"#dae2fd","primary-fixed":"#dce1ff","on-tertiary-fixed-variant":"#653e00","secondary-container":"#6cf8bb","tertiary":"#623c00","on-tertiary-fixed":"#2a1700","on-secondary-fixed-variant":"#005236","on-surface-variant":"#434655","primary-container":"#1d4ed8","tertiary-fixed":"#ffddb8","secondary":"#006c49","error-container":"#ffdad6","surface-container-lowest":"#ffffff","on-tertiary":"#ffffff","on-tertiary-container":"#ffcb8f","error":"#ba1a1a","on-primary-container":"#cad3ff","inverse-surface":"#283044","inverse-on-surface":"#eef0ff","surface-dim":"#d2d9f4","on-secondary":"#ffffff","primary-fixed-dim":"#b7c4ff","surface-container-highest":"#dae2fd","on-background":"#131b2e","on-primary-fixed-variant":"#0039b5","primary":"#0037b0","outline":"#747686","on-primary":"#ffffff","outline-variant":"#c4c5d7","surface-container-high":"#e2e7ff","background":"#faf8ff","surface-bright":"#faf8ff","on-secondary-fixed":"#002113","on-error":"#ffffff","surface-container":"#eaedff","secondary-fixed":"#6ffbbe","inverse-primary":"#b7c4ff","on-primary-fixed":"#001551","secondary-fixed-dim":"#4edea3","tertiary-container":"#825100","tertiary-fixed-dim":"#ffb95f","on-secondary-container":"#00714d"
+                        "surface-tint": "#2151da",
+                        "on-surface": "#131b2e",
+                        "surface": "#faf8ff",
+                        "surface-container-low": "#f2f3ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e2e7ff",
+                        "surface-container-highest": "#dae2fd",
+                        "on-surface-variant": "#434655",
+                        "primary": "#0037b0",
+                        "primary-container": "#1d4ed8",
+                        "secondary": "#006c49",
+                        "tertiary": "#623c00",
+                        "outline": "#747686",
+                        "outline-variant": "#c4c5d7",
+                        "inverse-surface": "#283044",
+                        "inverse-on-surface": "#eef0ff",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a"
                     },
-                    borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},
-                    spacing:{"margin":"1.5rem","space-sm":"0.5rem","gutter":"1rem","space-xs":"0.25rem","margin-compact":"1rem","space-md":"0.75rem","space-lg":"1.25rem","gutter-dense":"0.75rem","space-xl":"1.75rem"},
-                    fontFamily:{
-                        "sans":['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-                        "headline-lg":["Inter"],"body-md":["Inter"],"label-sm":["Inter"],"label-md":["Inter"],"body-lg":["Inter"],"metric-lg":["Geist"],"display-sm":["Inter"],"metric-md":["Geist"],"display-lg":["Inter"],"headline-sm":["Inter"],"body-sm":["Inter"],"tabular-data":["Geist"]
-                    },
-                    fontSize:{
-                        "headline-lg":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
-                        "body-md":["14px",{lineHeight:"20px",letterSpacing:"0em",fontWeight:"400"}],
-                        "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
-                        "label-md":["12px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"500"}],
-                        "body-lg":["15px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],
-                        "metric-lg":["28px",{lineHeight:"32px",letterSpacing:"-0.03em",fontWeight:"600"}],
-                        "display-sm":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],
-                        "metric-md":["20px",{lineHeight:"24px",letterSpacing:"-0.02em",fontWeight:"600"}],
-                        "display-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"700"}],
-                        "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
-                        "body-sm":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}],
-                        "tabular-data":["13px",{lineHeight:"18px",letterSpacing:"-0.01em",fontWeight:"500"}]
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                    spacing: { "margin": "1.5rem", "space-sm": "0.5rem", "gutter": "1rem", "space-xs": "0.25rem", "space-md": "0.75rem", "space-lg": "1.25rem", "space-xl": "1.75rem" },
+                    fontFamily: {
+                        "sans": ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        "tabular-data": ['Inter', 'monospace']
                     }
                 }
             }
-        }
+        };
     </script>
+    
+    <!-- SheetJS (xlsx) for client-side Excel parsing and export -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
-        @layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}
-        ::-webkit-scrollbar{display:none;}
+        @layer base {
+            html, body { margin: 0; padding: 0; }
+            body { overscroll-behavior: none; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         .num-tabular { font-variant-numeric: tabular-nums; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
-<body class="bg-surface font-body-md text-on-surface antialiased">
-    <aside class="fixed left-0 top-0 h-screen w-[240px] bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none">
+
+<body class="bg-surface font-sans text-on-surface antialiased selection:bg-brand-100 selection:text-brand-900">
+    <!-- Sidebar Navigation -->
+    <aside class="fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-slate-200 z-50 flex flex-col justify-between select-none shadow-xs">
         <div class="flex flex-col">
-            <div class="h-14 px-space-md border-b border-outline-variant flex items-center gap-space-sm">
-                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png">
+            <div class="h-14 px-space-md border-b border-slate-200 flex items-center gap-space-sm bg-white">
+                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png" onerror="this.src='https://ui-avatars.com/api/?name=NYRIX&background=1d4ed8&color=fff&bold=true'">
                 <div class="flex flex-col">
-                    <span class="font-headline-sm text-headline-sm text-on-surface leading-none tracking-tight">NYRIX</span>
-                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">ERP System</span>
+                    <span class="text-base font-bold text-slate-900 leading-none tracking-tight">NYRIX</span>
+                    <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">ERP System</span>
                 </div>
             </div>
+            
             <div class="px-space-md pt-space-md">
-                <span class="font-label-sm text-label-sm uppercase text-outline tracking-wider block px-space-xs mb-space-xs">Navigation</span>
-                <nav class="flex flex-col gap-space-xs">
-                    <a class="group flex items-center gap-space-sm px-space-md py-space-sm transition-colors bg-surface-container-low text-primary font-semibold border-l-4 border-primary rounded-none nav-link" data-path="importation" href="#" onclick="window.switchView('importation', this)">
-                        <span class="material-symbols-outlined text-[18px] text-primary">move_to_inbox</span>
-                        <span class="">Importation</span>
+                <span class="text-[11px] font-bold uppercase text-slate-400 tracking-wider block px-space-xs mb-2">Navigation</span>
+                <nav class="flex flex-col gap-1">
+                    <a id="nav-importation" class="group flex items-center gap-2.5 px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link" data-path="importation" href="#" onclick="window.switchView('importation', this); return false;">
+                        <span class="material-symbols-outlined text-[19px] text-brand-600">move_to_inbox</span>
+                        <span>Importation</span>
                     </a>
-                    <a class="group flex items-center gap-space-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface font-body-sm text-body-sm transition-colors nav-link border-l-4 border-transparent" data-path="stock" href="#" onclick="window.switchView('stock', this)">
-                        <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface">inventory_2</span>
-                        <span class="">Stock</span>
+                    <a id="nav-stock" class="group flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg" data-path="stock" href="#" onclick="window.switchView('stock', this); return false;">
+                        <span class="material-symbols-outlined text-[19px] text-slate-400 group-hover:text-slate-700">inventory_2</span>
+                        <span>Stock & Valorisation</span>
                     </a>
                 </nav>
             </div>
         </div>
-        <div class="border-t border-outline-variant p-space-md bg-surface-container-lowest">
-            <div class="flex items-center gap-space-sm mb-space-md">
+
+        <div class="border-t border-slate-200 p-space-md bg-slate-50/50">
+            <div class="flex items-center gap-2.5 mb-3">
+                <div class="w-8 h-8 rounded-full bg-brand-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    OA
+                </div>
                 <div class="flex flex-col min-w-0 flex-1">
-                    <span class="font-label-sm text-label-sm text-on-surface font-semibold truncate">CONNECTÉ: ADMIN</span>
-                    <span class="font-label-sm text-label-sm text-on-surface-variant truncate">Finance & Logistique</span>
+                    <span class="text-xs font-bold text-slate-800 truncate">CONNECTÉ: ADMIN</span>
+                    <span class="text-[11px] text-slate-500 truncate">Finance &amp; Logistique</span>
                 </div>
             </div>
-            <a class="flex items-center justify-center gap-space-xs w-full py-space-xs px-space-sm rounded-lg bg-surface-container-low hover:bg-error-container hover:text-on-error-container text-on-surface-variant font-label-md text-label-md transition-colors" href="#" onclick="window.logout()">
+            <a class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-600 text-xs font-semibold transition-colors shadow-xs" href="#" onclick="window.logout(); return false;">
                 <span class="material-symbols-outlined text-[16px]">logout</span>
-                <span class="">Déconnexion</span>
+                <span>Déconnexion</span>
             </a>
         </div>
     </aside>
 
+    <!-- Main Container -->
     <div class="pl-[240px] flex flex-col min-h-screen">
-        <header class="fixed top-0 left-[240px] right-0 h-14 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant z-40 px-margin flex items-center justify-between">
-            <div class="flex items-center gap-space-md">
-                <div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
-                    <span class="font-label-md text-label-md text-primary font-semibold">NYRIX</span>
-                    <span class="">/</span>
-                    <span class="text-on-surface">Portail Entreprise</span>
+        <!-- Top Fixed Header -->
+        <header class="fixed top-0 left-[240px] right-0 h-14 bg-white/95 backdrop-blur-md border-b border-slate-200 z-40 px-6 flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 text-xs text-slate-500">
+                    <span class="font-bold text-brand-700">NYRIX</span>
+                    <span>/</span>
+                    <span class="font-medium text-slate-700">Portail Entreprise</span>
+                    <span>/</span>
+                    <span id="breadcrumb-active" class="font-semibold text-slate-900">Arrivage & Landed Cost</span>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Exercice 2025 • Actif
+                </div>
+                <div class="hidden lg:flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 font-medium">
+                    <span class="material-symbols-outlined text-[15px] text-slate-500">currency_exchange</span>
+                    <span id="header-bam-rate">BAM: 10.0000 MAD / Devise</span>
+                </div>
+                <button class="h-8 w-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors" title="Notifications">
+                    <span class="material-symbols-outlined text-[20px]">notifications</span>
+                </button>
             </div>
         </header>
 
-        <!-- VIEW IMPORTATION -->
+        <!-- VIEW 1: IMPORTATION -->
         <main id="view-importation" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 mt-14">
-            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <!-- Header Row -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Arrivage & Détermination Coût de Revient</h1>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Arrivage &amp; Détermination Coût de Revient</h1>
                     <p class="text-xs text-slate-500 mt-1">Saisie des factures fournisseurs, ventilation analytique des frais d'approche et valorisation d'entrée en stock.</p>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-xs transition-colors" onclick="alert('Guide Douane DUM :\n- Taux standard appliqué : 2.5% à 5.0% selon nomenclature SH\n- Déclaration DUM à saisir au Port de Casablanca\n- Rapprochement automatique à la réception')">
+                        <span class="material-symbols-outlined text-[16px] text-slate-500">description</span>
+                        Guide Douane (DUM)
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors" onclick="window.refreshExchangeRate()">
+                        <span class="material-symbols-outlined text-[16px] text-brand-600">sync</span>
+                        Actualiser Parités
+                    </button>
+                </div>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+            <!-- Top 3 KPI Blocks -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
                 <!-- KPI 1 -->
-                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
-                    <div class="flex items-center justify-between"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Valeur Totale Immobilisée</span><div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div></div>
-                    <div class="mt-4"><div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular"><span id="kpi-val">0.00</span> <span class="text-lg font-semibold text-slate-500">MAD</span></div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Valeur Totale Immobilisée</span>
+                            <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">payments</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular">
+                                <span id="kpi-val">0.00</span> <span class="text-base font-semibold text-slate-500">MAD</span>
+                            </div>
+                            <div class="mt-2 flex items-center gap-1.5 text-xs">
+                                <span class="inline-flex items-center font-bold text-emerald-600">
+                                    <span class="material-symbols-outlined text-[14px]">trending_up</span>+4.2%
+                                </span>
+                                <span class="text-slate-500">vs arrivage précédent</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Exercice en cours</span>
+                        <span class="font-semibold text-slate-700">Taux couverture: 94%</span>
+                    </div>
                 </div>
+
                 <!-- KPI 2 -->
-                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
-                    <div class="flex items-center justify-between"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Global</span><div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div></div>
-                    <div class="mt-4"><div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular"><span id="kpi-stock">0</span> <span class="text-lg font-semibold text-slate-500">Unités</span></div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Stock Global / Disponible</span>
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular">
+                                <span id="kpi-stock">0</span> <span class="text-base font-semibold text-slate-500">Unités</span>
+                            </div>
+                            <div class="mt-3 space-y-1.5">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Disponible immédiat :</span>
+                                    <span id="kpi-stock-disp" class="font-semibold text-slate-800 num-tabular">0 U (100%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                    <div id="kpi-stock-bar" class="bg-brand-600 h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Dépôt Central Tit Mellil</span>
+                        <span class="font-semibold text-slate-700">Entrepôt A-04</span>
+                    </div>
                 </div>
+
                 <!-- KPI 3 -->
-                <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
-                    <div class="flex items-center justify-between"><span class="text-xs font-bold uppercase tracking-wider text-slate-500">Commandes du Jour</span><div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div></div>
-                    <div class="mt-4"><div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular"><span id="kpi-orders">0</span></div></div>
+                <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Commandes du Jour</span>
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-[20px]">local_shipping</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-slate-900 tracking-tight num-tabular">
+                                <span id="kpi-orders">0</span> <span class="text-base font-semibold text-slate-500">Commandes</span>
+                            </div>
+                            <div class="mt-3 space-y-1.5">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-slate-500">Contrôle logistique :</span>
+                                    <span class="font-bold text-emerald-600">Directement synchronisé</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Flux B2C &amp; B2B</span>
+                        <span class="font-semibold text-slate-700">Équipe Quai &amp; Expédition</span>
+                    </div>
                 </div>
             </div>
-            
+
+            <!-- Form Section -->
             <div class="grid grid-cols-1 gap-6 items-start">
                 <section class="flex flex-col gap-6 w-full">
-                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
+                    <!-- Invoice Data Box -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-5">
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-200">
                             <div>
-                                <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span><h2 class="text-xs font-bold uppercase tracking-wider text-slate-800">Saisie des Données de Facturation & Marchandises</h2></div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-brand-600"></span>
+                                    <h2 class="text-xs font-bold uppercase tracking-wider text-slate-800">Saisie des Données de Facturation &amp; Marchandises</h2>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-0.5">Importation dématérialisée et ventilation analytique par produit</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label for="file" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-brand-50 text-brand-700 border border-brand-300 hover:bg-brand-100 hover:border-brand-400 cursor-pointer shadow-xs transition-colors">
+                                    <span class="material-symbols-outlined text-[17px] text-brand-600">upload_file</span>
+                                    <span id="file-label-text">Importer facture / bordereau (XLSX, CSV)</span>
+                                    <input type="file" id="file" accept=".xlsx,.xls,.csv" class="hidden">
+                                </label>
+                                <span class="hidden lg:inline-flex text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">Auto-Parser Actif</span>
                             </div>
                         </div>
+
+                        <!-- Active File Loaded Banner -->
+                        <div id="file-info-banner" class="hidden p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-[20px]">table_view</span>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span id="banner-filename" class="text-xs font-bold text-emerald-950">facture.xlsx</span>
+                                        <span id="banner-tag" class="text-[10px] font-bold bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded">Parsed OK</span>
+                                    </div>
+                                    <p id="banner-details" class="text-[11px] text-emerald-800 mt-0.5">3 articles détectés • 1,200 pièces au total</p>
+                                </div>
+                            </div>
+                            <button type="button" class="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1" onclick="window.clearLoadedFile()">
+                                <span class="material-symbols-outlined text-[15px]">delete</span>
+                                <span>Retirer</span>
+                            </button>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="ref-facture">Référence de facture <span class="text-rose-500">*</span></label><input class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500 uppercase" id="ref-facture" type="text" placeholder="Ex: FAC-001"></div>
                             <div>
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">JSON Payload <span class="text-rose-500">*</span></label>
-                                <input class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="lines_json" type="text" placeholder='[{"sku":"AW-01","quantity":100,"unit_price_usd":10,"weight_kg":0.5}]'>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="nom-fournisseur">Nom de fournisseur <span class="text-rose-500">*</span></label>
+                                <input class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="nom-fournisseur" type="text" placeholder="Ex: Global Trade Logistics SARL" value="Global Trade Logistics SARL">
                             </div>
-                            <div class="col-span-1">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Fichier Excel (Optionnel)</label>
-                                <input type="file" id="file" accept=".xlsx" class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" />
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="ref-facture">Référence de facture <span class="text-rose-500">*</span></label>
+                                <input class="w-full text-sm font-bold text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500 uppercase" id="ref-facture" type="text" placeholder="Ex: FAC-2025-0984" value="FAC-2025-0984">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="date-facture">Date Facture <span class="text-rose-500">*</span></label>
+                                <input class="w-full text-sm font-medium text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="date-facture" type="date">
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="taux-change">Taux (Devise / MAD)</label><input class="w-full text-sm font-bold text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="taux-change" step="0.01" type="number" value="10.00"></div>
-                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="cle-repartition">Clé de répartition</label><select class="w-full text-sm font-semibold text-brand-700 bg-brand-50/50 rounded-lg border-brand-300 focus:border-brand-500 focus:ring-brand-500" id="cle-repartition"><option value="VALUE">Pro-rata Valeur</option><option value="WEIGHT">Pro-rata Poids</option><option value="QUANTITY">Pro-rata Quantité</option></select></div>
-                            <div><label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Douane (%)</label><input class="w-full text-sm font-bold text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="douane" step="0.1" type="number" value="5.0"></div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="devise-origine">Devise d'Achat</label>
+                                <select class="w-full text-sm font-semibold text-slate-900 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500" id="devise-origine" onchange="window.updateCurrencyBadge()">
+                                    <option value="USD" selected>USD - Dollar Américain ($)</option>
+                                    <option value="EUR">EUR - Euro (€)</option>
+                                    <option value="GBP">GBP - Livre Sterling (£)</option>
+                                    <option value="CNY">CNY - Yuan Chinois (¥)</option>
+                                    <option value="MAD">MAD - Dirham Marocain</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="taux-change">Taux (Devise / MAD)</label>
+                                <div class="relative">
+                                    <input class="w-full text-sm font-bold text-slate-900 text-right pr-12 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500 num-tabular" id="taux-change" step="0.0001" type="number" value="10.0000">
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-xs font-medium text-slate-400">MAD</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="cle-repartition">Clé de répartition</label>
+                                <select class="w-full text-sm font-semibold text-brand-700 bg-brand-50/50 rounded-lg border-brand-300 focus:border-brand-500 focus:ring-brand-500" id="cle-repartition">
+                                    <option value="VALUE" selected>Pro-rata Valeur (€/MAD)</option>
+                                    <option value="WEIGHT">Pro-rata Poids Brut (Kg)</option>
+                                    <option value="QUANTITY">Pro-rata Nombre d'Unités</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5" for="douane">Droits Douane (%)</label>
+                                <div class="relative">
+                                    <input class="w-full text-sm font-bold text-slate-900 text-right pr-8 rounded-lg border-slate-300 bg-slate-50 focus:bg-white focus:border-brand-500 focus:ring-brand-500 num-tabular" id="douane" step="0.1" type="number" value="5.0">
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none text-xs font-bold text-slate-400">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fallback / Developer JSON payload (collapsible) -->
+                        <div class="pt-2">
+                            <details class="text-xs text-slate-500">
+                                <summary class="cursor-pointer font-semibold hover:text-slate-700 select-none">Options Avancées: Payload JSON brut (optionnel)</summary>
+                                <div class="mt-2">
+                                    <textarea id="lines_json" rows="2" class="w-full text-xs font-mono text-slate-800 rounded-lg border-slate-300 bg-slate-50 focus:bg-white" placeholder='[{"sku":"AW-01","quantity":100,"unit_price_usd":10,"weight_kg":0.5}]'></textarea>
+                                </div>
+                            </details>
                         </div>
                     </div>
-                    
-                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between h-full">
+
+                    <!-- Ancillary Costs Card -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
                         <div class="flex flex-col gap-4">
-                            <div class="border-b border-slate-200 pb-2"><h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-500"></span>Décomposition des Frais</h3></div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Transport Int.</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="transport-inter" step="0.01" type="number" value="0.00"></div>
-                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Transport Local</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="transport-local" step="0.01" type="number" value="0.00"></div>
-                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Assurance</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="assurance" step="0.01" type="number" value="0.00"></div>
-                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Dédouanement</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="frais-dedouanement" step="0.01" type="number" value="0.00"></div>
-                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Portnet</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="portnet" step="0.01" type="number" value="0.00"></div>
-                                <div><label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Autres Frais</label><input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="autres-frais" step="0.01" type="number" value="0.00"></div>
+                            <div class="border-b border-slate-200 pb-2">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-brand-500"></span>
+                                    Décomposition des Frais d'Approche (MAD)
+                                </h3>
+                                <p class="text-[11px] text-slate-400">Éléments constitutifs ventilés sur les articles</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1" for="transport-inter">Fret Int. (Air/Mer)</label>
+                                    <input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="transport-inter" step="0.01" type="number" value="1200.00">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1" for="transport-local">Transport Local</label>
+                                    <input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="transport-local" step="0.01" type="number" value="500.00">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1" for="assurance">Assurance Transit</label>
+                                    <input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="assurance" step="0.01" type="number" value="250.00">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1" for="frais-dedouanement">Dédouanement</label>
+                                    <input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="frais-dedouanement" step="0.01" type="number" value="800.00">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1" for="portnet">Portnet / Guichet</label>
+                                    <input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="portnet" step="0.01" type="number" value="150.00">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wider text-slate-600 mb-1" for="autres-frais">Manutention / Autres</label>
+                                    <input class="w-full text-sm font-semibold text-slate-900 text-right rounded-lg border-slate-300 focus:border-brand-500 focus:ring-brand-500 num-tabular" id="autres-frais" step="0.01" type="number" value="300.00">
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+
+                    <!-- Action Bar -->
+                    <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div>
-                            <div><p class="text-xs font-semibold text-slate-900">Prêt pour validation comptable et intégration logistique</p></div>
+                            <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-900">Prêt pour validation comptable et intégration logistique</p>
+                                <p class="text-[11px] text-slate-500">Mise à jour immédiate du stock mondial et calcul du coût de revient pondéré.</p>
+                            </div>
                         </div>
                         <div class="flex items-center gap-3 w-full sm:w-auto">
-                            <button id="import-btn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg shadow-md shadow-emerald-500/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span class="">Ajouter au stock</span>
+                            <button id="btn-save-draft" type="button" class="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-xs transition-colors" onclick="window.saveDraft()">
+                                Sauvegarder Brouillon
+                            </button>
+                            <button id="import-btn" type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 rounded-lg shadow-md shadow-emerald-600/20 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span class="material-symbols-outlined text-[18px]">inventory</span>
+                                <span id="import-btn-text">Ajouter au stock</span>
                             </button>
                         </div>
                     </div>
-                    
-                    <!-- RECAP PREVIEW TABLE -->
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between h-full">
-                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
-                            <div><h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">Preview Recap Financier</h3></div>
+
+                    <!-- Analytical Recap & Items Preview Tables -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                        <!-- Table 1: Analytical Breakdown -->
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between">
+                            <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">Récapitulatif Financier Analytique (MAD)</h3>
+                                    <p class="text-[11px] text-slate-500">Synthèse consolidée du coût de revient avant validation</p>
+                                </div>
+                                <span id="recap-dum-badge" class="text-xs font-semibold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded">DUM Estimée</span>
+                            </div>
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
+                                        <tr>
+                                            <th class="py-2.5 px-4">Composante de Coût</th>
+                                            <th class="py-2.5 px-2 text-center">Part (%)</th>
+                                            <th class="py-2.5 px-4 text-right">Montant (MAD)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="analytical-body" class="divide-y divide-slate-200 text-slate-700">
+                                        <tr>
+                                            <td class="py-2.5 px-4 font-medium text-slate-900">Valeur Marchandise Usine (FOB)</td>
+                                            <td id="ana-part-fob" class="py-2.5 px-2 text-center text-slate-500 num-tabular">0.0%</td>
+                                            <td id="ana-val-fob" class="py-2.5 px-4 text-right font-semibold text-slate-900 num-tabular">0.00 MAD</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-4 font-medium text-slate-900">Fret &amp; Transport Local</td>
+                                            <td id="ana-part-transport" class="py-2.5 px-2 text-center text-slate-500 num-tabular">0.0%</td>
+                                            <td id="ana-val-transport" class="py-2.5 px-4 text-right font-semibold text-slate-900 num-tabular">0.00 MAD</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-4 font-medium text-slate-900">Droits Douane &amp; Transit</td>
+                                            <td id="ana-part-duty" class="py-2.5 px-2 text-center text-slate-500 num-tabular">0.0%</td>
+                                            <td id="ana-val-duty" class="py-2.5 px-4 text-right font-semibold text-slate-900 num-tabular">0.00 MAD</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-2.5 px-4 font-medium text-slate-900">Frais Annexes, Assurance &amp; Portnet</td>
+                                            <td id="ana-part-ancillary" class="py-2.5 px-2 text-center text-slate-500 num-tabular">0.0%</td>
+                                            <td id="ana-val-ancillary" class="py-2.5 px-4 text-right font-semibold text-slate-900 num-tabular">0.00 MAD</td>
+                                        </tr>
+                                        <tr class="bg-slate-50/50">
+                                            <td class="py-2.5 px-4 font-medium text-slate-900">TVA Déductible Import (20%)</td>
+                                            <td id="ana-part-tva" class="py-2.5 px-2 text-center text-slate-500 num-tabular">0.0%</td>
+                                            <td id="ana-val-tva" class="py-2.5 px-4 text-right font-semibold text-slate-900 num-tabular">0.00 MAD</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="bg-brand-50 border-t-2 border-brand-200">
+                                            <th class="py-3 px-4 text-xs font-bold text-brand-900 uppercase" colspan="2">Coût Total (Landed Cost HT)</th>
+                                            <th id="ana-val-total" class="py-3 px-4 text-right text-sm font-bold text-brand-700 num-tabular">0.00 MAD</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
-                        <div class="overflow-x-auto flex-1">
-                            <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
-                                    <tr>
-                                        <th class="py-3 px-4">SKU</th>
-                                        <th class="py-3 px-4 text-right">FOB MAD</th>
-                                        <th class="py-3 px-4 text-right">Douane MAD</th>
-                                        <th class="py-3 px-4 text-right">Coût de Revient U (MAD)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200 text-slate-700" id="recap-body">
-                                </tbody>
-                            </table>
+
+                        <!-- Table 2: Articles Landed Cost Preview -->
+                        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between">
+                            <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">Articles &amp; Coûts de Revient Unitaires</h3>
+                                    <p class="text-[11px] text-slate-500">Valorisation par article calculée en temps réel</p>
+                                </div>
+                                <span id="recap-count-badge" class="text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">0 articles</span>
+                            </div>
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
+                                        <tr>
+                                            <th class="py-2.5 px-3">SKU</th>
+                                            <th class="py-2.5 px-2 text-right">Qté</th>
+                                            <th class="py-2.5 px-3 text-right">FOB (MAD)</th>
+                                            <th class="py-2.5 px-3 text-right">Douane</th>
+                                            <th class="py-2.5 px-3 text-right font-bold text-brand-800">Coût U (MAD)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recap-body" class="divide-y divide-slate-200 text-slate-700">
+                                        <tr>
+                                            <td colspan="5" class="py-6 text-center text-slate-400 italic">
+                                                Chargez un fichier Excel (.xlsx) pour prévisualiser les calculs
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </section>
             </div>
         </main>
 
-        <!-- VIEW STOCK -->
-        <main id="view-stock" class="hidden flex-1 pt-14 bg-surface-container-low w-full px-margin py-margin mt-14">
-            <div class="flex flex-col w-full">
-                <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-space-lg mb-space-xl">
+        <!-- VIEW 2: STOCK & VALORISATION -->
+        <main id="view-stock" class="hidden flex-1 pt-14 bg-surface-container-low w-full px-6 py-6 mt-14">
+            <div class="flex flex-col w-full max-w-7xl mx-auto">
+                <!-- Top Header Row -->
+                <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-4 mb-6">
                     <div class="flex flex-col max-w-2xl">
-                        <h1 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Stock Global & Valorisation Financière</h1>
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold text-[11px] uppercase tracking-wider border border-brand-200">Module WMS &amp; Clôture Mensuelle</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <span class="text-xs text-slate-500 font-medium">Devise: MAD (Dirham Marocain)</span>
+                        </div>
+                        <h1 class="text-2xl font-bold tracking-tight text-slate-900">Stock Global &amp; Valorisation Financière</h1>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Audit d'inventaire physique entrepôt, traçabilité des réceptions fournisseurs et valorisation rigoureuse au coût de revient unitaire pondéré (Landed Cost).
+                        </p>
                     </div>
                 </div>
 
-                <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col mb-8">
-                    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md mb-space-lg">
-                        <div class="relative w-full lg:w-96">
-                            <span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-                            <input class="w-full h-10 pl-10 pr-space-md rounded-lg bg-surface-container-low focus:bg-surface-container-lowest font-body-sm text-body-sm text-on-surface placeholder:text-outline outline-none transition-all" id="stock-search-input" placeholder="Rechercher par SKU, produit ou N° facture..." type="text">
+                <!-- Operational Distribution Ribbon (4 cards) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Ribbon 1: Karime Stock -->
+                    <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand-600 shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">inventory</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[11px] uppercase text-slate-500 font-semibold">Karime (Entrepôt Palettes)</span>
+                            <span class="text-lg font-bold text-slate-900">
+                                <span id="ribbon-karime-stock">0</span>
+                                <span class="text-xs text-slate-500 font-normal">pcs (<span id="ribbon-karime-pct">0.0%</span>)</span>
+                            </span>
                         </div>
                     </div>
-                    
-                    <div class="overflow-x-auto w-full rounded-lg">
-                        <table class="w-full border-collapse text-left">
+
+                    <!-- Ribbon 2: Packer Stock -->
+                    <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">shelves</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[11px] uppercase text-slate-500 font-semibold">Packer (Tablettes Picking)</span>
+                            <span class="text-lg font-bold text-slate-900">
+                                <span id="ribbon-packer-stock">0</span>
+                                <span class="text-xs text-slate-500 font-normal">pcs (<span id="ribbon-packer-pct">0.0%</span>)</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Ribbon 3: Weighted Landed Cost -->
+                    <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                        <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">price_change</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[11px] uppercase text-slate-500 font-semibold">Coût Moyen / Unité</span>
+                            <span class="text-lg font-bold text-slate-900">
+                                <span id="ribbon-avg-cost">0.00</span>
+                                <span class="text-xs text-slate-500 font-normal">MAD net</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Ribbon 4: Live Synchronization -->
+                    <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                            <span class="material-symbols-outlined text-[22px]">sync</span>
+                        </div>
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[11px] uppercase text-slate-500 font-semibold">Dernière Synchronisation</span>
+                            <span class="text-lg font-bold text-slate-900">
+                                <span id="ribbon-last-sync">--:--:--</span>
+                                <span class="text-xs text-emerald-600 font-semibold">Direct live</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Card: Structured Full-Width Table Layout -->
+                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col mb-6">
+                    <!-- Table Controls Toolbar -->
+                    <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5">
+                        <!-- Search Field -->
+                        <div class="relative w-full lg:w-96">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                            <input class="w-full h-10 pl-9 pr-3 rounded-lg bg-slate-50 focus:bg-white border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all" id="stock-search-input" placeholder="Rechercher par SKU, produit ou N° facture..." type="text">
+                        </div>
+
+                        <!-- Filters & Actions -->
+                        <div class="flex flex-wrap items-center gap-2.5 justify-between lg:justify-end">
+                            <!-- Invoice Filter Dropdown -->
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+                                <span class="material-symbols-outlined text-slate-400 text-[16px]">filter_alt</span>
+                                <span class="text-xs text-slate-500 whitespace-nowrap">Facture Source:</span>
+                                <select class="bg-transparent text-xs text-slate-900 font-semibold py-0.5 pr-2 outline-none cursor-pointer border-none focus:ring-0" id="invoice-filter">
+                                    <option value="ALL">Toutes les factures</option>
+                                </select>
+                            </div>
+
+                            <!-- Sync Button -->
+                            <button class="h-10 px-3.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors flex items-center gap-1.5" id="btn-sync-wms" onclick="window.syncWMS(this)">
+                                <span class="material-symbols-outlined text-[16px] text-slate-500">sync</span>
+                                <span>Synchroniser WMS</span>
+                            </button>
+
+                            <!-- Export Button -->
+                            <button class="h-10 px-3.5 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold transition-colors flex items-center gap-1.5" id="btn-export-xlsx" onclick="window.exportToExcel()">
+                                <span class="material-symbols-outlined text-[16px] text-brand-600">file_download</span>
+                                <span>Exporter XLSX</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Table Container -->
+                    <div class="overflow-x-auto w-full rounded-lg border border-slate-200">
+                        <table class="w-full border-collapse text-left" id="inventory-table">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant">
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold rounded-tl-lg">SKU</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold min-w-[260px]">Désignation de l'Article</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Facture Source</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Stock Entrepôt (Karime)</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Stock Tablette (Packer)</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Coût Revient (Landed)</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Valeur Immobilisée (MAD)</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider">SKU</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider min-w-[240px]">Désignation de l'Article</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider">Facture Source</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right">Stock Entrepôt (Karime)</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right">Stock Tablette (Packer)</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right">Coût Revient (Landed)</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right">Valeur Immobilisée (MAD)</th>
+                                    <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-surface-container-high/60" id="inventory-tbody">
+                            <tbody class="divide-y divide-slate-200 text-slate-700 text-xs" id="inventory-tbody">
+                                <tr>
+                                    <td colspan="8" class="py-8 text-center text-slate-400 italic">Chargement de l'inventaire en cours...</td>
+                                </tr>
                             </tbody>
+                            <tfoot id="inventory-tfoot" class="border-t-2 border-slate-200 bg-slate-50 font-semibold text-slate-900 text-xs">
+                                <tr>
+                                    <td class="py-3.5 px-4" colspan="3">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-brand-600 text-[18px]">verified</span>
+                                            <span id="tfoot-label" class="uppercase tracking-wider">TOTAL VALORISATION INVENTAIRE</span>
+                                        </div>
+                                    </td>
+                                    <td id="tfoot-karime" class="py-3.5 px-4 text-right num-tabular font-bold">0</td>
+                                    <td id="tfoot-packer" class="py-3.5 px-4 text-right num-tabular font-bold">0</td>
+                                    <td id="tfoot-global-label" class="py-3.5 px-4 text-right text-slate-500">Global: 0 pcs</td>
+                                    <td id="tfoot-total-val" class="py-3.5 px-4 text-right text-sm font-extrabold text-brand-700 num-tabular">0.00 MAD</td>
+                                    <td class="py-3.5 px-4 text-center">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                            Équilibré à 100%
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
+
+                    <!-- Status Strip -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4 mt-3 text-slate-500 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span id="pagination-status">Affichage de 0 références enregistrées</span>
+                            <span>•</span>
+                            <span class="flex items-center gap-1 text-emerald-600 font-medium">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                Synchronisé avec ERP Finance &amp; Neon DB
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Policy Note Strip -->
+                <div class="bg-white rounded-xl p-4 shadow-xs border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+                            <span class="material-symbols-outlined text-[20px]">policy</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold text-slate-900">Politique d'évaluation du stock &amp; Landed Cost</span>
+                            <span class="text-[11px] text-slate-500">
+                                Les coûts de revient incluent le prix d'achat FOB, le fret international, l'assurance de transport, les droits de douane et les frais de débarquement au Port de Casablanca.
+                            </span>
+                        </div>
+                    </div>
+                    <button class="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center gap-1 shrink-0" onclick="alert('Règle Comptable NYRIX :\nValorisation au Coût Moyen Unitaire Pondéré (CUMP).\nChaque nouvel arrivage recalcule automatiquement le coût unitaire selon la formule :\nCUMP = (Stock Ancien * Ancien CUMP + Nouvel Arrivage * Landed Cost) / Total Stock')">
+                        <span>Règles Comptables</span>
+                        <span class="material-symbols-outlined text-[14px]">north_east</span>
+                    </button>
                 </div>
 
                 <!-- Discrepancies Panel -->
-                <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col">
-                    <h2 class="font-display-sm text-display-sm text-on-surface font-bold tracking-tight mb-4">Approbation des Écarts</h2>
-                    <div class="overflow-x-auto w-full rounded-lg">
-                        <table class="w-full border-collapse text-left">
+                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                            <h2 class="text-sm font-bold text-slate-900 tracking-tight">Approbation des Écarts de Stock (Discrepancies)</h2>
+                        </div>
+                        <span class="text-xs text-slate-500">Signalés par Karime &amp; Équipe Quai</span>
+                    </div>
+
+                    <div class="overflow-x-auto w-full rounded-lg border border-slate-200">
+                        <table class="w-full border-collapse text-left text-xs">
                             <thead>
-                                <tr class="bg-surface-container-low text-on-surface-variant">
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold rounded-tl-lg">ID</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">SKU</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Manquant</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold">Raison</th>
-                                    <th class="py-space-md px-space-md font-label-sm text-label-sm uppercase tracking-wider font-semibold text-right">Action</th>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">ID Écart</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">SKU</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">Quantité Manquante</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">Raison Signalée</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider text-right">Décision Admin</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-surface-container-high/60" id="disc-body">
+                            <tbody class="divide-y divide-slate-200 text-slate-700" id="disc-body">
+                                <tr>
+                                    <td colspan="5" class="py-6 text-center text-slate-400 italic">Aucun écart en attente d'approbation.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </main>
+    </div>
+
+    <!-- Slide-Over Cost Breakdown Drawer (Interactive Flyout) -->
+    <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 hidden transition-opacity" id="cost-drawer-backdrop" onclick="window.closeDetailDrawer()"></div>
+    <div class="fixed top-0 right-0 h-screen w-full sm:w-[480px] bg-white shadow-2xl z-50 translate-x-full transition-transform duration-300 flex flex-col justify-between" id="cost-drawer">
+        <div class="flex flex-col h-full overflow-y-auto">
+            <!-- Drawer Header -->
+            <div class="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between sticky top-0 z-10">
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-mono text-xs font-bold" id="drawer-sku">SKU-00</span>
+                        <span class="px-2 py-0.5 rounded bg-slate-200 text-slate-700 text-[11px] font-semibold" id="drawer-invoice">INV-000</span>
+                    </div>
+                    <h2 class="text-base font-bold text-slate-900 leading-tight" id="drawer-title">Détail Coûts &amp; Décomposition</h2>
+                </div>
+                <button class="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-200 hover:bg-slate-300 text-slate-700 transition-colors" onclick="window.closeDetailDrawer()">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <!-- Drawer Content Body -->
+            <div class="p-5 flex flex-col gap-5">
+                <!-- Main Landed Cost Metric Block -->
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Coût de Revient Pondéré Unitaire</span>
+                    <div class="flex items-baseline justify-between mt-1">
+                        <span class="text-2xl font-extrabold text-brand-700 num-tabular" id="drawer-landed-cost">00.00 MAD</span>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Rapprochement validé</span>
+                    </div>
+                    <div class="mt-3 pt-2.5 border-t border-slate-200 flex justify-between text-xs">
+                        <span class="text-slate-500">Quantité Totale Enregistrée :</span>
+                        <span class="font-bold text-slate-800" id="drawer-qty">0 pcs</span>
+                    </div>
+                    <div class="flex justify-between text-xs mt-1">
+                        <span class="text-slate-500">Valeur Totale Immobilisée :</span>
+                        <span class="font-bold text-brand-700" id="drawer-total-val">00.00 MAD</span>
+                    </div>
+                </div>
+
+                <!-- Breakdown Step Items -->
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">Composantes du Coût (Landed Cost Analysis)</span>
+                    <div class="flex flex-col gap-2">
+                        <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-400 text-[18px]">shopping_cart</span>
+                                <span class="text-slate-700 font-medium">Prix d'Achat Fournisseur (FOB unitaire)</span>
+                            </div>
+                            <span class="font-bold text-slate-900 num-tabular" id="drawer-fob-pct">62.5%</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-400 text-[18px]">flight_takeoff</span>
+                                <span class="text-slate-700 font-medium">Fret Maritime &amp; Aérien proratisé</span>
+                            </div>
+                            <span class="font-bold text-slate-900 num-tabular" id="drawer-fret-pct">15.0%</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-400 text-[18px]">gavel</span>
+                                <span class="text-slate-700 font-medium">Droits de Douane &amp; Transit</span>
+                            </div>
+                            <span class="font-bold text-slate-900 num-tabular" id="drawer-douane-pct">16.5%</span>
+                        </div>
+                        <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-slate-400 text-[18px]">local_shipping</span>
+                                <span class="text-slate-700 font-medium">Transit &amp; Manutention Locale</span>
+                            </div>
+                            <span class="font-bold text-slate-900 num-tabular" id="drawer-transit-pct">6.0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Localization Breakdown -->
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">Emplacement Physique Actuel</span>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 flex flex-col text-xs">
+                            <span class="text-slate-500 font-semibold">Zone Karime (Palettes)</span>
+                            <span class="text-base font-bold text-slate-900 mt-0.5" id="drawer-loc-karime">0 pcs</span>
+                            <span class="text-[11px] text-emerald-600 font-medium mt-0.5">Palette A-12 • Contrôle OK</span>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200 flex flex-col text-xs">
+                            <span class="text-slate-500 font-semibold">Zone Packer (Tablettes)</span>
+                            <span class="text-base font-bold text-slate-900 mt-0.5" id="drawer-loc-packer">0 pcs</span>
+                            <span class="text-[11px] text-slate-500 mt-0.5">Rayon R-04 • Prêt picking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drawer Footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-200 sticky bottom-0 mt-auto flex items-center gap-2.5">
+                <button class="flex-1 py-2 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-colors" onclick="window.closeDetailDrawer()">
+                    Fermer
+                </button>
+                <button class="flex-1 py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs" onclick="window.printArticleCard()">
+                    <span class="material-symbols-outlined text-[16px]">print</span>
+                    <span>Fiche Article</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Script imports -->

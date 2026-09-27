@@ -15,9 +15,15 @@ def calculate_landed_costs(
     
     # First pass: calc FOB, duty and totals
     for line in lines:
-        qty = line.get("quantity", 0)
-        unit_price_usd = line.get("unit_price_usd", 0.0)
-        weight_kg = line.get("weight_kg", 0.0)
+        qty = float(line.get("quantity") or line.get("quantite") or line.get("qty") or 0)
+        unit_price_usd = float(line.get("unit_price_usd") or line.get("unit_price") or line.get("fob") or line.get("prix_unitaire") or 0.0)
+        weight_kg = float(line.get("weight_kg") or line.get("poids") or line.get("weight") or 0.0)
+        sku = str(line.get("sku") or line.get("SKU") or line.get("ref") or "").strip()
+        
+        line["sku"] = sku
+        line["quantity"] = int(qty)
+        line["unit_price_usd"] = unit_price_usd
+        line["weight_kg"] = weight_kg
         
         line_fob_mad = qty * unit_price_usd * exchange_rate
         line["fob_mad"] = line_fob_mad

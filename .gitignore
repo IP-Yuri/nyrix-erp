@@ -40,3 +40,4 @@ scratch/
 .pytest_cache/
 .neon
 node_modules/
+~$*

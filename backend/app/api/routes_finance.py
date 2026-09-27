@@ -5,9 +5,10 @@ from typing import List, Optional
 import json
 import uuid
 
+from datetime import datetime
 from backend.app.core.database import get_db
 from backend.app.core.dependencies import require_role, get_current_user
-from backend.app.models.models import User, Product, StockLedger, InboundShipment, Discrepancy
+from backend.app.models.models import User, Product, StockLedger, InboundShipment, Discrepancy, Order
 from backend.app.models.models import StockActionEnum, ShipmentStatusEnum, DiscrepancyStatusEnum
 from backend.app.schemas.schemas import ProductAdminOut, DiscrepancyOut
 from backend.app.services.landed_cost import calculate_landed_costs
@@ -18,6 +19,7 @@ router = APIRouter(prefix="/api/finance", tags=["finance"], dependencies=[Depend
 
 @router.post("/import")
 async def import_stock(
+    ref_facture: Optional[str] = Form(None),
     lines_json: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     exchange_rate: float = Form(...),
@@ -33,12 +35,13 @@ async def import_stock(
     current_user: User = Depends(get_current_user)
 ):
     lines = []
-    if lines_json:
-        lines = json.loads(lines_json)
-    elif file and file.filename.endswith('.xlsx'):
+    if file and file.filename and (file.filename.lower().endswith('.xlsx') or file.filename.lower().endswith('.xls')):
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
+        df = df.fillna('')
         lines = df.to_dict('records')
+    elif lines_json:
+        lines = json.loads(lines_json)
     else:
         raise HTTPException(status_code=400, detail="Must provide lines_json or valid xlsx file")
 
@@ -51,23 +54,27 @@ async def import_stock(
     calculated = calculate_landed_costs(lines, exchange_rate, customs_duty_pct, ancillaries, allocation_key)
     
     import_items = []
+    invoice_ref = ref_facture.strip().upper() if (ref_facture and ref_facture.strip()) else f"INV-{uuid.uuid4().hex[:8].upper()}"
     
     for item in calculated:
-        sku = item["sku"]
-        qty = item["quantity"]
-        new_lc = item["landed_cost_mad"]
+        sku = str(item["sku"]).strip()
+        qty = int(item["quantity"])
+        new_lc = float(item["landed_cost_mad"])
+        item_name = item.get("name") or item.get("designation") or sku
         
         product = db.query(Product).filter(Product.sku == sku).first()
         if not product:
-            product = Product(sku=sku, name=item.get("name", sku), landed_cost=new_lc, global_stock=qty, packer_stock=0)
+            product = Product(sku=sku, name=item_name, landed_cost=new_lc, global_stock=qty, packer_stock=0)
             db.add(product)
         else:
+            if item_name and (not product.name or product.name == sku):
+                product.name = item_name
             total_value = (product.global_stock * product.landed_cost) + (qty * new_lc)
             new_total_stock = product.global_stock + qty
             product.landed_cost = total_value / new_total_stock if new_total_stock > 0 else 0
             product.global_stock = new_total_stock
             
-        import_items.append({"sku": sku, "quantity": qty, "landed_cost": new_lc})
+        import_items.append({"sku": sku, "name": item_name, "quantity": qty, "landed_cost": new_lc})
         
         ledger_entry = StockLedger(
             product_sku=sku,
@@ -77,7 +84,6 @@ async def import_stock(
         )
         db.add(ledger_entry)
         
-    invoice_ref = f"INV-{uuid.uuid4().hex[:8].upper()}"
     shipment = InboundShipment(
         invoice_ref=invoice_ref,
         status=ShipmentStatusEnum.EN_ATTENTE_RECEPTION,
@@ -90,17 +96,51 @@ async def import_stock(
 
 @router.get("/valuation")
 def get_valuation(db: Session = Depends(get_db)):
-    products = db.query(Product).all()
-    total_val = sum((p.global_stock * p.landed_cost) for p in products)
-    total_stock = sum(p.global_stock for p in products)
+    products = db.query(Product).order_by(Product.sku).all()
     
+    shipments = db.query(InboundShipment).order_by(InboundShipment.created_at.desc()).all()
+    sku_to_invoice = {}
+    invoices = []
+    for s in shipments:
+        if s.invoice_ref and s.invoice_ref not in invoices:
+            invoices.append(s.invoice_ref)
+        if isinstance(s.items_json, list):
+            for itm in s.items_json:
+                sku = itm.get("sku")
+                if sku and sku not in sku_to_invoice:
+                    sku_to_invoice[sku] = s.invoice_ref
+                    
+    total_karime = sum(p.global_stock for p in products)
+    total_packer = sum(p.packer_stock for p in products)
+    total_stock = total_karime + total_packer
+    total_val = sum((p.landed_cost * (p.global_stock + p.packer_stock)) for p in products)
+    avg_cost = (total_val / total_stock) if total_stock > 0 else 0.0
+    orders_count = db.query(Order).count()
+    
+    inventory_data = []
+    for p in products:
+        p_dict = {
+            "sku": p.sku,
+            "name": p.name,
+            "global_stock": p.global_stock,
+            "packer_stock": p.packer_stock,
+            "landed_cost": round(p.landed_cost, 2),
+            "last_invoice_ref": sku_to_invoice.get(p.sku, "STOCK-INITIAL")
+        }
+        inventory_data.append(p_dict)
+        
     return {
         "kpis": {
-            "total_valuation_mad": total_val,
+            "total_valuation_mad": round(total_val, 2),
             "total_global_stock": total_stock,
-            "orders_today_count": 0
+            "karime_stock": total_karime,
+            "packer_stock": total_packer,
+            "avg_unit_cost": round(avg_cost, 2),
+            "orders_today_count": orders_count,
+            "last_sync": datetime.utcnow().strftime("%H:%M:%S")
         },
-        "inventory": [ProductAdminOut.model_validate(p) for p in products]
+        "invoices": invoices,
+        "inventory": inventory_data
     }
 
 @router.get("/discrepancies", response_model=List[DiscrepancyOut])
