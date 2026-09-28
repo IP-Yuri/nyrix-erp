@@ -130,9 +130,25 @@ class InboundShipment(Base):
     __tablename__ = "inbound_shipments"
     id = Column(String(36), primary_key=True, default=generate_uuid)
     invoice_ref = Column(String(255), nullable=False)
+    supplier_name = Column(String(255), nullable=True)
     status = Column(Enum(ShipmentStatusEnum), nullable=False)
     items_json = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class ProductReturn(Base):
+    __tablename__ = "product_returns"
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    product_sku = Column(String(255), ForeignKey("products.sku"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    condition = Column(String(50), nullable=False)  # "INTACT" or "DAMAGED"
+    action = Column(String(50), nullable=False)     # "RETURN_RESTORED" or "QUARANTINE"
+    tracking_number = Column(String(255), nullable=True)
+    reason = Column(String(255), nullable=True)
+    reported_by = Column(String(36), ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    product = relationship("Product")
+    reporter = relationship("User", foreign_keys=[reported_by])
 
 class Discrepancy(Base):
     __tablename__ = "discrepancies"

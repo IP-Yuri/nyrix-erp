@@ -117,3 +117,38 @@ class CODCashBookOut(BaseModel):
     created_at: datetime
     
     model_config = {"from_attributes": True}
+
+class InboundInvoiceItemOut(BaseModel):
+    sku: str
+    name: Optional[str] = None
+    quantity: int
+    landed_cost: float
+
+class InboundInvoiceOut(BaseModel):
+    id: str
+    invoice_ref: str
+    supplier_name: Optional[str] = None
+    status: str
+    created_at: datetime
+    total_skus: int
+    total_quantity: int
+    total_amount_mad: float
+    items: List[InboundInvoiceItemOut] = []
+
+    model_config = {"from_attributes": True}
+
+class ProductReturnOut(BaseModel):
+    id: str
+    product_sku: str
+    product_name: Optional[str] = None
+    quantity: int
+    condition: str
+    action: str
+    tracking_number: Optional[str] = None
+    reason: Optional[str] = None
+    reported_by: str
+    reported_by_username: Optional[str] = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+

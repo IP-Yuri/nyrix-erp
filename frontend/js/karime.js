@@ -650,6 +650,8 @@ if (formReturns) {
         const qty = parseInt(document.getElementById('return-qty')?.value, 10);
         const condition = document.querySelector('input[name="return-condition"]:checked')?.value;
         const isDamaged = (condition === 'damaged');
+        const tracking = document.getElementById('return-tracking')?.value?.trim() || null;
+        const reason = document.getElementById('return-reason')?.value?.trim() || null;
 
         if (!sku || qty <= 0) {
             alert("Données de retour invalides.");
@@ -659,7 +661,14 @@ if (formReturns) {
         try {
             const res = await apiCall('/warehouse/returns', {
                 method: 'POST',
-                body: JSON.stringify({ product_sku: sku, quantity: qty, is_damaged: isDamaged, is_shelf_damage: false })
+                body: JSON.stringify({ 
+                    product_sku: sku, 
+                    quantity: qty, 
+                    is_damaged: isDamaged, 
+                    is_shelf_damage: false,
+                    tracking_number: tracking,
+                    reason: reason
+                })
             });
 
             if (res && res.status === 200) {

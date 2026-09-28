@@ -8,9 +8,9 @@ import uuid
 from datetime import datetime
 from backend.app.core.database import get_db
 from backend.app.core.dependencies import require_role, get_current_user
-from backend.app.models.models import User, Product, StockLedger, InboundShipment, Discrepancy, Order
+from backend.app.models.models import User, Product, StockLedger, InboundShipment, Discrepancy, Order, ProductReturn
 from backend.app.models.models import StockActionEnum, ShipmentStatusEnum, DiscrepancyStatusEnum
-from backend.app.schemas.schemas import ProductAdminOut, DiscrepancyOut
+from backend.app.schemas.schemas import ProductAdminOut, DiscrepancyOut, InboundInvoiceOut, ProductReturnOut
 from backend.app.services.landed_cost import calculate_landed_costs
 import pandas as pd
 import io
@@ -20,6 +20,8 @@ router = APIRouter(prefix="/api/finance", tags=["finance"], dependencies=[Depend
 @router.post("/import")
 async def import_stock(
     ref_facture: Optional[str] = Form(None),
+    nom_fournisseur: Optional[str] = Form(None),
+    supplier_name: Optional[str] = Form(None),
     lines_json: Optional[str] = Form(None),
     file: Optional[UploadFile] = File(None),
     exchange_rate: float = Form(...),
@@ -55,7 +57,8 @@ async def import_stock(
     
     import_items = []
     invoice_ref = ref_facture.strip().upper() if (ref_facture and ref_facture.strip()) else f"INV-{uuid.uuid4().hex[:8].upper()}"
-    
+    final_supplier = (supplier_name or nom_fournisseur or "").strip() or None
+
     for item in calculated:
         sku = str(item["sku"]).strip()
         qty = int(item["quantity"])
@@ -86,13 +89,15 @@ async def import_stock(
         
     shipment = InboundShipment(
         invoice_ref=invoice_ref,
+        supplier_name=final_supplier,
         status=ShipmentStatusEnum.EN_ATTENTE_RECEPTION,
-        items_json=import_items
+        items_json=import_items,
+        created_at=datetime.utcnow()
     )
     db.add(shipment)
     db.commit()
     
-    return {"status": "success", "invoice_ref": invoice_ref, "items": import_items}
+    return {"status": "success", "invoice_ref": invoice_ref, "supplier_name": final_supplier, "items": import_items}
 
 @router.get("/valuation")
 def get_valuation(db: Session = Depends(get_db)):
@@ -173,3 +178,91 @@ def resolve_discrepancy(id: str, action: str, db: Session = Depends(get_db), cur
         
     db.commit()
     return {"status": "success", "discrepancy_status": disc.status}
+
+@router.get("/invoices")
+def list_invoices(db: Session = Depends(get_db)):
+    shipments = db.query(InboundShipment).order_by(InboundShipment.created_at.desc()).all()
+    result = []
+    for s in shipments:
+        items = s.items_json if isinstance(s.items_json, list) else []
+        total_qty = sum(int(i.get("quantity", 0)) for i in items)
+        total_mad = sum(int(i.get("quantity", 0)) * float(i.get("landed_cost", 0.0)) for i in items)
+        status_str = s.status.value if hasattr(s.status, "value") else str(s.status)
+        result.append({
+            "id": str(s.id),
+            "invoice_ref": s.invoice_ref,
+            "supplier_name": s.supplier_name or "Fournisseur non spécifié",
+            "status": status_str,
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+            "total_skus": len(items),
+            "total_quantity": total_qty,
+            "total_amount_mad": round(total_mad, 2),
+            "items": items
+        })
+    return result
+
+@router.delete("/invoices/{id}")
+def delete_invoice(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    shipment = db.query(InboundShipment).filter(InboundShipment.id == id).first()
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Facture introuvable")
+
+    items = shipment.items_json if isinstance(shipment.items_json, list) else []
+    reverted_items = []
+    total_deducted = 0
+
+    for item in items:
+        sku = item.get("sku")
+        qty = int(item.get("quantity", 0))
+        if not sku or qty <= 0:
+            continue
+
+        product = db.query(Product).filter(Product.sku == sku).first()
+        if product:
+            # Automatically remove added quantity from stock
+            product.global_stock = max(0, product.global_stock - qty)
+            
+            # Log reversal in StockLedger
+            ledger_entry = StockLedger(
+                product_sku=sku,
+                user_id=str(current_user.id),
+                action=StockActionEnum.IMPORT,
+                quantity=-qty
+            )
+            db.add(ledger_entry)
+            reverted_items.append({"sku": sku, "deducted_qty": qty, "remaining_stock": product.global_stock})
+            total_deducted += qty
+
+    invoice_ref = shipment.invoice_ref
+    db.delete(shipment)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Facture {invoice_ref} supprimée avec succès. {total_deducted} unités ont été retirées du stock.",
+        "deleted_invoice_ref": invoice_ref,
+        "total_deducted": total_deducted,
+        "reverted_items": reverted_items
+    }
+
+@router.get("/returns")
+def list_returns(db: Session = Depends(get_db)):
+    returns = db.query(ProductReturn).order_by(ProductReturn.created_at.desc()).all()
+    result = []
+    for r in returns:
+        prod = db.query(Product).filter(Product.sku == r.product_sku).first()
+        user = db.query(User).filter(User.id == r.reported_by).first()
+        result.append({
+            "id": str(r.id),
+            "product_sku": r.product_sku,
+            "product_name": prod.name if prod else r.product_sku,
+            "quantity": r.quantity,
+            "condition": r.condition,
+            "action": r.action,
+            "tracking_number": r.tracking_number,
+            "reason": r.reason,
+            "reported_by": str(r.reported_by),
+            "reported_by_username": user.username if user else "karime",
+            "created_at": r.created_at.isoformat() if r.created_at else None
+        })
+    return result

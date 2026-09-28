@@ -3,6 +3,20 @@
 // Global state
 window.currentInvoiceLines = [];
 window.currentInventory = [];
+window.currentInvoicesList = [];
+window.currentReturnsList = [];
+window.selectedInvoiceToDelete = null;
+
+// Helper: Format ISO date to readable string with exact date and time
+function formatDateTime(isoStr) {
+    if (!isoStr) return '--:--:--';
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const pad = (n) => String(n).padStart(2, '0');
+    const datePart = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    return `${datePart} à ${timePart}`;
+}
 
 // Logout
 window.logout = function() {
@@ -10,20 +24,28 @@ window.logout = function() {
     window.location.href = '/';
 };
 
-// View Switcher (Importation vs Stock)
+// View Switcher (Importation vs Factures vs Stock)
 window.switchView = function(view, element) {
     const importView = document.getElementById('view-importation');
+    const facturesView = document.getElementById('view-factures');
     const stockView = document.getElementById('view-stock');
     const breadcrumb = document.getElementById('breadcrumb-active');
     
+    if (importView) importView.classList.add('hidden');
+    if (facturesView) facturesView.classList.add('hidden');
+    if (stockView) stockView.classList.add('hidden');
+
     if (view === 'importation') {
-        importView.classList.remove('hidden');
-        stockView.classList.add('hidden');
+        if (importView) importView.classList.remove('hidden');
         if (breadcrumb) breadcrumb.innerText = 'Arrivage & Landed Cost';
-    } else {
-        importView.classList.add('hidden');
-        stockView.classList.remove('hidden');
+    } else if (view === 'factures') {
+        if (facturesView) facturesView.classList.remove('hidden');
+        if (breadcrumb) breadcrumb.innerText = 'Factures Fournisseurs & Réceptions';
+        window.loadInvoices();
+    } else if (view === 'stock') {
+        if (stockView) stockView.classList.remove('hidden');
         if (breadcrumb) breadcrumb.innerText = 'Stock Global & Valorisation';
+        window.loadStock();
     }
     
     document.querySelectorAll('.nav-link').forEach(el => {
@@ -44,10 +66,6 @@ window.switchView = function(view, element) {
             icon.classList.remove('text-slate-400');
             icon.classList.add('text-brand-600');
         }
-    }
-    
-    if (view === 'stock') {
-        window.loadStock();
     }
 };
 
@@ -113,6 +131,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const invFilter = document.getElementById('invoice-filter');
     if (invFilter) {
         invFilter.addEventListener('change', window.renderInventoryTable);
+    }
+
+    // Factures search and status filters
+    const facturesSearch = document.getElementById('factures-search-input');
+    if (facturesSearch) {
+        facturesSearch.addEventListener('input', window.renderInvoicesTable);
+    }
+    const facturesFilter = document.getElementById('factures-status-filter');
+    if (facturesFilter) {
+        facturesFilter.addEventListener('change', window.renderInvoicesTable);
     }
 
     // Initial load
@@ -367,6 +395,8 @@ if (importBtn) {
         if (btnText) btnText.innerText = "Intégration en cours...";
 
         const formData = new FormData();
+        const nomFournisseur = document.getElementById('nom-fournisseur')?.value?.trim();
+        if (nomFournisseur) formData.append('nom_fournisseur', nomFournisseur);
         if (refFacture) formData.append('ref_facture', refFacture);
         if (file) formData.append('file', file);
         else formData.append('lines_json', linesJson);
@@ -508,6 +538,77 @@ window.loadStock = async function() {
         }
     } catch (e) {
         console.error("Error loading discrepancies:", e);
+    }
+
+    // Load Retours (Signalés par Karime)
+    try {
+        const rRes = await apiCall('/finance/returns');
+        if (rRes && rRes.status === 200) {
+            const rData = await rRes.json();
+            window.currentReturnsList = rData || [];
+            
+            const badgeTotal = document.getElementById('returns-badge-total');
+            const badgeRestored = document.getElementById('returns-badge-restored');
+            const badgeQuarantine = document.getElementById('returns-badge-quarantine');
+            
+            const restoredCount = rData.filter(r => r.action === 'RETURN_RESTORED' || r.condition === 'INTACT').reduce((s, r) => s + r.quantity, 0);
+            const quarantineCount = rData.filter(r => r.action === 'QUARANTINE' || r.condition === 'DAMAGED').reduce((s, r) => s + r.quantity, 0);
+
+            if (badgeTotal) badgeTotal.innerText = `${rData.length} retours enregistrés`;
+            if (badgeRestored) badgeRestored.innerText = `${restoredCount} sains réintégrés`;
+            if (badgeQuarantine) badgeQuarantine.innerText = `${quarantineCount} en quarantaine`;
+
+            const rtbody = document.getElementById('returns-tbody');
+            if (rtbody) {
+                if (rData.length === 0) {
+                    rtbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">Aucun retour de colis enregistré pour le moment.</td></tr>`;
+                } else {
+                    rtbody.innerHTML = '';
+                    rData.forEach(r => {
+                        const isIntact = (r.condition === 'INTACT' || r.action === 'RETURN_RESTORED');
+                        const statusBadge = isIntact 
+                            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Colis Intact (Sain)</span>`
+                            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Marchandise Avariée</span>`;
+                        
+                        const actionImpact = isIntact
+                            ? `<span class="font-bold text-emerald-700">+${r.quantity} Réintégré au Stock Disponible</span>`
+                            : `<span class="font-bold text-rose-700">Isolé en Zone Quarantaine (Hors Stock)</span>`;
+
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition-colors";
+                        tr.innerHTML = `
+                            <td class="py-2.5 px-4 whitespace-nowrap">
+                                <div class="flex items-center gap-1.5 text-slate-700">
+                                    <span class="material-symbols-outlined text-[15px] text-slate-400">schedule</span>
+                                    <span class="font-bold text-xs num-tabular">${formatDateTime(r.created_at)}</span>
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-4">
+                                <div class="flex flex-col">
+                                    <span class="font-mono font-bold text-slate-900">${r.product_sku}</span>
+                                    <span class="text-[11px] text-slate-500 truncate max-w-[200px]">${r.product_name || r.product_sku}</span>
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-4 text-right num-tabular font-bold text-sm text-slate-900">${r.quantity.toLocaleString()} pcs</td>
+                            <td class="py-2.5 px-4 text-center whitespace-nowrap">${statusBadge}</td>
+                            <td class="py-2.5 px-4 text-xs whitespace-nowrap">${actionImpact}</td>
+                            <td class="py-2.5 px-4 whitespace-nowrap">
+                                <div class="flex items-center gap-1.5">
+                                    <div class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-[10px] flex items-center justify-center">K</div>
+                                    <span class="font-semibold text-slate-800 text-xs">${r.reported_by_username || 'karime'} (Entrepôt)</span>
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-4 text-slate-600 text-xs">
+                                <span class="font-medium">${r.tracking_number ? `<strong class="text-slate-800">[${r.tracking_number}]</strong> ` : ''}${r.reason || 'Retour quai standard'}</span>
+                            </td>
+                        `;
+                        rtbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Error loading returns:", e);
     }
 };
 
@@ -698,5 +799,216 @@ window.resolveDisc = async function(id, action, btn) {
     } catch (e) {
         console.error("Error resolving discrepancy:", e);
         if (btn) btn.disabled = false;
+    }
+};
+
+// ==========================================
+// FACTURES (INVOICES) MANAGEMENT CONTROLLERS
+// ==========================================
+
+window.loadInvoices = async function() {
+    try {
+        const res = await apiCall('/finance/invoices');
+        if (res && res.status === 200) {
+            const invoices = await res.json();
+            window.currentInvoicesList = invoices || [];
+
+            // Update KPI blocks
+            const kpiCount = document.getElementById('kpi-factures-count');
+            const kpiQty = document.getElementById('kpi-factures-qty');
+            const kpiVal = document.getElementById('kpi-factures-val');
+            const kpiLatest = document.getElementById('kpi-factures-latest');
+
+            const totalInvoices = invoices.length;
+            const totalQty = invoices.reduce((s, i) => s + (i.total_quantity || 0), 0);
+            const totalVal = invoices.reduce((s, i) => s + (i.total_amount_mad || 0), 0);
+
+            if (kpiCount) kpiCount.innerText = totalInvoices.toLocaleString();
+            if (kpiQty) kpiQty.innerText = totalQty.toLocaleString();
+            if (kpiVal) kpiVal.innerText = totalVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            if (kpiLatest) {
+                if (invoices.length > 0 && invoices[0].created_at) {
+                    kpiLatest.innerText = formatDateTime(invoices[0].created_at);
+                } else {
+                    kpiLatest.innerText = "Aucun enregistrement";
+                }
+            }
+
+            window.renderInvoicesTable();
+        }
+    } catch (e) {
+        console.error("Error loading invoices:", e);
+    }
+};
+
+window.renderInvoicesTable = function() {
+    const tbody = document.getElementById('factures-tbody');
+    if (!tbody) return;
+
+    const query = (document.getElementById('factures-search-input')?.value || '').toLowerCase().trim();
+    const statusFilter = document.getElementById('factures-status-filter')?.value || 'ALL';
+
+    const invoices = window.currentInvoicesList || [];
+    const filtered = invoices.filter(inv => {
+        const matchesQuery = !query ||
+            (inv.invoice_ref && inv.invoice_ref.toLowerCase().includes(query)) ||
+            (inv.supplier_name && inv.supplier_name.toLowerCase().includes(query)) ||
+            (inv.items && inv.items.some(it => (it.sku && it.sku.toLowerCase().includes(query)) || (it.name && it.name.toLowerCase().includes(query))));
+
+        const matchesStatus = (statusFilter === 'ALL') || (inv.status === statusFilter);
+
+        return matchesQuery && matchesStatus;
+    });
+
+    tbody.innerHTML = '';
+    const label = document.getElementById('factures-count-label');
+    if (label) label.innerText = `${filtered.length} sur ${invoices.length} facture(s) affichée(s)`;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 italic">Aucune facture ne correspond à votre recherche.</td></tr>`;
+        return;
+    }
+
+    filtered.forEach(inv => {
+        const statusBadge = (inv.status === 'RECEPTIONNE')
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Réceptionné</span>`
+            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>En attente de réception</span>`;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors group";
+        tr.innerHTML = `
+            <td class="py-3 px-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-mono text-xs font-bold border border-brand-200">
+                        ${inv.invoice_ref}
+                    </span>
+                </div>
+            </td>
+            <td class="py-3 px-4">
+                <div class="flex flex-col">
+                    <span class="font-bold text-slate-900 group-hover:text-brand-700 transition-colors">${inv.supplier_name || 'Fournisseur non spécifié'}</span>
+                    <span class="text-[11px] text-slate-400">Import dématérialisé</span>
+                </div>
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap">
+                <div class="flex items-center gap-1.5 text-slate-700">
+                    <span class="material-symbols-outlined text-[16px] text-slate-400">schedule</span>
+                    <span class="font-bold text-xs num-tabular text-slate-900">${formatDateTime(inv.created_at)}</span>
+                </div>
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+                <span class="font-bold text-slate-900 num-tabular">${(inv.total_quantity || 0).toLocaleString()} pcs</span>
+                <span class="text-[11px] text-slate-400 block">${inv.total_skus || 0} référence(s)</span>
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+                <span class="font-bold text-brand-700 text-sm num-tabular">${(inv.total_amount_mad || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD</span>
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+                ${statusBadge}
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+                <div class="flex items-center justify-center gap-1.5">
+                    <button type="button" class="h-8 px-2.5 rounded-lg bg-slate-100 hover:bg-brand-600 hover:text-white text-slate-700 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openInvoiceDetailModal('${inv.id}')" title="Voir les articles de cette facture">
+                        <span class="material-symbols-outlined text-[15px]">visibility</span>
+                        <span>Articles</span>
+                    </button>
+                    <button type="button" class="h-8 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-600 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openDeleteInvoiceModal('${inv.id}')" title="Supprimer et déduire automatiquement du stock">
+                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                        <span>Supprimer</span>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+window.openInvoiceDetailModal = function(id) {
+    const inv = (window.currentInvoicesList || []).find(i => i.id === id);
+    if (!inv) return;
+
+    document.getElementById('modal-inv-title').innerText = `Facture ${inv.invoice_ref}`;
+    document.getElementById('modal-inv-subtitle').innerText = `Enregistrée le ${formatDateTime(inv.created_at)} • Statut: ${inv.status}`;
+    document.getElementById('modal-inv-supplier').innerText = inv.supplier_name || 'Non spécifié';
+    document.getElementById('modal-inv-datetime').innerText = formatDateTime(inv.created_at);
+    document.getElementById('modal-inv-total-qty').innerText = `${(inv.total_quantity || 0).toLocaleString()} pcs (${inv.total_skus || 0} SKUs)`;
+    document.getElementById('modal-inv-total-val').innerText = `${(inv.total_amount_mad || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} MAD`;
+
+    const tbody = document.getElementById('modal-inv-items-tbody');
+    if (tbody) {
+        tbody.innerHTML = '';
+        (inv.items || []).forEach(it => {
+            const qty = it.quantity || 0;
+            const lc = it.landed_cost || 0;
+            const lineTotal = qty * lc;
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50";
+            tr.innerHTML = `
+                <td class="py-2 px-3 font-mono font-bold text-slate-900">${it.sku}</td>
+                <td class="py-2 px-3 font-medium text-slate-800">${it.name || it.sku}</td>
+                <td class="py-2 px-3 text-right num-tabular font-bold text-slate-900">${qty.toLocaleString()} pcs</td>
+                <td class="py-2 px-3 text-right num-tabular text-slate-700">${lc.toFixed(2)} MAD</td>
+                <td class="py-2 px-3 text-right num-tabular font-bold text-brand-700">${lineTotal.toFixed(2)} MAD</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    const modal = document.getElementById('modal-invoice-detail');
+    if (modal) modal.classList.remove('hidden');
+};
+
+window.closeInvoiceDetailModal = function() {
+    const modal = document.getElementById('modal-invoice-detail');
+    if (modal) modal.classList.add('hidden');
+};
+
+window.openDeleteInvoiceModal = function(id) {
+    const inv = (window.currentInvoicesList || []).find(i => i.id === id);
+    if (!inv) return;
+
+    window.selectedInvoiceToDelete = inv;
+    document.getElementById('delete-inv-ref').innerText = inv.invoice_ref;
+    document.getElementById('delete-inv-datetime').innerText = formatDateTime(inv.created_at);
+    document.getElementById('delete-inv-qty').innerText = (inv.total_quantity || 0).toLocaleString();
+
+    const modal = document.getElementById('modal-delete-invoice');
+    if (modal) modal.classList.remove('hidden');
+};
+
+window.closeDeleteInvoiceModal = function() {
+    const modal = document.getElementById('modal-delete-invoice');
+    if (modal) modal.classList.add('hidden');
+    window.selectedInvoiceToDelete = null;
+};
+
+window.confirmDeleteInvoice = async function() {
+    const inv = window.selectedInvoiceToDelete;
+    if (!inv) return;
+
+    const btn = document.getElementById('btn-confirm-delete-invoice');
+    const btnText = document.getElementById('btn-confirm-delete-text');
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.innerText = "Suppression et déduction du stock...";
+
+    try {
+        const res = await apiCall(`/finance/invoices/${inv.id}`, { method: 'DELETE' });
+        if (res && res.status === 200) {
+            const data = await res.json();
+            alert(`✅ Facture ${inv.invoice_ref} supprimée avec succès !\n\n${data.total_deducted} unités de marchandises ont été automatiquement retirées du stock global.`);
+            window.closeDeleteInvoiceModal();
+            // Refresh both invoices and stock
+            await window.loadInvoices();
+            await window.loadStock();
+        } else {
+            const err = res ? await res.json() : { detail: "Erreur inconnue" };
+            alert("Erreur lors de la suppression de la facture: " + (err.detail || JSON.stringify(err)));
+        }
+    } catch (e) {
+        console.error("Delete invoice error:", e);
+        alert("Erreur réseau lors de la suppression: " + e.message);
+    } finally {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.innerText = "Confirmer la Suppression";
     }
 };

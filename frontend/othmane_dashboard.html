@@ -91,6 +91,10 @@
                         <span class="material-symbols-outlined text-[19px] text-brand-600">move_to_inbox</span>
                         <span>Importation</span>
                     </a>
+                    <a id="nav-factures" class="group flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg" data-path="factures" href="#" onclick="window.switchView('factures', this); return false;">
+                        <span class="material-symbols-outlined text-[19px] text-slate-400 group-hover:text-slate-700">receipt_long</span>
+                        <span>Factures</span>
+                    </a>
                     <a id="nav-stock" class="group flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg" data-path="stock" href="#" onclick="window.switchView('stock', this); return false;">
                         <span class="material-symbols-outlined text-[19px] text-slate-400 group-hover:text-slate-700">inventory_2</span>
                         <span>Stock & Valorisation</span>
@@ -512,7 +516,144 @@
             </div>
         </main>
 
-        <!-- VIEW 2: STOCK & VALORISATION -->
+        <!-- VIEW 2: FACTURES FOURNISSEURS -->
+        <main id="view-factures" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 mt-14">
+            <!-- Header Row -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold text-[11px] uppercase tracking-wider border border-brand-200">Traçabilité &amp; Historique Arrivages</span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="text-xs text-slate-500 font-medium">Horodatage Précis &amp; Déréférencement</span>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Registre des Factures Fournisseurs</h1>
+                    <p class="text-xs text-slate-500 mt-1">Consultez toutes les factures ajoutées avec date et heure exactes. En cas de saisie erronée, supprimez la facture pour retirer immédiatement la marchandise du stock.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-xs transition-colors" onclick="window.loadInvoices()">
+                        <span class="material-symbols-outlined text-[16px] text-slate-500">sync</span>
+                        <span>Actualiser</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-lg shadow-xs transition-colors" onclick="window.switchView('importation', document.getElementById('nav-importation'))">
+                        <span class="material-symbols-outlined text-[16px]">add_circle</span>
+                        <span>Nouvel Arrivage</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- KPI 1 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Total Factures</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-factures-count">0</span>
+                            <span class="text-xs text-slate-500 font-normal">enregistrées</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">inventory_2</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Volume Réceptionné</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-factures-qty">0</span>
+                            <span class="text-xs text-slate-500 font-normal">unités</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">payments</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Valeur Totale Engagée</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-factures-val">0.00</span>
+                            <span class="text-xs text-slate-500 font-normal">MAD</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">schedule</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Dernière Facture Ajoutée</span>
+                        <span class="text-xs font-bold text-slate-900 truncate" id="kpi-factures-latest">
+                            --:--:--
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices Table Card -->
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col mb-6">
+                <!-- Toolbar -->
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5">
+                    <div class="relative w-full lg:w-96">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                        <input class="w-full h-10 pl-9 pr-3 rounded-lg bg-slate-50 focus:bg-white border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all" id="factures-search-input" placeholder="Rechercher par référence, fournisseur ou article..." type="text">
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2.5 justify-between lg:justify-end">
+                        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+                            <span class="material-symbols-outlined text-slate-400 text-[16px]">filter_alt</span>
+                            <span class="text-xs text-slate-500 whitespace-nowrap">Statut Réception:</span>
+                            <select class="bg-transparent text-xs text-slate-900 font-semibold py-0.5 pr-2 outline-none cursor-pointer border-none focus:ring-0" id="factures-status-filter">
+                                <option value="ALL">Tous les statuts</option>
+                                <option value="EN_ATTENTE_RECEPTION">En attente de réception</option>
+                                <option value="RECEPTIONNE">Réceptionné par Karime</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="overflow-x-auto w-full rounded-lg border border-slate-200">
+                    <table class="w-full border-collapse text-left" id="factures-table">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider">Réf. Facture</th>
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider">Fournisseur</th>
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider min-w-[200px]">Date &amp; Heure d'Ajout (Exacte)</th>
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right">Articles &amp; Pièces</th>
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right">Valeur Totale (MAD)</th>
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-center">Statut Réception</th>
+                                <th class="py-3 px-4 text-xs font-bold uppercase tracking-wider text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-700 text-xs" id="factures-tbody">
+                            <tr>
+                                <td colspan="7" class="py-8 text-center text-slate-400 italic">Chargement des factures en cours...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4 mt-3 text-slate-500 text-xs">
+                    <span id="factures-count-label">0 facture affichée</span>
+                    <span class="flex items-center gap-1 text-emerald-600 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Synchronisé avec Base de Données
+                    </span>
+                </div>
+            </div>
+        </main>
+
+        <!-- VIEW 3: STOCK & VALORISATION -->
         <main id="view-stock" class="hidden flex-1 pt-14 bg-surface-container-low w-full px-6 py-6 mt-14">
             <div class="flex flex-col w-full max-w-7xl mx-auto">
                 <!-- Top Header Row -->
@@ -698,6 +839,53 @@
                     </button>
                 </div>
 
+                <!-- Retours Panel (Signalés par Karime) -->
+                <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[20px]">assignment_return</span>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900 tracking-tight">Contrôle des Retours Colis (Signalés par Karime)</h2>
+                                <p class="text-[11px] text-slate-500">Flux logistiques inverses enregistrés au quai entrepôt — Marchandises saines réintégrées au stock ou isolées en quarantaine</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="returns-badge-total" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                0 retours
+                            </span>
+                            <span id="returns-badge-restored" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                0 sains réintégrés
+                            </span>
+                            <span id="returns-badge-quarantine" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                0 en quarantaine
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto w-full rounded-lg border border-slate-200">
+                        <table class="w-full border-collapse text-left text-xs" id="returns-table">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider min-w-[170px]">Date &amp; Heure du Retour</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">SKU &amp; Désignation</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider text-right">Quantité</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider text-center">Diagnostic / État</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">Impact Logistique &amp; Stock</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">Opérateur WMS</th>
+                                    <th class="py-2.5 px-4 font-bold uppercase tracking-wider">Réf. Colis / Motif</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-slate-700" id="returns-tbody">
+                                <tr>
+                                    <td colspan="7" class="py-6 text-center text-slate-400 italic">Chargement des retours en cours...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Discrepancies Panel -->
                 <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col">
                     <div class="flex items-center justify-between mb-4">
@@ -829,6 +1017,95 @@
                 <button class="flex-1 py-2 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs" onclick="window.printArticleCard()">
                     <span class="material-symbols-outlined text-[16px]">print</span>
                     <span>Fiche Article</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Invoice Items Detail -->
+    <div id="modal-invoice-detail" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl p-6 flex flex-col gap-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900" id="modal-inv-title">Détail de la Facture</h3>
+                        <p class="text-xs text-slate-500" id="modal-inv-subtitle">Articles et valorisations d'entrée en stock</p>
+                    </div>
+                </div>
+                <button type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" onclick="window.closeInvoiceDetailModal()">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-slate-50 rounded-xl text-xs">
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Fournisseur</span>
+                    <span class="font-bold text-slate-800" id="modal-inv-supplier">--</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Date &amp; Heure d'Ajout</span>
+                    <span class="font-bold text-slate-800" id="modal-inv-datetime">--</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Total Articles</span>
+                    <span class="font-bold text-slate-800" id="modal-inv-total-qty">--</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Valeur Totale MAD</span>
+                    <span class="font-bold text-brand-700" id="modal-inv-total-val">--</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-72 rounded-lg border border-slate-200">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase">
+                        <tr>
+                            <th class="py-2.5 px-3">SKU</th>
+                            <th class="py-2.5 px-3">Désignation</th>
+                            <th class="py-2.5 px-3 text-right">Quantité</th>
+                            <th class="py-2.5 px-3 text-right">Coût U. (MAD)</th>
+                            <th class="py-2.5 px-3 text-right">Total Ligne (MAD)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-inv-items-tbody" class="divide-y divide-slate-200 text-slate-700">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors" onclick="window.closeInvoiceDetailModal()">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirm Delete Invoice -->
+    <div id="modal-delete-invoice" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 flex flex-col gap-4">
+            <div class="flex items-center gap-3 text-rose-600">
+                <div class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[24px]">warning</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Supprimer la Facture ?</h3>
+                    <p class="text-xs text-rose-600 font-medium">Déduction automatique et immédiate du stock</p>
+                </div>
+            </div>
+
+            <div class="p-3.5 bg-rose-50/70 border border-rose-200 rounded-xl text-xs space-y-2 text-slate-700">
+                <p>Vous êtes sur le point de supprimer la facture <strong id="delete-inv-ref" class="text-slate-900 font-mono">--</strong> enregistrée le <span id="delete-inv-datetime" class="font-bold text-slate-900">--</span>.</p>
+                <div class="p-2.5 bg-white rounded-lg border border-rose-200 text-[11px] font-semibold text-rose-800">
+                    ⚠️ <strong>Impact Stock :</strong> Un total de <span id="delete-inv-qty" class="font-extrabold text-rose-900">0</span> unités de marchandises seront automatiquement retirées du stock global de l'entrepôt pour annuler cette entrée.
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors" onclick="window.closeDeleteInvoiceModal()">Annuler</button>
+                <button type="button" id="btn-confirm-delete-invoice" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors" onclick="window.confirmDeleteInvoice()">
+                    <span class="material-symbols-outlined text-[16px]">delete_forever</span>
+                    <span id="btn-confirm-delete-text">Confirmer la Suppression</span>
                 </button>
             </div>
         </div>

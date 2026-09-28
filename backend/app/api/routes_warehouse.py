@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 from backend.app.core.database import get_db
 from backend.app.core.dependencies import require_role, get_current_user
 from backend.app.models.models import (
-    User, Product, InboundShipment, Transfer, StockLedger, Discrepancy, Order, CODCashBook,
+    User, Product, InboundShipment, Transfer, StockLedger, Discrepancy, Order, CODCashBook, ProductReturn,
     ShipmentStatusEnum, TransferStatusEnum, StockActionEnum, DiscrepancyStatusEnum, OrderStatusEnum
 )
 from backend.app.schemas.schemas import (
@@ -30,6 +30,8 @@ class ReturnReq(BaseModel):
     quantity: int
     is_shelf_damage: bool = False
     is_damaged: bool = False
+    tracking_number: Optional[str] = None
+    reason: Optional[str] = None
 
 class CODReq(BaseModel):
     driver_ref: str
@@ -132,6 +134,18 @@ def process_return(req: ReturnReq, db: Session = Depends(get_db), current_user: 
         quantity=ledger_qty
     )
     db.add(ledger)
+
+    product_return = ProductReturn(
+        product_sku=req.product_sku,
+        quantity=req.quantity,
+        condition="DAMAGED" if req.is_damaged else "INTACT",
+        action=action.value,
+        tracking_number=req.tracking_number,
+        reason=req.reason or ("Marchandise endommagée / avariée" if req.is_damaged else "Colis intact réintégré"),
+        reported_by=str(current_user.id)
+    )
+    db.add(product_return)
+
     db.commit()
     return {"status": "success", "action": action}
 
