@@ -99,6 +99,10 @@
                         <span class="material-symbols-outlined text-[19px] text-slate-400 group-hover:text-slate-700">inventory_2</span>
                         <span>Stock & Valorisation</span>
                     </a>
+                    <a id="nav-ledger" class="group flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg" data-path="ledger" href="#" onclick="window.switchView('ledger', this); return false;">
+                        <span class="material-symbols-outlined text-[19px] text-slate-400 group-hover:text-slate-700">menu_book</span>
+                        <span>Grand Livre (Ledger)</span>
+                    </a>
                 </nav>
             </div>
         </div>
@@ -914,6 +918,147 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- VIEW 4: GRAND LIVRE DE STOCK (LEDGER) -->
+        <main id="view-ledger" class="hidden flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 mt-14">
+            <!-- Header Row -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold text-[11px] uppercase tracking-wider border border-brand-200">Audit &amp; Traçabilité Immuable</span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="text-xs text-slate-500 font-medium">Contrôle Comptable &amp; Mouvements Physiques</span>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Grand Livre de Stock (Stock Ledger)</h1>
+                    <p class="text-xs text-slate-500 mt-1">Historique chronologique et exhaustif de tous les flux de marchandises (arrivages, transferts entrepôt-tablette, expéditions, retours et régularisations).</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-xs transition-colors" onclick="window.loadLedger()">
+                        <span class="material-symbols-outlined text-[16px] text-slate-500">sync</span>
+                        <span>Actualiser</span>
+                    </button>
+                    <button type="button" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 shadow-xs transition-colors" onclick="window.exportLedgerToExcel()">
+                        <span class="material-symbols-outlined text-[16px] text-brand-600">file_download</span>
+                        <span>Exporter XLSX</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- KPI 1 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">menu_book</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Total Mouvements</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-ledger-total">0</span>
+                            <span class="text-xs text-slate-500 font-normal">écritures</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">add_circle</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Entrées (Arrivages &amp; Retours)</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-ledger-in">0</span>
+                            <span class="text-xs text-slate-500 font-normal">pièces</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">local_shipping</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Sorties Expédiées</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-ledger-out">0</span>
+                            <span class="text-xs text-slate-500 font-normal">pièces</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="bg-white rounded-xl p-4 flex items-center gap-3.5 shadow-xs border border-slate-200">
+                    <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">tune</span>
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span class="text-[11px] uppercase text-slate-500 font-semibold">Ajustements &amp; Avaries</span>
+                        <span class="text-lg font-bold text-slate-900">
+                            <span id="kpi-ledger-adj">0</span>
+                            <span class="text-xs text-slate-500 font-normal">pièces</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ledger Table Card -->
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200 p-5 flex flex-col mb-6">
+                <!-- Toolbar -->
+                <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-5">
+                    <div class="relative w-full lg:w-96">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                        <input class="w-full h-10 pl-9 pr-3 rounded-lg bg-slate-50 focus:bg-white border border-slate-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all" id="ledger-search-input" placeholder="Filtrer par SKU, désignation, action ou opérateur..." type="text">
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2.5 justify-between lg:justify-end">
+                        <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg">
+                            <span class="material-symbols-outlined text-slate-400 text-[16px]">filter_alt</span>
+                            <span class="text-xs text-slate-500 whitespace-nowrap">Type d'Action:</span>
+                            <select class="bg-transparent text-xs text-slate-900 font-semibold py-0.5 pr-2 outline-none cursor-pointer border-none focus:ring-0" id="ledger-action-filter">
+                                <option value="ALL">Toutes les actions</option>
+                                <option value="IMPORT">IMPORT (Arrivages Factures)</option>
+                                <option value="TRANSFER_ACCEPTED">TRANSFER_ACCEPTED (Quai -> Tablette)</option>
+                                <option value="PACKED_OUT">PACKED_OUT (Expéditions Commandes)</option>
+                                <option value="RETURN_RESTORED">RETURN_RESTORED (Retours Colis Sains)</option>
+                                <option value="QUARANTINE">QUARANTINE (Isolement Avaries)</option>
+                                <option value="DISCREPANCY_APPROVED">DISCREPANCY_APPROVED (Écarts Validés)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="overflow-x-auto w-full rounded-lg border border-slate-200">
+                    <table class="w-full border-collapse text-left text-xs" id="ledger-table">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600">
+                                <th class="py-3 px-4 font-bold uppercase tracking-wider min-w-[170px]">Date &amp; Heure Exacte</th>
+                                <th class="py-3 px-4 font-bold uppercase tracking-wider">Article / SKU</th>
+                                <th class="py-3 px-4 font-bold uppercase tracking-wider text-center">Type d'Opération</th>
+                                <th class="py-3 px-4 font-bold uppercase tracking-wider text-right">Quantité Mouvementée</th>
+                                <th class="py-3 px-4 font-bold uppercase tracking-wider">Opérateur Responsable</th>
+                                <th class="py-3 px-4 font-bold uppercase tracking-wider text-center">ID Écriture</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-700" id="ledger-tbody">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-slate-400 italic">Chargement des écritures du ledger en cours...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4 mt-3 text-slate-500 text-xs">
+                    <span id="ledger-count-label">0 écriture affichée</span>
+                    <span class="flex items-center gap-1 text-emerald-600 font-medium">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Registre Immuable &amp; Conforme Audit
+                    </span>
                 </div>
             </div>
         </main>

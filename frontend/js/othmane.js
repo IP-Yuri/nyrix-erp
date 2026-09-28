@@ -5,6 +5,7 @@ window.currentInvoiceLines = [];
 window.currentInventory = [];
 window.currentInvoicesList = [];
 window.currentReturnsList = [];
+window.currentLedgerList = [];
 window.selectedInvoiceToDelete = null;
 
 // Helper: Format ISO date to readable string with exact date and time
@@ -24,16 +25,18 @@ window.logout = function() {
     window.location.href = '/';
 };
 
-// View Switcher (Importation vs Factures vs Stock)
+// View Switcher (Importation vs Factures vs Stock vs Ledger)
 window.switchView = function(view, element) {
     const importView = document.getElementById('view-importation');
     const facturesView = document.getElementById('view-factures');
     const stockView = document.getElementById('view-stock');
+    const ledgerView = document.getElementById('view-ledger');
     const breadcrumb = document.getElementById('breadcrumb-active');
     
     if (importView) importView.classList.add('hidden');
     if (facturesView) facturesView.classList.add('hidden');
     if (stockView) stockView.classList.add('hidden');
+    if (ledgerView) ledgerView.classList.add('hidden');
 
     if (view === 'importation') {
         if (importView) importView.classList.remove('hidden');
@@ -46,6 +49,10 @@ window.switchView = function(view, element) {
         if (stockView) stockView.classList.remove('hidden');
         if (breadcrumb) breadcrumb.innerText = 'Stock Global & Valorisation';
         window.loadStock();
+    } else if (view === 'ledger') {
+        if (ledgerView) ledgerView.classList.remove('hidden');
+        if (breadcrumb) breadcrumb.innerText = 'Grand Livre de Stock (Ledger)';
+        window.loadLedger();
     }
     
     document.querySelectorAll('.nav-link').forEach(el => {
@@ -141,6 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const facturesFilter = document.getElementById('factures-status-filter');
     if (facturesFilter) {
         facturesFilter.addEventListener('change', window.renderInvoicesTable);
+    }
+
+    // Ledger search and action filters
+    const ledgerSearch = document.getElementById('ledger-search-input');
+    if (ledgerSearch) {
+        ledgerSearch.addEventListener('input', window.renderLedgerTable);
+    }
+    const ledgerFilter = document.getElementById('ledger-action-filter');
+    if (ledgerFilter) {
+        ledgerFilter.addEventListener('change', window.renderLedgerTable);
     }
 
     // Initial load
@@ -1010,5 +1027,205 @@ window.confirmDeleteInvoice = async function() {
     } finally {
         if (btn) btn.disabled = false;
         if (btnText) btnText.innerText = "Confirmer la Suppression";
+    }
+};
+
+// ==========================================
+// STOCK LEDGER (GRAND LIVRE) AUDIT CONTROLLERS
+// ==========================================
+
+window.loadLedger = async function() {
+    try {
+        const tbody = document.getElementById('ledger-tbody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-8 text-center text-slate-400 italic">Chargement des écritures du ledger en cours...</td>
+                </tr>
+            `;
+        }
+
+        const res = await apiCall('/finance/ledger');
+        if (res && res.status === 200) {
+            const data = await res.json();
+            window.currentLedgerList = data || [];
+
+            // Calculate KPI values
+            const totalEntries = window.currentLedgerList.length;
+            let totalIn = 0;
+            let totalOut = 0;
+            let totalAdj = 0;
+
+            window.currentLedgerList.forEach(entry => {
+                const qty = Math.abs(entry.quantity || 0);
+                const act = (entry.action || '').toUpperCase();
+                if (['IMPORT', 'RETURN_RESTORED'].includes(act)) {
+                    totalIn += qty;
+                } else if (['PACKED_OUT'].includes(act)) {
+                    totalOut += qty;
+                } else {
+                    totalAdj += qty;
+                }
+            });
+
+            const kpiTotal = document.getElementById('kpi-ledger-total');
+            const kpiIn = document.getElementById('kpi-ledger-in');
+            const kpiOut = document.getElementById('kpi-ledger-out');
+            const kpiAdj = document.getElementById('kpi-ledger-adj');
+
+            if (kpiTotal) kpiTotal.innerText = totalEntries.toLocaleString();
+            if (kpiIn) kpiIn.innerText = totalIn.toLocaleString();
+            if (kpiOut) kpiOut.innerText = totalOut.toLocaleString();
+            if (kpiAdj) kpiAdj.innerText = totalAdj.toLocaleString();
+
+            window.renderLedgerTable();
+        } else {
+            console.error("Failed to load stock ledger", res);
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-rose-500 font-medium">Erreur lors de la récupération des écritures comptables.</td>
+                    </tr>
+                `;
+            }
+        }
+    } catch (e) {
+        console.error("Error loading stock ledger:", e);
+        const tbody = document.getElementById('ledger-tbody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-8 text-center text-rose-500 font-medium">Erreur réseau lors de la récupération du ledger.</td>
+                </tr>
+            `;
+        }
+    }
+};
+
+window.renderLedgerTable = function() {
+    const tbody = document.getElementById('ledger-tbody');
+    if (!tbody) return;
+
+    const query = (document.getElementById('ledger-search-input')?.value || '').toLowerCase().trim();
+    const actionFilter = document.getElementById('ledger-action-filter')?.value || 'ALL';
+
+    const entries = window.currentLedgerList || [];
+
+    const filtered = entries.filter(item => {
+        // Filter by action
+        if (actionFilter !== 'ALL' && item.action !== actionFilter) {
+            return false;
+        }
+
+        // Filter by search query
+        if (query) {
+            const sku = (item.sku || '').toLowerCase();
+            const name = (item.product_name || '').toLowerCase();
+            const action = (item.action || '').toLowerCase();
+            const user = (item.username || '').toLowerCase();
+            const id = (item.id || '').toLowerCase();
+            if (!sku.includes(query) && !name.includes(query) && !action.includes(query) && !user.includes(query) && !id.includes(query)) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
+    const countLabel = document.getElementById('ledger-count-label');
+    if (countLabel) {
+        countLabel.innerText = `${filtered.length} écriture(s) affichée(s) sur ${entries.length}`;
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-12 text-center text-slate-400">
+                    <span class="material-symbols-outlined text-[36px] text-slate-300 block mb-2">menu_book</span>
+                    Aucune écriture ne correspond à vos filtres.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = '';
+    filtered.forEach(entry => {
+        const action = (entry.action || '').toUpperCase();
+        let actionBadge = '';
+        let qtyDisplay = '';
+
+        if (action === 'IMPORT') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>ENTRÉE (IMPORT)</span>`;
+            qtyDisplay = `<span class="font-bold text-emerald-700 text-xs num-tabular">+${Math.abs(entry.quantity).toLocaleString()} pcs</span>`;
+        } else if (action === 'TRANSFER_ACCEPTED') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>TRANSFERT QUAI->TABLETTE</span>`;
+            qtyDisplay = `<span class="font-bold text-blue-700 text-xs num-tabular">${entry.quantity > 0 ? '+' : ''}${entry.quantity.toLocaleString()} pcs</span>`;
+        } else if (action === 'PACKED_OUT') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>EXPÉDITION COMMANDE</span>`;
+            qtyDisplay = `<span class="font-bold text-indigo-700 text-xs num-tabular">-${Math.abs(entry.quantity).toLocaleString()} pcs</span>`;
+        } else if (action === 'RETURN_RESTORED') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200"><span class="w-1.5 h-1.5 rounded-full bg-teal-500"></span>RETOUR RÉINTÉGRÉ</span>`;
+            qtyDisplay = `<span class="font-bold text-teal-700 text-xs num-tabular">+${Math.abs(entry.quantity).toLocaleString()} pcs</span>`;
+        } else if (action === 'QUARANTINE') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>QUARANTAINE AVARIE</span>`;
+            qtyDisplay = `<span class="font-bold text-rose-700 text-xs num-tabular">-${Math.abs(entry.quantity).toLocaleString()} pcs</span>`;
+        } else if (action === 'DISCREPANCY_APPROVED') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>ÉCART VALIDÉ</span>`;
+            qtyDisplay = `<span class="font-bold text-amber-700 text-xs num-tabular">${entry.quantity > 0 ? '+' : ''}${entry.quantity.toLocaleString()} pcs</span>`;
+        } else {
+            actionBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">${action}</span>`;
+            qtyDisplay = `<span class="font-bold text-slate-800 text-xs num-tabular">${entry.quantity > 0 ? '+' : ''}${entry.quantity.toLocaleString()} pcs</span>`;
+        }
+
+        const initials = ((entry.username || 'SY').substring(0, 2)).toUpperCase();
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+            <td class="py-3 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5 text-slate-700 font-mono text-[11px]">
+                    <span class="material-symbols-outlined text-[14px] text-slate-400">schedule</span>
+                    ${formatDateTime(entry.created_at)}
+                </span>
+            </td>
+            <td class="py-3 px-4">
+                <span class="font-mono font-bold text-slate-900 block">${entry.sku}</span>
+                <span class="text-[11px] text-slate-500 truncate max-w-[220px] block" title="${entry.product_name}">${entry.product_name}</span>
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+                ${actionBadge}
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+                ${qtyDisplay}
+            </td>
+            <td class="py-3 px-4 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0">
+                        ${initials}
+                    </div>
+                    <span class="font-medium text-slate-900">${entry.username || 'Système'}</span>
+                </div>
+            </td>
+            <td class="py-3 px-4 text-center whitespace-nowrap">
+                <span class="font-mono text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200" title="${entry.id}">#${(entry.id || '').substring(0, 8)}</span>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+};
+
+window.exportLedgerToExcel = function() {
+    try {
+        const table = document.getElementById('ledger-table');
+        if (!table) return;
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.table_to_sheet(table);
+        XLSX.utils.book_append_sheet(wb, ws, "Grand_Livre_Stock");
+        XLSX.writeFile(wb, `NYRIX_Grand_Livre_Stock_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (e) {
+        console.error("Export ledger error:", e);
+        alert("Erreur lors de l'exportation du Grand Livre: " + e.message);
     }
 };

@@ -266,3 +266,34 @@ def list_returns(db: Session = Depends(get_db)):
             "created_at": r.created_at.isoformat() if r.created_at else None
         })
     return result
+
+@router.get("/ledger")
+def get_stock_ledger(db: Session = Depends(get_db), sku: Optional[str] = None, action: Optional[str] = None):
+    q = db.query(StockLedger).order_by(StockLedger.created_at.desc())
+    if sku:
+        q = q.filter(StockLedger.product_sku == sku)
+    if action and action != "ALL":
+        q = q.filter(StockLedger.action == action)
+    entries = q.all()
+
+    products = {p.sku: p.name for p in db.query(Product).all()}
+    users = {str(u.id): u.username for u in db.query(User).all()}
+
+    result = []
+    for e in entries:
+        prod_name = products.get(e.product_sku, e.product_sku)
+        username = users.get(str(e.user_id), "Système")
+        action_val = e.action.value if hasattr(e.action, "value") else str(e.action)
+        result.append({
+            "id": str(e.id),
+            "sku": e.product_sku,
+            "product_sku": e.product_sku,
+            "product_name": prod_name,
+            "user_id": str(e.user_id),
+            "username": username,
+            "action": action_val,
+            "quantity": e.quantity,
+            "created_at": e.created_at.isoformat() if e.created_at else None
+        })
+    return result
+
