@@ -70,71 +70,98 @@
 </head>
 
 <body class="bg-surface font-sans text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-brand-100 selection:text-brand-900">
-    <!-- Fixed Top Header Navigation -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div class="h-16 w-full px-6 flex items-center justify-between gap-4">
-            <!-- Brand & User Identity -->
-            <div class="flex items-center gap-6 min-w-0">
-                <div class="flex items-center gap-3 shrink-0">
-                    <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png" onerror="this.src='https://ui-avatars.com/api/?name=NYRIX&background=1d4ed8&color=fff&bold=true'">
-                    <div class="flex flex-col">
-                        <span class="text-base font-bold text-brand-700 leading-none tracking-tight">NYRIX ERP</span>
-                        <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Warehouse Logistics</span>
-                    </div>
+    <!-- Fixed Sidebar Navigation Menu -->
+    <aside class="fixed left-0 top-0 h-screen w-[240px] bg-white border-r border-slate-200 z-50 flex flex-col justify-between select-none shadow-xs">
+        <div class="flex flex-col">
+            <!-- Brand Header -->
+            <div class="h-14 px-space-md border-b border-slate-200 flex items-center gap-space-sm bg-white">
+                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png" onerror="this.src='https://ui-avatars.com/api/?name=NYRIX&background=1d4ed8&color=fff&bold=true'">
+                <div class="flex flex-col">
+                    <span class="text-base font-bold text-slate-900 leading-none tracking-tight">NYRIX</span>
+                    <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-0.5">Warehouse Logistics</span>
                 </div>
-
-                <div class="h-6 w-px bg-slate-200 hidden md:block shrink-0"></div>
-
-                <div class="hidden sm:inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Connecté: WAREHOUSE (Karime • Superviseur Quai)</span>
-                </div>
-
-                <!-- Navigation Tabs -->
-                <nav class="hidden xl:flex items-center gap-2">
-                    <button id="nav-btn-ops" type="button" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-brand-50 text-brand-700 border border-brand-200 flex items-center gap-1.5" onclick="window.switchTab('operations')">
-                        <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+            </div>
+            
+            <!-- Side Navigation Menu -->
+            <div class="px-space-md pt-space-md">
+                <span class="text-[11px] font-bold uppercase text-slate-400 tracking-wider block px-space-xs mb-2">Navigation Quai</span>
+                <nav class="flex flex-col gap-1">
+                    <a id="nav-btn-ops" class="group flex items-center gap-2.5 px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link cursor-pointer" href="#" onclick="window.switchTab('operations'); return false;">
+                        <span class="material-symbols-outlined text-[19px] text-brand-600">local_shipping</span>
                         <span>Opérations Quai</span>
+                    </a>
+                    <a id="nav-btn-inbound" class="group flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg cursor-pointer" href="#" onclick="window.switchTab('inbound'); return false;">
+                        <div class="flex items-center gap-2.5">
+                            <span class="material-symbols-outlined text-[19px] text-slate-400 group-hover:text-slate-700">move_to_inbox</span>
+                            <span>Réception Inbound</span>
+                        </div>
+                        <span id="inbound-pending-count" class="hidden px-2 py-0.5 bg-amber-500 text-white font-bold text-[10px] rounded-full">0</span>
+                    </a>
+                </nav>
+
+                <span class="text-[11px] font-bold uppercase text-slate-400 tracking-wider block px-space-xs mt-6 mb-2">Actions &amp; Contrôles</span>
+                <nav class="flex flex-col gap-1">
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.openModal('modal-discrepancy')">
+                        <span class="material-symbols-outlined text-[19px] text-amber-600">warning</span>
+                        <span>Déclarer un Écart</span>
                     </button>
-                    <button id="nav-btn-inbound" type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5 relative" onclick="window.switchTab('inbound')">
-                        <span class="material-symbols-outlined text-[16px]">move_to_inbox</span>
-                        <span>Réception Inbound</span>
-                        <span id="inbound-pending-count" class="hidden px-1.5 py-0.2 bg-amber-500 text-white font-bold text-[10px] rounded-full">0</span>
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.openModal('modal-returns')">
+                        <span class="material-symbols-outlined text-[19px] text-indigo-600">assignment_return</span>
+                        <span>Contrôle des Retours</span>
+                    </button>
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.openModal('modal-ledger')">
+                        <span class="material-symbols-outlined text-[19px] text-slate-500 group-hover:text-slate-700">history</span>
+                        <span>Historique (Ledger)</span>
+                    </button>
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.syncCarrier(this)">
+                        <span class="material-symbols-outlined text-[19px] text-brand-600">cloud_sync</span>
+                        <span>Sync Transporteur</span>
                     </button>
                 </nav>
             </div>
-
-            <!-- Action Buttons on Header Right -->
-            <div class="flex items-center gap-2 shrink-0">
-                <button type="button" class="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs" onclick="window.openModal('modal-discrepancy')">
-                    <span class="material-symbols-outlined text-[16px] text-amber-600">warning</span>
-                    <span>Déclarer un Écart</span>
-                </button>
-                <button type="button" class="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs" onclick="window.openModal('modal-returns')">
-                    <span class="material-symbols-outlined text-[16px] text-indigo-600">assignment_return</span>
-                    <span>Contrôle des Retours</span>
-                </button>
-                <button type="button" class="hidden lg:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors shadow-2xs" onclick="window.openModal('modal-ledger')">
-                    <span class="material-symbols-outlined text-[16px] text-slate-500">history</span>
-                    <span>Historique (Ledger)</span>
-                </button>
-                <button type="button" class="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-700 text-xs font-semibold transition-colors" onclick="window.syncCarrier(this)" title="Synchroniser avec Digylog">
-                    <span class="material-symbols-outlined text-[16px] text-brand-600">cloud_sync</span>
-                    <span>Sync Transporteur</span>
-                </button>
-
-                <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
-
-                <button type="button" class="flex items-center gap-1 h-8 px-2.5 rounded-lg text-rose-600 hover:bg-rose-50 hover:text-rose-800 text-xs font-semibold transition-colors" onclick="window.logout()">
-                    <span class="material-symbols-outlined text-[16px]">logout</span>
-                    <span class="hidden sm:inline">Déconnexion</span>
-                </button>
-            </div>
         </div>
-    </header>
 
-    <!-- Main Workspace -->
-    <main class="w-full pt-16 flex-1 flex flex-col">
+        <!-- Sidebar footer: User card & logout -->
+        <div class="border-t border-slate-200 p-space-md bg-slate-50/50">
+            <div class="flex items-center gap-2.5 mb-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                    KA
+                </div>
+                <div class="flex flex-col min-w-0 flex-1">
+                    <span class="text-xs font-bold text-slate-800 truncate">CONNECTÉ: WAREHOUSE</span>
+                    <span class="text-[11px] text-slate-500 truncate">Karime • Superviseur Quai</span>
+                </div>
+            </div>
+            <a class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 text-slate-600 text-xs font-semibold transition-colors shadow-xs" href="#" onclick="window.logout(); return false;">
+                <span class="material-symbols-outlined text-[16px]">logout</span>
+                <span>Déconnexion</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Container shifted for sidebar -->
+    <div class="pl-[240px] flex flex-col min-h-screen">
+        <!-- Top Fixed Header -->
+        <header class="fixed top-0 left-[240px] right-0 h-14 bg-white/95 backdrop-blur-md border-b border-slate-200 z-40 px-6 flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-2 text-xs">
+                <span class="text-slate-400">Karime</span>
+                <span class="text-slate-300">/</span>
+                <span id="breadcrumb-active" class="font-semibold text-slate-800">Opérations Quai &amp; Expéditions</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Terminal Quai #04 Actif</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg text-xs font-semibold text-slate-700">
+                    <span class="material-symbols-outlined text-[15px] text-emerald-600">schedule</span>
+                    <span id="live-clock" class="num-tabular">--:--:-- UTC+1</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="w-full pt-14 flex-1 flex flex-col">
 
         <!-- ========================================== -->
         <!-- STATE 1: TABLEAU DE BORD DE RÉCEPTION INBOUND -->
@@ -224,18 +251,23 @@
                 </div>
 
                 <!-- Validation Actions -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-3 border-t border-slate-100">
                     <div class="flex items-center gap-2 text-xs text-slate-500">
                         <span class="material-symbols-outlined text-emerald-600 text-[18px]">verified</span>
                         <span>Le pointage valide l'entrée physique des marchandises dans l'inventaire entrepôt.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button type="button" class="px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors" onclick="window.switchTab('operations')">
-                            Basculer vers Opérations Quai
-                        </button>
-                        <button id="btnValidateReceipt" type="button" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button id="btnValidateReceipt" type="button" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
                             <span class="material-symbols-outlined text-[18px]">check_circle</span>
                             <span>Valider la Réception Physique</span>
+                        </button>
+                        <button id="btnReportDamaged" type="button" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-colors cursor-pointer shadow-2xs" onclick="window.openReportDamagedModal()">
+                            <span class="material-symbols-outlined text-[17px] text-rose-600">report_problem</span>
+                            <span>Signaler un Colis Endommagé</span>
+                        </button>
+                        <button id="btnReportMissing" type="button" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition-colors cursor-pointer shadow-2xs" onclick="window.openReportMissingModal()">
+                            <span class="material-symbols-outlined text-[17px] text-amber-600">production_quantity_limits</span>
+                            <span>Signaler un manque</span>
                         </button>
                     </div>
                 </div>
@@ -316,6 +348,19 @@
 
                     <!-- Date & Search -->
                     <div class="flex flex-wrap items-center gap-2">
+                        <!-- Date Filter: Du -->
+                        <div class="relative flex items-center bg-white border border-slate-200 rounded-lg px-2.5 h-8 shadow-2xs">
+                            <span class="material-symbols-outlined text-[15px] text-slate-400 mr-1.5">calendar_today</span>
+                            <label class="text-[11px] text-slate-500 font-semibold mr-1.5" for="dateStartInput">Du</label>
+                            <input class="bg-transparent text-xs font-mono text-slate-800 focus:outline-none cursor-pointer w-28" id="dateStartInput" type="date">
+                        </div>
+                        <!-- Date Filter: Au -->
+                        <div class="relative flex items-center bg-white border border-slate-200 rounded-lg px-2.5 h-8 shadow-2xs">
+                            <span class="material-symbols-outlined text-[15px] text-slate-400 mr-1.5">event</span>
+                            <label class="text-[11px] text-slate-500 font-semibold mr-1.5" for="dateEndInput">Au</label>
+                            <input class="bg-transparent text-xs font-mono text-slate-800 focus:outline-none cursor-pointer w-28" id="dateEndInput" type="date">
+                        </div>
+                        <!-- Search Bar -->
                         <div class="relative flex-1 min-w-[200px] md:w-64">
                             <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-slate-400">search</span>
                             <input id="orderSearchInput" class="w-full h-8 pl-8 pr-3 text-xs bg-white text-slate-900 placeholder:text-slate-400 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 shadow-2xs" placeholder="Rechercher N° commande, client ou ville..." type="text">
@@ -467,16 +512,38 @@
                                 </div>
                             </div>
 
+                            <!-- Deux Champs de Date: De la date & À la date -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="flex flex-col gap-1">
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="dateDebutCaisse">De la date</label>
+                                    <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-9 focus-within:bg-white focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 shadow-2xs">
+                                        <span class="material-symbols-outlined text-[16px] text-slate-400 mr-1.5">calendar_today</span>
+                                        <input class="bg-transparent text-xs font-mono font-medium text-slate-800 focus:outline-none cursor-pointer w-full" id="dateDebutCaisse" type="date">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="dateFinCaisse">À la date</label>
+                                    <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 h-9 focus-within:bg-white focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 shadow-2xs">
+                                        <span class="material-symbols-outlined text-[16px] text-slate-400 mr-1.5">event</span>
+                                        <input class="bg-transparent text-xs font-mono font-medium text-slate-800 focus:outline-none cursor-pointer w-full" id="dateFinCaisse" type="date">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- N° Tournée / Bordereau & Mode de Règlement (2 options: "especes" & "virement") -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div class="flex flex-col gap-1">
                                     <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="bordereauInput">N° Tournée / Bordereau</label>
-                                    <input class="w-full h-9 px-3 rounded-lg bg-slate-50 text-slate-900 text-xs font-mono font-bold uppercase focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200" id="bordereauInput" type="text" value="DIG-TR-88219">
+                                    <input class="w-full h-9 px-3 rounded-lg bg-slate-50 text-slate-900 text-xs font-mono font-bold uppercase focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 shadow-2xs" id="bordereauInput" type="text" value="DIG-TR-88219">
                                 </div>
                                 <div class="flex flex-col gap-1">
-                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold">Mode de Règlement</label>
-                                    <div class="h-9 px-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-slate-700 font-medium">
-                                        <span>Espèces / Cash vérifié</span>
-                                        <span class="material-symbols-outlined text-emerald-600 text-[17px]">verified</span>
+                                    <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="modeReglementSelect">Mode de Règlement</label>
+                                    <div class="relative">
+                                        <select id="modeReglementSelect" class="w-full h-9 px-3 pr-8 rounded-lg bg-slate-50 text-slate-900 text-xs font-semibold focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 cursor-pointer appearance-none shadow-2xs">
+                                            <option value="especes" selected>Espèces</option>
+                                            <option value="virement">Virement</option>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[18px]">expand_more</span>
                                     </div>
                                 </div>
                             </div>
@@ -520,6 +587,7 @@
             </div>
         </div>
     </main>
+    </div>
 
     <!-- ========================================== -->
     <!-- INTERACTIVE MODALS -->

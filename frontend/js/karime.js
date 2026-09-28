@@ -16,28 +16,50 @@ window.switchTab = function(tab) {
     const opsView = document.getElementById('view-operations');
     const btnOps = document.getElementById('nav-btn-ops');
     const btnInbound = document.getElementById('nav-btn-inbound');
+    const breadcrumb = document.getElementById('breadcrumb-active');
 
     if (tab === 'inbound') {
-        inboundView.classList.remove('hidden');
-        opsView.classList.add('hidden');
+        if (inboundView) inboundView.classList.remove('hidden');
+        if (opsView) opsView.classList.add('hidden');
+        if (breadcrumb) breadcrumb.innerText = "Réception Inbound (Arrivages Fournisseurs)";
 
         if (btnInbound) {
-            btnInbound.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-brand-50 text-brand-700 border border-brand-200 flex items-center gap-1.5 relative";
+            btnInbound.className = "group flex items-center justify-between px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link cursor-pointer";
+            const icon = btnInbound.querySelector('.material-symbols-outlined');
+            if (icon) { icon.classList.remove('text-slate-400'); icon.classList.add('text-brand-600'); }
         }
         if (btnOps) {
-            btnOps.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5";
+            btnOps.className = "group flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg cursor-pointer";
+            const icon = btnOps.querySelector('.material-symbols-outlined');
+            if (icon) { icon.classList.remove('text-brand-600'); icon.classList.add('text-slate-400'); }
         }
     } else {
-        inboundView.classList.add('hidden');
-        opsView.classList.remove('hidden');
+        if (inboundView) inboundView.classList.add('hidden');
+        if (opsView) opsView.classList.remove('hidden');
+        if (breadcrumb) breadcrumb.innerText = "Opérations Quai & Expéditions";
 
         if (btnOps) {
-            btnOps.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-colors bg-brand-50 text-brand-700 border border-brand-200 flex items-center gap-1.5";
+            btnOps.className = "group flex items-center gap-2.5 px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link cursor-pointer";
+            const icon = btnOps.querySelector('.material-symbols-outlined');
+            if (icon) { icon.classList.remove('text-slate-400'); icon.classList.add('text-brand-600'); }
         }
         if (btnInbound) {
-            btnInbound.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center gap-1.5 relative";
+            btnInbound.className = "group flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg cursor-pointer";
+            const icon = btnInbound.querySelector('.material-symbols-outlined');
+            if (icon) { icon.classList.remove('text-brand-600'); icon.classList.add('text-slate-400'); }
         }
     }
+};
+
+// Discrepancy & Damaged package helpers for Inbound reception view
+window.openReportDamagedModal = function() {
+    window.openModal('modal-returns');
+    const damagedRadio = document.querySelector('input[name="return-condition"][value="damaged"]');
+    if (damagedRadio) damagedRadio.checked = true;
+};
+
+window.openReportMissingModal = function() {
+    window.openModal('modal-discrepancy');
 };
 
 // Modal Control
@@ -83,11 +105,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Setup search input
+    // Setup search input and date range filters
     const searchInput = document.getElementById('orderSearchInput');
     if (searchInput) {
         searchInput.addEventListener('input', window.renderLogisticsTable);
     }
+    const dateStartInput = document.getElementById('dateStartInput');
+    const dateEndInput = document.getElementById('dateEndInput');
+    if (dateStartInput) dateStartInput.addEventListener('input', window.renderLogisticsTable);
+    if (dateEndInput) dateEndInput.addEventListener('input', window.renderLogisticsTable);
+
+    // Initialize default dates
+    const today = new Date().toISOString().split('T')[0];
+    const dateDebutCaisse = document.getElementById('dateDebutCaisse');
+    const dateFinCaisse = document.getElementById('dateFinCaisse');
+    if (dateDebutCaisse && !dateDebutCaisse.value) dateDebutCaisse.value = today;
+    if (dateFinCaisse && !dateFinCaisse.value) dateFinCaisse.value = today;
+    if (dateStartInput && !dateStartInput.value) dateStartInput.value = today;
+    if (dateEndInput && !dateEndInput.value) dateEndInput.value = today;
 
     // Setup steppers in transfer container
     setupTransferContainerListeners();
@@ -571,6 +606,9 @@ if (formCash) {
         e.preventDefault();
         const driverName = document.getElementById('livreurInput')?.value?.trim();
         const slipId = document.getElementById('bordereauInput')?.value?.trim();
+        const dateDebut = document.getElementById('dateDebutCaisse')?.value;
+        const dateFin = document.getElementById('dateFinCaisse')?.value;
+        const modeReglement = document.getElementById('modeReglementSelect')?.value || 'especes';
         const amount = parseFloat(document.getElementById('montantInput')?.value) || 0;
 
         if (!driverName || amount <= 0) {
@@ -578,7 +616,9 @@ if (formCash) {
             return;
         }
 
-        const driverRef = `${driverName} (${slipId || 'BORDEREAU-DIRECT'})`;
+        const modeLabel = modeReglement === 'virement' ? 'Virement' : 'Espèces';
+        const dateRangeInfo = (dateDebut && dateFin) ? ` • Du ${dateDebut} au ${dateFin}` : '';
+        const driverRef = `${driverName} (${slipId || 'BORDEREAU-DIRECT'} • ${modeLabel}${dateRangeInfo})`;
         const btn = document.getElementById('btnSubmitCash');
         if (btn) btn.disabled = true;
 
@@ -589,7 +629,7 @@ if (formCash) {
             });
 
             if (res && res.status === 200) {
-                alert(`✅ Recette de ${amount.toFixed(2)} MAD enregistrée pour ${driverName} !`);
+                alert(`✅ Recette de ${amount.toFixed(2)} MAD (${modeLabel}) enregistrée pour ${driverName} !`);
                 await loadCOD();
                 document.getElementById('montantInput').value = '';
             } else {
