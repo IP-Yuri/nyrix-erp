@@ -3,6 +3,9 @@
 window.inventoryOptionsHtml = '';
 window.allOrders = [];
 window.activeFilter = 'all';
+window.currentLogisticsPage = 1;
+window.logisticsPageSize = 15;
+window.totalLogisticsPages = 1;
 
 // Logout
 window.logout = function() {
@@ -101,6 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             target.classList.add('active', 'bg-white', 'text-slate-900', 'font-bold', 'border', 'border-slate-200', 'shadow-2xs');
             target.classList.remove('text-slate-600', 'font-medium');
             window.activeFilter = target.getAttribute('data-filter') || 'all';
+            window.currentLogisticsPage = 1;
             window.renderLogisticsTable();
         });
     });
@@ -108,12 +112,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Setup search input and date range filters
     const searchInput = document.getElementById('orderSearchInput');
     if (searchInput) {
-        searchInput.addEventListener('input', window.renderLogisticsTable);
+        searchInput.addEventListener('input', () => {
+            window.currentLogisticsPage = 1;
+            window.renderLogisticsTable();
+        });
     }
     const dateStartInput = document.getElementById('dateStartInput');
     const dateEndInput = document.getElementById('dateEndInput');
-    if (dateStartInput) dateStartInput.addEventListener('input', window.renderLogisticsTable);
-    if (dateEndInput) dateEndInput.addEventListener('input', window.renderLogisticsTable);
+    if (dateStartInput) dateStartInput.addEventListener('input', () => {
+        window.currentLogisticsPage = 1;
+        window.renderLogisticsTable();
+    });
+    if (dateEndInput) dateEndInput.addEventListener('input', () => {
+        window.currentLogisticsPage = 1;
+        window.renderLogisticsTable();
+    });
 
     // Initialize default dates
     const today = new Date().toISOString().split('T')[0];
@@ -454,6 +467,60 @@ function updateLogisticsMetrics() {
     });
 }
 
+window.changeLogisticsPage = function(delta) {
+    window.currentLogisticsPage += delta;
+    window.renderLogisticsTable();
+};
+
+window.goToLogisticsPage = function(page) {
+    window.currentLogisticsPage = page;
+    window.renderLogisticsTable();
+};
+
+window.goToLastLogisticsPage = function() {
+    window.currentLogisticsPage = window.totalLogisticsPages || 1;
+    window.renderLogisticsTable();
+};
+
+window.changeLogisticsPageSize = function(val) {
+    window.logisticsPageSize = val === 'all' ? 'all' : parseInt(val, 10);
+    window.currentLogisticsPage = 1;
+    window.renderLogisticsTable();
+};
+
+function updatePaginationUI(totalFiltered, pageSize, totalPages, startIndex, endIndex) {
+    const footerCount = document.getElementById('logistics-footer-count');
+    const indicator = document.getElementById('logistics-page-indicator');
+    const btnFirst = document.getElementById('btn-first-page');
+    const btnPrev = document.getElementById('btn-prev-page');
+    const btnNext = document.getElementById('btn-next-page');
+    const btnLast = document.getElementById('btn-last-page');
+
+    window.totalLogisticsPages = totalPages;
+
+    if (footerCount) {
+        if (totalFiltered === 0) {
+            footerCount.innerText = "0 colis trouvé";
+        } else {
+            const totalOrders = window.allOrders?.length || 0;
+            const filterNote = totalFiltered < totalOrders ? ` (sur ${totalOrders} au total)` : '';
+            footerCount.innerText = `Colis ${startIndex + 1}–${endIndex} sur ${totalFiltered}${filterNote}`;
+        }
+    }
+
+    if (indicator) {
+        indicator.innerText = `${totalFiltered === 0 ? 0 : window.currentLogisticsPage} / ${totalPages}`;
+    }
+
+    const isFirst = window.currentLogisticsPage <= 1 || totalFiltered === 0;
+    const isLast = window.currentLogisticsPage >= totalPages || totalFiltered === 0;
+
+    if (btnFirst) btnFirst.disabled = isFirst;
+    if (btnPrev) btnPrev.disabled = isFirst;
+    if (btnNext) btnNext.disabled = isLast;
+    if (btnLast) btnLast.disabled = isLast;
+}
+
 window.renderLogisticsTable = function() {
     const tbody = document.getElementById('ops-logistics-body');
     if (!tbody) return;
@@ -481,10 +548,26 @@ window.renderLogisticsTable = function() {
     tbody.innerHTML = '';
     if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Aucune expédition ne correspond à votre filtre.</td></tr>`;
+        updatePaginationUI(0, 15, 1, 0, 0);
         return;
     }
 
-    filtered.forEach(o => {
+    const totalFiltered = filtered.length;
+    const pageSize = window.logisticsPageSize === 'all' ? totalFiltered : (parseInt(window.logisticsPageSize, 10) || 15);
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / (pageSize || 1)));
+
+    if (window.currentLogisticsPage > totalPages) {
+        window.currentLogisticsPage = totalPages;
+    }
+    if (window.currentLogisticsPage < 1) {
+        window.currentLogisticsPage = 1;
+    }
+
+    const startIndex = (window.currentLogisticsPage - 1) * pageSize;
+    const endIndex = window.logisticsPageSize === 'all' ? totalFiltered : Math.min(startIndex + pageSize, totalFiltered);
+    const pageItems = filtered.slice(startIndex, endIndex);
+
+    pageItems.forEach(o => {
         let typeBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">B2C</span>`;
         if (o.type === 'B2B') {
             typeBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-slate-900 text-white">B2B Palettes</span>`;
@@ -534,8 +617,7 @@ window.renderLogisticsTable = function() {
         tbody.appendChild(tr);
     });
 
-    const footerCount = document.getElementById('logistics-footer-count');
-    if (footerCount) footerCount.innerText = `Affichage de ${filtered.length} sur ${orders.length} enregistrements`;
+    updatePaginationUI(totalFiltered, pageSize, totalPages, startIndex, endIndex);
 };
 
 // Carrier Sync Action
