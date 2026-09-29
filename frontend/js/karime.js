@@ -819,8 +819,71 @@ window.exportPreparedOrdersToExcel = function() {
 
 // Print Function for Karime Manifest
 window.printPreparedOrders = function() {
-    window.print();
+    const prevPageSize = window.preparesPageSize;
+    const prevPage = window.currentPreparesPage;
+
+    // Expand table to display all filtered rows on the printed document
+    window.preparesPageSize = 999999;
+    window.currentPreparesPage = 1;
+    window.renderPreparedOrdersTable();
+
+    // Populate manifest print header info
+    const printDate = document.getElementById('print-manifest-date');
+    if (printDate) {
+        const now = new Date();
+        printDate.innerText = now.toLocaleDateString('fr-FR') + ' à ' + now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    const carrierFilterVal = document.getElementById('carrierPreparesFilter')?.value || 'all';
+    const printCarrier = document.getElementById('print-manifest-carrier');
+    if (printCarrier) {
+        printCarrier.innerText = carrierFilterVal === 'all' ? 'Transporteurs : Tous (Digylog)' : `Transporteur : ${carrierFilterVal}`;
+    }
+
+    const printTotal = document.getElementById('print-manifest-total');
+    const totalCountBadge = document.getElementById('badge-prepares-total-count');
+    if (printTotal && totalCountBadge) {
+        printTotal.innerText = `Total : ${totalCountBadge.innerText}`;
+    }
+
+    // Trigger standard print
+    setTimeout(() => {
+        window.print();
+
+        // Restore pagination view after print dialog closes
+        window.preparesPageSize = prevPageSize || 15;
+        window.currentPreparesPage = prevPage || 1;
+        window.renderPreparedOrdersTable();
+    }, 150);
 };
+
+// Also listen for Ctrl+P shortcut as fallback
+window.addEventListener('beforeprint', () => {
+    const preparesView = document.getElementById('view-prepares');
+    if (preparesView && !preparesView.classList.contains('hidden')) {
+        window._preparesSavedPageSize = window.preparesPageSize;
+        window._preparesSavedPage = window.currentPreparesPage;
+        window.preparesPageSize = 999999;
+        window.currentPreparesPage = 1;
+        window.renderPreparedOrdersTable();
+
+        const printDate = document.getElementById('print-manifest-date');
+        if (printDate) {
+            const now = new Date();
+            printDate.innerText = now.toLocaleDateString('fr-FR') + ' à ' + now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        }
+    }
+});
+
+window.addEventListener('afterprint', () => {
+    if (window._preparesSavedPageSize !== undefined) {
+        window.preparesPageSize = window._preparesSavedPageSize;
+        window.currentPreparesPage = window._preparesSavedPage || 1;
+        delete window._preparesSavedPageSize;
+        delete window._preparesSavedPage;
+        window.renderPreparedOrdersTable();
+    }
+});
 
 // Carrier Sync Action
 window.syncCarrier = async function(btn) {
