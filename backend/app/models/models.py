@@ -89,6 +89,8 @@ class Order(Base):
     payment_status = Column(Enum(PaymentStatusEnum), nullable=False)
     cod_amount = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
+    packed_at = Column(DateTime, nullable=True)
+    packed_by = Column(String(255), nullable=True)
 
     items = relationship("OrderItem", back_populates="order")
 

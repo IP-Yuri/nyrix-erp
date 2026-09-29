@@ -7,50 +7,64 @@ window.currentLogisticsPage = 1;
 window.logisticsPageSize = 15;
 window.totalLogisticsPages = 1;
 
+// Colis Préparés state
+window.currentPreparesPage = 1;
+window.preparesPageSize = 15;
+window.totalPreparesPages = 1;
+
 // Logout
 window.logout = function() {
     localStorage.clear();
     window.location.href = '/';
 };
 
-// Tab Switcher between Inbound and Operations
+// Tab Switcher between Inbound, Operations, and Colis Préparés
 window.switchTab = function(tab) {
     const inboundView = document.getElementById('view-inbound');
     const opsView = document.getElementById('view-operations');
+    const preparesView = document.getElementById('view-prepares');
+
     const btnOps = document.getElementById('nav-btn-ops');
     const btnInbound = document.getElementById('nav-btn-inbound');
+    const btnPrepares = document.getElementById('nav-btn-prepares');
     const breadcrumb = document.getElementById('breadcrumb-active');
+
+    if (inboundView) inboundView.classList.add('hidden');
+    if (opsView) opsView.classList.add('hidden');
+    if (preparesView) preparesView.classList.add('hidden');
+
+    const setInactive = (btn) => {
+        if (!btn) return;
+        btn.className = "group flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg cursor-pointer";
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) { icon.classList.remove('text-brand-600'); icon.classList.add('text-slate-400'); }
+    };
+
+    const setActive = (btn) => {
+        if (!btn) return;
+        btn.className = "group flex items-center justify-between px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link cursor-pointer";
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (icon) { icon.classList.remove('text-slate-400'); icon.classList.add('text-brand-600'); }
+    };
+
+    setInactive(btnOps);
+    setInactive(btnInbound);
+    setInactive(btnPrepares);
 
     if (tab === 'inbound') {
         if (inboundView) inboundView.classList.remove('hidden');
-        if (opsView) opsView.classList.add('hidden');
+        setActive(btnInbound);
         if (breadcrumb) breadcrumb.innerText = "Réception Inbound (Arrivages Fournisseurs)";
-
-        if (btnInbound) {
-            btnInbound.className = "group flex items-center justify-between px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link cursor-pointer";
-            const icon = btnInbound.querySelector('.material-symbols-outlined');
-            if (icon) { icon.classList.remove('text-slate-400'); icon.classList.add('text-brand-600'); }
-        }
-        if (btnOps) {
-            btnOps.className = "group flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg cursor-pointer";
-            const icon = btnOps.querySelector('.material-symbols-outlined');
-            if (icon) { icon.classList.remove('text-brand-600'); icon.classList.add('text-slate-400'); }
-        }
+    } else if (tab === 'prepares') {
+        if (preparesView) preparesView.classList.remove('hidden');
+        setActive(btnPrepares);
+        if (breadcrumb) breadcrumb.innerText = "Colis Préparés & Manifeste d'Enlèvement";
+        window.renderPreparedOrdersTable();
     } else {
-        if (inboundView) inboundView.classList.add('hidden');
         if (opsView) opsView.classList.remove('hidden');
+        setActive(btnOps);
         if (breadcrumb) breadcrumb.innerText = "Opérations Quai & Expéditions";
-
-        if (btnOps) {
-            btnOps.className = "group flex items-center gap-2.5 px-3 py-2 text-sm font-semibold transition-colors bg-brand-50 text-brand-700 border-l-4 border-brand-600 rounded-r-lg nav-link cursor-pointer";
-            const icon = btnOps.querySelector('.material-symbols-outlined');
-            if (icon) { icon.classList.remove('text-slate-400'); icon.classList.add('text-brand-600'); }
-        }
-        if (btnInbound) {
-            btnInbound.className = "group flex items-center justify-between px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors nav-link border-l-4 border-transparent rounded-r-lg cursor-pointer";
-            const icon = btnInbound.querySelector('.material-symbols-outlined');
-            if (icon) { icon.classList.remove('text-brand-600'); icon.classList.add('text-slate-400'); }
-        }
+        window.renderLogisticsTable();
     }
 };
 
@@ -136,6 +150,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (dateFinCaisse && !dateFinCaisse.value) dateFinCaisse.value = today;
     if (dateStartInput && !dateStartInput.value) dateStartInput.value = today;
     if (dateEndInput && !dateEndInput.value) dateEndInput.value = today;
+    const datePreparesInput = document.getElementById('datePreparesInput');
+    if (datePreparesInput && !datePreparesInput.value) datePreparesInput.value = today;
 
     // Setup steppers in transfer container
     setupTransferContainerListeners();
@@ -465,6 +481,11 @@ function updateLogisticsMetrics() {
         else if (filter === 'B2C') p.innerText = `B2C (${b2cCount})`;
         else if (filter === 'encours') p.innerText = `En cours (${encoursCount})`;
     });
+
+    // Update prepares badge in sidebar
+    const preparedOrders = orders.filter(o => ['READY', 'SHIPPED'].includes(o.status));
+    const badgePrepares = document.getElementById('badge-nav-prepares');
+    if (badgePrepares) badgePrepares.innerText = `${preparedOrders.length}`;
 }
 
 window.changeLogisticsPage = function(delta) {
@@ -618,6 +639,187 @@ window.renderLogisticsTable = function() {
     });
 
     updatePaginationUI(totalFiltered, pageSize, totalPages, startIndex, endIndex);
+};
+
+// ----------------------------------------------------
+// STATE 3: MANIFESTE DES COLIS PRÉPARÉS & ENLÈVEMENT
+// ----------------------------------------------------
+window.changePreparesPage = function(delta) {
+    window.currentPreparesPage += delta;
+    window.renderPreparedOrdersTable();
+};
+
+window.renderPreparedOrdersTable = function() {
+    const tbody = document.getElementById('prepares-logistics-body');
+    if (!tbody) return;
+
+    const query = (document.getElementById('searchPreparesInput')?.value || '').toLowerCase().trim();
+    const carrierFilter = document.getElementById('carrierPreparesFilter')?.value || 'all';
+    const dateFilter = document.getElementById('datePreparesInput')?.value || '';
+
+    const orders = window.allOrders || [];
+    // Filter for prepared packages (READY or SHIPPED)
+    const prepared = orders.filter(o => ['READY', 'SHIPPED'].includes(o.status));
+
+    // Update KPI counters
+    const kpiTotal = document.getElementById('kpi-prepares-total');
+    const kpiB2C = document.getElementById('kpi-prepares-b2c');
+    const kpiB2B = document.getElementById('kpi-prepares-b2b');
+    const totalCountBadge = document.getElementById('badge-prepares-total-count');
+
+    const totalB2C = prepared.filter(o => o.type !== 'B2B').length;
+    const totalB2B = prepared.filter(o => o.type === 'B2B').length;
+
+    if (kpiTotal) kpiTotal.innerText = `${prepared.length}`;
+    if (kpiB2C) kpiB2C.innerText = `${totalB2C}`;
+    if (kpiB2B) kpiB2B.innerText = `${totalB2B}`;
+    if (totalCountBadge) totalCountBadge.innerText = `${prepared.length} enregistrements`;
+
+    // Filter by query, carrier, date
+    const filtered = prepared.filter(o => {
+        const matchesQuery = !query ||
+            (o.tracking_number && o.tracking_number.toLowerCase().includes(query)) ||
+            (o.client_name && o.client_name.toLowerCase().includes(query)) ||
+            (o.city && o.city.toLowerCase().includes(query));
+
+        let matchesCarrier = true;
+        if (carrierFilter === 'Digylog Express') matchesCarrier = (o.type !== 'B2B');
+        else if (carrierFilter === 'Digylog Fret') matchesCarrier = (o.type === 'B2B');
+
+        let matchesDate = true;
+        if (dateFilter) {
+            const orderDate = o.packed_at ? o.packed_at.split('T')[0] : (o.created_at ? o.created_at.split('T')[0] : '');
+            matchesDate = (orderDate === dateFilter);
+        }
+
+        return matchesQuery && matchesCarrier && matchesDate;
+    });
+
+    tbody.innerHTML = '';
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400 italic">Aucun colis préparé ne correspond à votre filtre.</td></tr>`;
+        updatePreparesPaginationUI(0, 15, 1, 0, 0);
+        return;
+    }
+
+    const totalFiltered = filtered.length;
+    const pageSize = window.preparesPageSize || 15;
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
+
+    if (window.currentPreparesPage > totalPages) window.currentPreparesPage = totalPages;
+    if (window.currentPreparesPage < 1) window.currentPreparesPage = 1;
+
+    const startIndex = (window.currentPreparesPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, totalFiltered);
+    const pageItems = filtered.slice(startIndex, endIndex);
+
+    pageItems.forEach(o => {
+        const isB2B = (o.type === 'B2B');
+        const carrierName = isB2B ? 'Digylog Fret' : 'Digylog Express';
+        const typeBadge = isB2B 
+            ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-slate-900 text-white">B2B Palettes</span>`
+            : `<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">B2C</span>`;
+
+        const timeStr = o.packed_at ? new Date(o.packed_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : (o.created_at ? new Date(o.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Aujourd\'hui');
+        const itemsStr = (o.items && o.items.length > 0) ? o.items.map(it => `${it.quantity}x ${it.product_sku}`).join(', ') : 'Contenu standard';
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+            <td class="py-2.5 px-4 font-mono font-bold text-slate-700 whitespace-nowrap">
+                <div class="flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[15px] text-teal-600">schedule</span>
+                    <span>${timeStr}</span>
+                </div>
+            </td>
+            <td class="py-2.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px] text-slate-400">${isB2B ? 'domain' : 'inventory_2'}</span>
+                    <span>#${o.tracking_number}</span>
+                </div>
+            </td>
+            <td class="py-2.5 px-4 whitespace-nowrap">${typeBadge}</td>
+            <td class="py-2.5 px-4">
+                <div class="font-bold text-slate-800 truncate max-w-[170px]">${o.client_name || 'Client Direct'}</div>
+                <div class="text-[11px] text-slate-500">${o.city || 'Maroc'}</div>
+            </td>
+            <td class="py-2.5 px-4 whitespace-nowrap">
+                <div class="inline-flex items-center gap-1.5 text-slate-700">
+                    <span class="material-symbols-outlined text-[16px] text-brand-600">local_shipping</span>
+                    <span class="font-medium">${carrierName}</span>
+                </div>
+            </td>
+            <td class="py-2.5 px-4 font-mono text-[11px] text-slate-700 truncate max-w-[190px]" title="${itemsStr}">
+                ${itemsStr}
+            </td>
+            <td class="py-2.5 px-4 whitespace-nowrap">
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
+                    <span class="material-symbols-outlined text-[13px]">done_all</span>
+                    ${o.status === 'READY' ? 'Prêt Expédition' : o.status}
+                </span>
+            </td>
+            <td class="py-2.5 px-4 text-right text-slate-500 font-mono text-[11px] whitespace-nowrap">
+                ${o.packed_by ? `Packer: ${o.packed_by}` : 'Poste Packer 01'}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    updatePreparesPaginationUI(totalFiltered, pageSize, totalPages, startIndex, endIndex);
+};
+
+function updatePreparesPaginationUI(totalFiltered, pageSize, totalPages, startIndex, endIndex) {
+    const footerCount = document.getElementById('prepares-footer-count');
+    const indicator = document.getElementById('prepares-page-indicator');
+    const btnPrev = document.getElementById('btn-prepares-prev');
+    const btnNext = document.getElementById('btn-prepares-next');
+
+    window.totalPreparesPages = totalPages;
+
+    if (footerCount) {
+        if (totalFiltered === 0) {
+            footerCount.innerText = "0 colis trouvé";
+        } else {
+            footerCount.innerText = `Colis ${startIndex + 1}–${endIndex} sur ${totalFiltered}`;
+        }
+    }
+
+    if (indicator) {
+        indicator.innerText = `${totalFiltered === 0 ? 0 : window.currentPreparesPage} / ${totalPages}`;
+    }
+
+    const isFirst = window.currentPreparesPage <= 1 || totalFiltered === 0;
+    const isLast = window.currentPreparesPage >= totalPages || totalFiltered === 0;
+
+    if (btnPrev) btnPrev.disabled = isFirst;
+    if (btnNext) btnNext.disabled = isLast;
+}
+
+// Export Excel for Karime Prepared Orders Manifest
+window.exportPreparedOrdersToExcel = function() {
+    try {
+        const table = document.getElementById('table-prepared-orders');
+        if (!table) return;
+
+        if (!window.XLSX) {
+            alert("Module Excel (SheetJS) indisponible.");
+            return;
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.table_to_sheet(table);
+        XLSX.utils.book_append_sheet(wb, ws, "Bordereau_Colis_Prepares");
+        const today = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `NYRIX_Bordereau_Colis_Prepares_${today}.xlsx`);
+    } catch (e) {
+        console.error("Export error:", e);
+        alert("Erreur lors de l'exportation du bordereau Excel: " + e.message);
+    }
+};
+
+// Print Function for Karime Manifest
+window.printPreparedOrders = function() {
+    window.print();
 };
 
 // Carrier Sync Action

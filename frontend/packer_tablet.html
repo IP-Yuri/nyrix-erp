@@ -8,8 +8,17 @@
     <style>
         @layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } }
         ::-webkit-scrollbar { display: none; }
+        @media print {
+            header, .no-print, button, #toast-container, .tablet-switcher { display: none !important; }
+            body { background: white !important; color: black !important; }
+            main { padding: 0 !important; }
+            #view-historique { display: block !important; }
+            #view-receptionner, #view-preparer { display: none !important; }
+            .print-full { width: 100% !important; box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
     </style>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -26,13 +35,16 @@
     </script>
 </head>
 <body class="bg-background font-body-md text-on-surface select-none antialiased min-h-screen">
-    <header class="fixed top-0 w-full z-50 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+    <!-- Floating Toast Feedback Container -->
+    <div id="toast-container" class="fixed top-20 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <header class="fixed top-0 w-full z-40 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] no-print">
         <div class="h-16 w-full px-margin flex items-center justify-between">
             <div class="flex items-center gap-space-lg">
-                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png">
+                <img alt="Brand logo" class="h-8 w-auto object-contain" src="assets/nyrix-logo.png" onerror="this.src='https://ui-avatars.com/api/?name=NYRIX&background=1d4ed8&color=fff&bold=true'">
                 <div class="flex items-center gap-space-sm">
-                    <span class="font-headline-sm text-headline-sm text-on-surface">NYRIX ERP</span>
-                    <span class="font-label-md text-label-md text-on-surface-variant bg-surface-container px-space-sm py-space-xs rounded">Station Pack #01</span>
+                    <span class="font-headline-sm text-headline-sm text-on-surface font-bold">NYRIX ERP</span>
+                    <span class="font-label-md text-label-md text-on-surface-variant bg-surface-container px-space-sm py-space-xs rounded font-medium">Station Pack #01</span>
                 </div>
             </div>
             <div class="flex items-center gap-space-md">
@@ -50,87 +62,158 @@
 
     <main class="w-full pt-16 bg-background px-margin min-h-[calc(100vh-4rem)] flex flex-col justify-start">
         <div class="flex flex-col w-full pb-6 space-y-4">
-            <!-- Tablet Pill Switcher -->
-            <div class="w-full flex justify-center mt-4 mb-4">
-                <div class="w-full max-w-3xl grid grid-cols-2 p-1.5 bg-surface-container rounded-2xl shadow-sm gap-2">
-                    <button id="btn-tab-receptionner" class="h-[58px] rounded-xl bg-primary-container text-on-primary flex items-center justify-center gap-3 px-5 transition-transform shadow-md" onclick="window.switchTab('receptionner')">
+            <!-- Tablet 3-Pill Switcher -->
+            <div class="w-full flex justify-center mt-4 mb-3 tablet-switcher no-print">
+                <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 p-1.5 bg-surface-container rounded-2xl shadow-sm gap-2">
+                    <button id="btn-tab-receptionner" class="h-[56px] rounded-xl bg-primary-container text-on-primary flex items-center justify-center gap-2.5 px-4 transition-transform shadow-md cursor-pointer select-none" onclick="window.switchTab('receptionner')">
                         <span class="material-symbols-outlined text-[22px]">inventory_2</span>
                         <span class="font-headline-sm text-headline-sm font-semibold tracking-tight">[1] À Réceptionner</span>
-                        <span id="badge-receptionner" class="px-2.5 py-1 rounded-full bg-on-primary text-primary-container font-tabular-data text-label-sm font-bold shadow-sm">0 lots</span>
+                        <span id="badge-receptionner" class="px-2 py-0.5 rounded-full bg-on-primary text-primary-container font-tabular-data text-label-sm font-bold shadow-sm">0</span>
                     </button>
-                    <button id="btn-tab-preparer" class="h-[58px] rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-bright flex items-center justify-center gap-3 px-5 transition-all shadow-sm" onclick="window.switchTab('preparer')">
+                    <button id="btn-tab-preparer" class="h-[56px] rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-bright flex items-center justify-center gap-2.5 px-4 transition-all shadow-sm cursor-pointer select-none" onclick="window.switchTab('preparer')">
                         <span class="material-symbols-outlined text-[22px] text-outline">package_2</span>
-                        <span class="font-headline-sm text-headline-sm font-medium tracking-tight">[2] À Préparer (Commandes)</span>
+                        <span class="font-headline-sm text-headline-sm font-medium tracking-tight">[2] À Préparer</span>
+                        <span id="badge-preparer" class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-tabular-data text-label-sm font-bold shadow-sm">0</span>
+                    </button>
+                    <button id="btn-tab-historique" class="h-[56px] rounded-xl bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-bright flex items-center justify-center gap-2.5 px-4 transition-all shadow-sm cursor-pointer select-none" onclick="window.switchTab('historique')">
+                        <span class="material-symbols-outlined text-[22px] text-outline">history</span>
+                        <span class="font-headline-sm text-headline-sm font-medium tracking-tight">[3] Historique Préparés</span>
+                        <span id="badge-historique" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-tabular-data text-label-sm font-bold shadow-sm">0</span>
                     </button>
                 </div>
             </div>
 
-            <!-- VIEW: RECEPTIONNER -->
+            <!-- VIEW 1: RECEPTIONNER -->
             <div id="view-receptionner" class="w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col">
                 <div class="w-full bg-surface-container px-6 py-3.5 flex items-center justify-between text-on-surface-variant select-none">
                     <div class="w-28 flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[16px] text-outline">pin</span>
-                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Qté reçue</span>
+                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Qté reçue</span>
                     </div>
                     <div class="flex-1 px-6 flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[16px] text-outline">category</span>
-                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Article & Spécifications</span>
+                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Article &amp; Spécifications</span>
                     </div>
                     <div class="text-right flex items-center justify-end gap-1.5">
                         <span class="material-symbols-outlined text-[16px] text-outline">rule</span>
-                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Actions</span>
+                        <span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Actions</span>
                     </div>
                 </div>
                 <div class="w-full flex flex-col divide-y divide-surface-container" id="reception-items-list">
-                    <!-- Javascript will populate rows here -->
+                    <div class="p-8 text-center text-on-surface-variant italic">Chargement des transferts entrants...</div>
                 </div>
             </div>
 
-            <!-- VIEW: PREPARER -->
-            <div id="view-preparer" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-space-lg w-full items-stretch">
-                <!-- CARD 1 -->
-                <div class="flex flex-col justify-between bg-surface-container-lowest rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div class="space-y-4">
-                        <div class="flex items-start justify-between gap-2 pb-3 bg-surface-container-low p-3.5 rounded-lg">
-                            <div class="flex flex-col">
-                                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Bordereau Logistique</span>
-                                <div class="flex items-center gap-2 mt-0.5">
-                                    <span class="material-symbols-outlined text-primary text-[24px]">barcode_scanner</span>
-                                    <span class="font-tabular-data text-headline-sm font-bold text-on-surface tracking-tight">S4001940AA</span>
-                                </div>
-                            </div>
+            <!-- VIEW 2: PREPARER (Clean order cards matching assets) -->
+            <div id="view-preparer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg w-full items-stretch">
+                <div class="col-span-full py-12 text-center text-on-surface-variant italic">
+                    Chargement des commandes à préparer...
+                </div>
+            </div>
+
+            <!-- VIEW 3: HISTORIQUE DES COLIS PRÉPARÉS -->
+            <div id="view-historique" class="hidden w-full flex flex-col space-y-4">
+                <!-- Action & Filter Bar -->
+                <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 no-print">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-xs">
+                            <span class="material-symbols-outlined text-[24px]">task_alt</span>
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-bold">
-                                <span class="material-symbols-outlined text-[18px] text-secondary">check_circle</span>
-                                Standard B2C • Prêt
-                            </span>
-                        </div>
-                        <div class="space-y-2.5 pt-1">
-                            <div class="p-3.5 bg-surface-container-low rounded-lg flex items-start gap-3.5 select-none active:bg-surface-container transition-colors cursor-pointer" onclick="window.togglePackCheck(this)">
-                                <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-on-secondary shrink-0 mt-0.5 shadow-sm">
-                                    <span class="material-symbols-outlined text-[22px] font-bold">check</span>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-baseline justify-between gap-1">
-                                        <span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Exemple Article 1</span>
-                                        <span class="font-tabular-data text-headline-sm text-on-surface font-extrabold px-2 py-0.5 bg-surface-container-lowest rounded">1x</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div>
+                            <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Historique des Colis Préparés</h2>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Journal de production du poste packer avec pointage horodaté</p>
                         </div>
                     </div>
-                    <div class="pt-5">
-                        <button class="w-full h-16 bg-primary-container hover:bg-primary active:scale-[0.98] text-on-primary rounded-xl font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-3 shadow-md transition-all">
-                            <span class="material-symbols-outlined text-[28px]">print</span>
-                            <span class="">✓ Colis Terminé</span>
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+                            <input id="history-search" type="text" placeholder="Rechercher tracking, client..." class="h-10 pl-9 pr-3 bg-surface-container-low border border-outline-variant rounded-xl text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" oninput="window.filterHistoryTable()">
+                        </div>
+                        <button type="button" onclick="window.exportPackingHistoryToExcel()" class="h-10 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-headline-sm text-label-md font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]">download</span>
+                            <span>Exporter Excel</span>
                         </button>
+                        <button type="button" onclick="window.printPackingHistory()" class="h-10 px-3.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface rounded-xl font-headline-sm text-label-md font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer">
+                            <span class="material-symbols-outlined text-[18px]">print</span>
+                            <span>Imprimer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Printable History Table -->
+                <div class="w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col print-full">
+                    <div class="w-full overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse" id="packer-history-table">
+                            <thead>
+                                <tr class="bg-surface-container text-on-surface-variant font-label-md uppercase tracking-wider border-b border-surface-container-high">
+                                    <th class="py-3 px-4">Heure Préparation</th>
+                                    <th class="py-3 px-4">N° Commande</th>
+                                    <th class="py-3 px-4">Type</th>
+                                    <th class="py-3 px-4">Destinataire &amp; Ville</th>
+                                    <th class="py-3 px-4">Articles Vérifiés</th>
+                                    <th class="py-3 px-4">Statut Quai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packer-history-tbody" class="divide-y divide-surface-container text-on-surface font-body-sm">
+                                <tr><td colspan="6" class="py-8 text-center text-on-surface-variant italic">Chargement de l'historique...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-3 border-t border-surface-container flex items-center justify-between text-on-surface-variant font-label-md">
+                        <span id="packer-history-count">0 colis préparés enregistrés</span>
+                        <span class="text-emerald-700 font-semibold flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Synchronisé avec Registre Quai
+                        </span>
                     </div>
                 </div>
             </div>
 
         </div>
     </main>
+
+    <!-- MODAL LITIGE / RÉCLAMATION SUR TRANSFERT -->
+    <div id="modal-claim" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-xl border border-outline-variant w-full max-w-lg space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+                <div class="flex items-center gap-2 text-error">
+                    <span class="material-symbols-outlined text-[24px]">report_problem</span>
+                    <h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Signaler un Écart sur le Lot</h3>
+                </div>
+                <button type="button" class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg" onclick="window.closeClaimModal()">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+            <form id="claim-form" onsubmit="window.submitClaim(event)" class="space-y-4">
+                <input type="hidden" id="claim-transfer-id">
+                <div>
+                    <label class="block font-label-sm uppercase text-on-surface-variant font-semibold mb-1">Lot / SKU Concerné</label>
+                    <input type="text" id="claim-sku-display" class="w-full h-11 px-3.5 bg-surface-container-low rounded-xl text-on-surface font-mono font-bold text-body-sm border border-outline-variant" readonly>
+                </div>
+                <div>
+                    <label class="block font-label-sm uppercase text-on-surface-variant font-semibold mb-1">Quantité Manquante ou Dégradée</label>
+                    <input type="number" id="claim-qty" min="1" class="w-full h-11 px-3.5 bg-surface-container-lowest rounded-xl text-on-surface font-bold text-body-sm border border-outline-variant focus:ring-2 focus:ring-primary-container" required>
+                </div>
+                <div>
+                    <label class="block font-label-sm uppercase text-on-surface-variant font-semibold mb-1">Motif du Litige</label>
+                    <select id="claim-reason" class="w-full h-11 px-3.5 bg-surface-container-lowest rounded-xl text-on-surface text-body-sm border border-outline-variant focus:ring-2 focus:ring-primary-container">
+                        <option value="Colis incomplet / Quantité reçue inférieure au bon">Colis incomplet / Quantité reçue inférieure au bon</option>
+                        <option value="Marchandise endommagée / Cassée pendant transfert">Marchandise endommagée / Cassée pendant transfert</option>
+                        <option value="Erreur d'étiquetage / Mauvaise référence SKU reçue">Erreur d'étiquetage / Mauvaise référence SKU reçue</option>
+                    </select>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button type="button" onclick="window.closeClaimModal()" class="h-11 px-4 bg-surface-container text-on-surface rounded-xl font-headline-sm text-label-md font-semibold hover:bg-surface-container-high transition-colors">
+                        Annuler
+                    </button>
+                    <button type="submit" id="btn-submit-claim" class="h-11 px-5 bg-error hover:bg-red-700 text-on-error rounded-xl font-headline-sm text-label-md font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">send</span>
+                        <span>Transmettre la Réclamation</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="js/api.js"></script>
     <script src="js/packer.js"></script>

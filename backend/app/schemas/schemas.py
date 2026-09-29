@@ -54,6 +54,9 @@ class OrderLogisticsOut(BaseModel):
     client_name: str
     city: str
     status: str
+    created_at: Optional[datetime] = None
+    packed_at: Optional[datetime] = None
+    packed_by: Optional[str] = None
     items: List[OrderItemLogisticsOut] = []
 
     model_config = {"from_attributes": True}
