@@ -48,6 +48,8 @@ def fetch_confirmed_orders(sheet_id: Optional[str] = None) -> List[Dict[str, Any
             except ValueError:
                 price = 0.0
 
+            date_str = (row.get("date") or "").strip()
+
             confirmed_orders.append({
                 "sheet_order_id": num,
                 "client_name": name,
@@ -58,7 +60,10 @@ def fetch_confirmed_orders(sheet_id: Optional[str] = None) -> List[Dict[str, Any
                 "quantity": qty,
                 "total_price": price,
                 "tracking": tracking,
+                "date": date_str,
                 "status_livraison": (row.get("Status de Livraison") or "").strip()
             })
 
+    # Return newest orders first (the sheet is ordered chronologically from top to bottom)
+    confirmed_orders.reverse()
     return confirmed_orders

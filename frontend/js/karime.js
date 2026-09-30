@@ -614,10 +614,11 @@ window.renderLogisticsTable = function() {
         tr.className = "hover:bg-slate-50/70 transition-colors";
         tr.innerHTML = `
             <td class="py-2.5 px-4 font-mono font-bold text-slate-900 whitespace-nowrap">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-[16px] text-slate-400">${iconName}</span>
-                    <span>#${o.tracking_number}</span>
-                </div>
+                <button type="button" onclick="window.openDigylogModal('${o.tracking_number}')" title="Cliquer pour voir le suivi Digylog en direct" class="flex items-center gap-1.5 group text-left hover:text-brand-600 transition-colors">
+                    <span class="material-symbols-outlined text-[16px] text-slate-400 group-hover:text-brand-600">${iconName}</span>
+                    <span class="group-hover:underline">#${o.tracking_number}</span>
+                    <span class="material-symbols-outlined text-[13px] text-brand-500 opacity-60 group-hover:opacity-100">travel_explore</span>
+                </button>
             </td>
             <td class="py-2.5 px-4 whitespace-nowrap">${typeBadge}</td>
             <td class="py-2.5 px-4">
@@ -1111,4 +1112,114 @@ async function loadLedgerHistory() {
     } catch (e) {
         console.error("Ledger error:", e);
     }
-}
+};
+
+// ----------------------------------------------------
+// STATE 4: SUIVI EN DIRECT DIGYLOG API & SCAN TIMELINE
+// ----------------------------------------------------
+window.openDigylogModal = async function(trackingNumber) {
+    const modal = document.getElementById('modal-digylog-track');
+    if (!modal) return;
+
+    document.getElementById('digylog-modal-tracking').innerText = `Colis #${trackingNumber}`;
+    const badge = document.getElementById('digylog-modal-status-badge');
+    badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 animate-pulse";
+    badge.innerText = "Interrogation Digylog API...";
+
+    document.getElementById('digylog-modal-client').innerText = "Chargement...";
+    document.getElementById('digylog-modal-city').innerText = "--";
+    document.getElementById('digylog-modal-phone').innerText = "--";
+    document.getElementById('digylog-modal-price').innerText = "-- MAD";
+    document.getElementById('digylog-modal-cash').innerText = "--";
+    document.getElementById('digylog-modal-hub').innerText = "--";
+    document.getElementById('digylog-modal-events-count').innerText = "0 étapes";
+    document.getElementById('digylog-modal-timeline').innerHTML = `
+        <div class="text-center py-6 text-slate-400 text-xs italic flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px] animate-spin text-brand-600">progress_activity</span>
+            <span>Interrogation en direct de l'API Digylog Seller...</span>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+
+    try {
+        const resp = await apiCall(`/digylog/track/${encodeURIComponent(trackingNumber)}`);
+        if (!resp || !resp.ok) {
+            throw new Error(`Erreur HTTP ${resp ? resp.status : 'Connexion'}`);
+        }
+        const data = await resp.json();
+        const local = data.local_order || {};
+        const live = data.digylog_live || {};
+        const history = data.history || [];
+
+        const clientName = live.name || local.client_name || "Client Direct";
+        const city = live.city || local.city || "Maroc";
+        const phone = live.phone || "Non renseigné";
+        const price = live.price !== undefined ? live.price : (local.cod_amount || 0);
+        const cashStatus = live.cash_status || (local.payment_status === "PAID" ? "Versés" : "Non versés");
+        const status = live.status || local.status || "En cours";
+        const hub = live.location || live.hub || "Hub Régional";
+
+        document.getElementById('digylog-modal-client').innerText = clientName;
+        document.getElementById('digylog-modal-city').innerText = city;
+        document.getElementById('digylog-modal-phone').innerText = phone;
+        document.getElementById('digylog-modal-price').innerText = `${price} MAD`;
+        document.getElementById('digylog-modal-cash').innerText = cashStatus;
+        document.getElementById('digylog-modal-hub').innerText = hub;
+
+        const isDelivered = String(status).toLowerCase().includes("livr") || local.status === "DELIVERED";
+        const isReturned = String(status).toLowerCase().includes("retour") || local.status === "RETURNED";
+
+        let badgeColor = "bg-blue-50 text-brand-700 border-brand-200";
+        if (isDelivered) badgeColor = "bg-emerald-50 text-emerald-800 border-emerald-200";
+        else if (isReturned) badgeColor = "bg-rose-50 text-rose-800 border-rose-200";
+
+        badge.className = `px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeColor}`;
+        badge.innerText = status;
+
+        document.getElementById('digylog-modal-events-count').innerText = `${history.length} scans enregistrés`;
+
+        const timelineContainer = document.getElementById('digylog-modal-timeline');
+        if (!history || history.length === 0) {
+            timelineContainer.innerHTML = `
+                <div class="p-4 rounded-xl bg-white border border-slate-200 text-center">
+                    <span class="material-symbols-outlined text-[28px] text-slate-300">history_toggle_off</span>
+                    <p class="text-xs text-slate-600 font-medium mt-1">Colis enregistré dans le système NYRIX</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">En attente de la transmission ou du premier scan physique au quai d'enlèvement.</p>
+                </div>
+            `;
+        } else {
+            timelineContainer.innerHTML = history.map((ev, idx) => {
+                const rawDate = ev.date || ev.operationDate;
+                const dateStr = rawDate ? new Date(rawDate).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : '--';
+                const isFinal = idx === 0;
+                const scanTitle = ev.newValue || ev.newvalue || ev.type || 'Scan étape';
+                return `
+                    <div class="flex items-start gap-3 relative pb-2 ${idx !== history.length - 1 ? 'border-b border-slate-100' : ''}">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${isFinal ? 'bg-brand-600 text-white shadow-xs' : 'bg-slate-200 text-slate-600'} text-[12px] font-bold">
+                            <span class="material-symbols-outlined text-[14px]">${isFinal ? 'check' : 'radio_button_checked'}</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-xs font-bold text-slate-900 truncate">${scanTitle}</span>
+                                <span class="text-[10px] font-mono text-slate-400 whitespace-nowrap">${dateStr}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                                <span class="material-symbols-outlined text-[13px] text-slate-400">pin_drop</span>
+                                <span>${ev.location || 'Réseau National'}</span>
+                                ${ev.oldValue ? `<span class="text-[10px] text-slate-400">(Avant: ${ev.oldValue})</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (err) {
+        console.error("Error fetching Digylog live data:", err);
+        document.getElementById('digylog-modal-timeline').innerHTML = `
+            <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs">
+                Impossible d'interroger l'API Digylog en direct : ${err.message || 'Erreur réseau'}
+            </div>
+        `;
+    }
+};

@@ -51,7 +51,7 @@ def resolve_product_sku(db: Session, raw_product_name: str) -> str:
         
     return matched_sku
 
-def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 50):
+def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 250):
     """
     The Matchmaker Engine:
     Reads B2C orders from Fatima Zahra's Google Sheet (rows flagged 'Envoyer au SL')
@@ -94,6 +94,8 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 50):
     updated_count = 0
     skipped_count = 0
 
+    from datetime import datetime
+
     for item in sheet_orders[:limit]:
         sheet_id = item["sheet_order_id"]
         raw_tracking = item["tracking"]
@@ -119,6 +121,15 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 50):
 
         sku = resolve_product_sku(db, item["product_raw"])
 
+        # Parse date if available
+        created_dt = datetime.utcnow()
+        date_str = item.get("date")
+        if date_str:
+            try:
+                created_dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                pass
+
         if not existing_order:
             order = Order(
                 tracking_number=tracking_number,
@@ -129,7 +140,8 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 50):
                 status=order_status,
                 payment_method=PaymentMethodEnum.COD,
                 payment_status=payment_status,
-                cod_amount=item["total_price"]
+                cod_amount=item["total_price"],
+                created_at=created_dt
             )
             db.add(order)
             db.flush()
@@ -143,11 +155,13 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 50):
             db.add(order_item)
             synced_count += 1
         else:
-            # Update tracking or status if changed
+            # Update tracking or status or date if changed
             if raw_tracking and existing_order.tracking_number != raw_tracking:
                 existing_order.tracking_number = raw_tracking
             existing_order.status = order_status
             existing_order.payment_status = payment_status
+            if date_str:
+                existing_order.created_at = created_dt
             updated_count += 1
 
     db.commit()

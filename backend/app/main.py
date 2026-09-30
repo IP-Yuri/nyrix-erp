@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from backend.app.api import routes_auth, routes_finance, routes_warehouse, routes_packer, routes_b2b
+from backend.app.api import routes_auth, routes_finance, routes_warehouse, routes_packer, routes_b2b, routes_digylog
 from backend.app.core.dependencies import require_role
 
 app = FastAPI(title="NYRIX ERP System")
@@ -21,6 +21,7 @@ app.include_router(routes_finance.router)
 app.include_router(routes_warehouse.router)
 app.include_router(routes_packer.router)
 app.include_router(routes_b2b.router)
+app.include_router(routes_digylog.router)
 
 @app.get("/health")
 def health_check():

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from pydantic import BaseModel
 
@@ -151,7 +151,7 @@ def process_return(req: ReturnReq, db: Session = Depends(get_db), current_user: 
 
 @router.get("/orders", response_model=List[OrderLogisticsOut])
 def get_orders(db: Session = Depends(get_db)):
-    return db.query(Order).all()
+    return db.query(Order).options(joinedload(Order.items)).order_by(Order.created_at.desc()).all()
 
 @router.post("/cod", response_model=CODCashBookOut)
 def log_cod(req: CODReq, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -176,5 +176,5 @@ from backend.app.services.matchmaker import sync_b2c_orders
 
 @router.post("/sync")
 def trigger_matchmaker_sync(db: Session = Depends(get_db)):
-    result = sync_b2c_orders(db, simulate=True)
+    result = sync_b2c_orders(db, simulate=False)
     return result
