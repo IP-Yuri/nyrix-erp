@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
+from typing import Optional
+from pydantic import BaseModel
 from backend.app.core.database import get_db
-from backend.app.core.security import verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.app.core.security import verify_password, get_password_hash, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from backend.app.core.dependencies import get_current_user
 from backend.app.schemas.schemas import LoginRequest, TokenResponse, UserOut
 from backend.app.models.models import User
@@ -56,3 +58,28 @@ def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = D
 def get_me(current_user: User = Depends(get_current_user)):
     role_str = current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role)
     return UserOut(id=str(current_user.id), username=current_user.username, role=role_str)
+
+class ResetPasswordRequest(BaseModel):
+    username: str
+    new_password: Optional[str] = None
+
+@router.post("/reset-password")
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    uname = req.username.strip()
+    user = db.query(User).filter(User.username == uname).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Utilisateur '{uname}' introuvable dans le système."
+        )
+    
+    new_pwd = req.new_password.strip() if req.new_password and req.new_password.strip() else "nyrix2026"
+    user.password_hash = get_password_hash(new_pwd)
+    db.commit()
+    return {
+        "status": "success",
+        "message": f"Mot de passe réinitialisé avec succès pour l'utilisateur '{user.username}'.",
+        "username": user.username,
+        "new_password": new_pwd
+    }
+
