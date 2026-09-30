@@ -30,6 +30,10 @@ class ProductBase(BaseModel):
 class ProductOperationalOut(ProductBase):
     model_config = {"from_attributes": True}
 
+class ProductB2BOut(ProductBase):
+    suggested_price: float = 0.0
+    model_config = {"from_attributes": True}
+
 class ProductAdminOut(ProductBase):
     landed_cost: float
     last_invoice_ref: Optional[str] = None
@@ -45,6 +49,7 @@ class OrderItemLogisticsOut(BaseModel):
 
 class OrderItemFullOut(OrderItemLogisticsOut):
     unit_price: float
+    product_name: Optional[str] = None
     
     model_config = {"from_attributes": True}
 
@@ -65,8 +70,10 @@ class OrderFullOut(OrderLogisticsOut):
     payment_method: str
     payment_status: str
     cod_amount: float
-    owner_id: Optional[str]
+    owner_id: Optional[str] = None
     items: List[OrderItemFullOut] = []
+    total_amount_ht: Optional[float] = 0.0
+    total_amount_ttc: Optional[float] = 0.0
     
     model_config = {"from_attributes": True}
 

@@ -76,6 +76,10 @@ class Product(Base):
     packer_stock = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    @property
+    def suggested_price(self) -> float:
+        return round((self.landed_cost or 0.0) * 1.25, 2) if self.landed_cost else 150.0
+
 class Order(Base):
     __tablename__ = "orders"
     tracking_number = Column(String(255), primary_key=True, index=True)
@@ -94,6 +98,14 @@ class Order(Base):
 
     items = relationship("OrderItem", back_populates="order")
 
+    @property
+    def total_amount_ht(self) -> float:
+        return sum((item.quantity * (item.unit_price or 0.0)) for item in (self.items or []))
+
+    @property
+    def total_amount_ttc(self) -> float:
+        return round(self.total_amount_ht * 1.2, 2)
+
 class OrderItem(Base):
     __tablename__ = "order_items"
     id = Column(String(36), primary_key=True, default=generate_uuid)
@@ -104,6 +116,10 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product")
+
+    @property
+    def product_name(self) -> str:
+        return self.product.name if self.product else self.product_sku
 
 class Transfer(Base):
     __tablename__ = "transfers"
