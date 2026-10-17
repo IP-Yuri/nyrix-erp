@@ -221,7 +221,7 @@ function handleExcelUpload(e) {
 
             // If reference invoice is generic, suggest one based on filename
             const refInput = document.getElementById('ref-facture');
-            if (refInput && (!refInput.value || refInput.value === 'FAC-2025-0984')) {
+            if (refInput && !refInput.value) {
                 const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_").toUpperCase();
                 refInput.value = baseName.substring(0, 20);
             }
@@ -887,9 +887,53 @@ window.renderInvoicesTable = function() {
     }
 
     filtered.forEach(inv => {
-        const statusBadge = (inv.status === 'RECEPTIONNE')
-            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Réceptionné</span>`
-            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>En attente de réception</span>`;
+        let statusBadge = '';
+        let actionButtons = `
+            <button type="button" class="h-8 px-2.5 rounded-lg bg-slate-100 hover:bg-brand-600 hover:text-white text-slate-700 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openInvoiceDetailModal('${inv.id}')" title="Voir les articles de cette facture">
+                <span class="material-symbols-outlined text-[15px]">visibility</span>
+                <span>Articles</span>
+            </button>
+        `;
+
+        if (inv.status === 'RECEPTIONNE') {
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Réceptionné (En stock)</span>`;
+            actionButtons += `
+                <button type="button" class="h-8 px-2.5 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 border border-blue-200 hover:border-blue-600 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openEditInvoiceCostsModal('${inv.id}')" title="Modifier les coûts de revient sans impacter le stock">
+                    <span class="material-symbols-outlined text-[15px]">tune</span>
+                    <span>Coûts</span>
+                </button>
+                <button type="button" class="h-8 px-2.5 rounded-lg bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-800 border border-amber-200 hover:border-amber-600 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openRequestCancelModal('${inv.id}')" title="Demander l'annulation à Karime au quai">
+                    <span class="material-symbols-outlined text-[15px]">cancel</span>
+                    <span>Demander Annulation</span>
+                </button>
+                <span class="inline-flex items-center gap-0.5 px-2 py-1 rounded bg-slate-100 text-slate-400 text-[11px] font-medium" title="Suppression directe verrouillée : Stock physique déjà intégré au quai">
+                    <span class="material-symbols-outlined text-[14px]">lock</span>
+                    <span>Verrouillée</span>
+                </span>
+            `;
+        } else if (inv.status === 'DEMANDE_ANNULATION') {
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 text-orange-700 border border-orange-200"><span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>Annulation en attente ⏳</span>`;
+            actionButtons += `
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-50 text-orange-800 border border-orange-200 text-xs font-semibold">
+                    <span class="material-symbols-outlined text-[15px] animate-spin">sync</span>
+                    <span>En attente Karime</span>
+                </span>
+            `;
+        } else if (inv.status === 'ANNULEE') {
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Annulée</span>`;
+            actionButtons += `
+                <span class="text-xs text-slate-400 italic">Annulée (Stock déduit)</span>
+            `;
+        } else {
+            // EN_ATTENTE_RECEPTION
+            statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>En attente réception</span>`;
+            actionButtons += `
+                <button type="button" class="h-8 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-600 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openDeleteInvoiceModal('${inv.id}')" title="Supprimer et retirer du stock">
+                    <span class="material-symbols-outlined text-[15px]">delete</span>
+                    <span>Supprimer</span>
+                </button>
+            `;
+        }
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50 transition-colors group";
@@ -925,14 +969,7 @@ window.renderInvoicesTable = function() {
             </td>
             <td class="py-3 px-4 text-center whitespace-nowrap">
                 <div class="flex items-center justify-center gap-1.5">
-                    <button type="button" class="h-8 px-2.5 rounded-lg bg-slate-100 hover:bg-brand-600 hover:text-white text-slate-700 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openInvoiceDetailModal('${inv.id}')" title="Voir les articles de cette facture">
-                        <span class="material-symbols-outlined text-[15px]">visibility</span>
-                        <span>Articles</span>
-                    </button>
-                    <button type="button" class="h-8 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 hover:border-rose-600 text-xs font-semibold transition-all inline-flex items-center gap-1 shadow-2xs" onclick="window.openDeleteInvoiceModal('${inv.id}')" title="Supprimer et déduire automatiquement du stock">
-                        <span class="material-symbols-outlined text-[15px]">delete</span>
-                        <span>Supprimer</span>
-                    </button>
+                    ${actionButtons}
                 </div>
             </td>
         `;
@@ -1027,6 +1064,157 @@ window.confirmDeleteInvoice = async function() {
     } finally {
         if (btn) btn.disabled = false;
         if (btnText) btnText.innerText = "Confirmer la Suppression";
+    }
+};
+
+// ==========================================
+// REQUEST CANCELLATION MODAL (OPTION 1)
+// ==========================================
+window.openRequestCancelModal = function(id) {
+    const inv = (window.currentInvoicesList || []).find(i => i.id === id);
+    if (!inv) return;
+
+    window.selectedInvoiceToCancel = inv;
+    const refEl = document.getElementById('cancel-req-ref');
+    const supEl = document.getElementById('cancel-req-supplier');
+    const qtyEl = document.getElementById('cancel-req-qty');
+    const reasonInput = document.getElementById('cancel-req-reason');
+
+    if (refEl) refEl.innerText = inv.invoice_ref;
+    if (supEl) supEl.innerText = inv.supplier_name || 'Fournisseur non spécifié';
+    if (qtyEl) qtyEl.innerText = (inv.total_quantity || 0).toLocaleString();
+    if (reasonInput) reasonInput.value = '';
+
+    const modal = document.getElementById('modal-request-cancel-invoice');
+    if (modal) modal.classList.remove('hidden');
+};
+
+window.closeRequestCancelModal = function() {
+    const modal = document.getElementById('modal-request-cancel-invoice');
+    if (modal) modal.classList.add('hidden');
+    window.selectedInvoiceToCancel = null;
+};
+
+window.confirmRequestCancelInvoice = async function() {
+    const inv = window.selectedInvoiceToCancel;
+    if (!inv) return;
+
+    const reason = document.getElementById('cancel-req-reason')?.value?.trim() || 'Erreur de saisie / doublon';
+    const btn = document.getElementById('btn-confirm-req-cancel');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await apiCall(`/finance/invoices/${inv.id}/request-cancellation`, {
+            method: 'POST',
+            body: JSON.stringify({ reason: reason })
+        });
+
+        if (res && res.status === 200) {
+            alert(`✅ Demande d'annulation transmise à Karime au quai pour la facture ${inv.invoice_ref}.\n\nKarime validera le contrôle d'intégrité du stock quai (Stock Guard) avant d'approuver la déduction.`);
+            window.closeRequestCancelModal();
+            await window.loadInvoices();
+        } else {
+            const err = res ? await res.json() : { detail: 'Erreur inconnue' };
+            alert("Erreur lors de la demande d'annulation: " + (err.detail || JSON.stringify(err)));
+        }
+    } catch (e) {
+        console.error("Cancel request error:", e);
+        alert("Erreur réseau: " + e.message);
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+};
+
+// ==========================================
+// EDIT INVOICE COSTS MODAL (SUGGESTION 1)
+// ==========================================
+window.openEditInvoiceCostsModal = function(id) {
+    const inv = (window.currentInvoicesList || []).find(i => i.id === id);
+    if (!inv) return;
+
+    window.selectedInvoiceToEditCosts = inv;
+    const refInput = document.getElementById('edit-costs-ref');
+    const supInput = document.getElementById('edit-costs-supplier');
+    if (refInput) refInput.value = inv.invoice_ref || '';
+    if (supInput) supInput.value = inv.supplier_name || '';
+
+    const container = document.getElementById('edit-costs-items-container');
+    if (container) {
+        container.innerHTML = '';
+        (inv.items || []).forEach(it => {
+            const row = document.createElement('div');
+            row.className = "flex items-center gap-3 p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-xs";
+            row.innerHTML = `
+                <div class="w-1/3">
+                    <span class="font-mono font-bold text-slate-800">${it.sku}</span>
+                    <span class="text-[11px] text-slate-400 block truncate">${it.name || it.sku}</span>
+                </div>
+                <div class="w-1/4 text-right">
+                    <span class="text-slate-500">Quantité:</span>
+                    <span class="font-bold text-slate-800">${(it.quantity || 0).toLocaleString()} U</span>
+                </div>
+                <div class="flex-1 flex items-center gap-1.5 justify-end">
+                    <label class="text-[11px] text-slate-500">Coût MAD:</label>
+                    <input type="number" step="0.01" min="0" data-sku="${it.sku}" class="edit-item-cost-input w-24 h-8 px-2 rounded-lg bg-white border border-slate-300 text-right font-mono font-bold text-brand-700 text-xs focus:ring-1 focus:ring-brand-500" value="${(it.landed_cost || 0).toFixed(2)}" />
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    const modal = document.getElementById('modal-edit-invoice-costs');
+    if (modal) modal.classList.remove('hidden');
+};
+
+window.closeEditInvoiceCostsModal = function() {
+    const modal = document.getElementById('modal-edit-invoice-costs');
+    if (modal) modal.classList.add('hidden');
+    window.selectedInvoiceToEditCosts = null;
+};
+
+window.saveInvoiceCosts = async function() {
+    const inv = window.selectedInvoiceToEditCosts;
+    if (!inv) return;
+
+    const ref = document.getElementById('edit-costs-ref')?.value?.trim();
+    const supplier = document.getElementById('edit-costs-supplier')?.value?.trim();
+
+    const items = [];
+    document.querySelectorAll('.edit-item-cost-input').forEach(input => {
+        const sku = input.getAttribute('data-sku');
+        const cost = parseFloat(input.value) || 0;
+        if (sku) {
+            items.push({ sku: sku, landed_cost: cost });
+        }
+    });
+
+    const btn = document.getElementById('btn-save-invoice-costs');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await apiCall(`/finance/invoices/${inv.id}/costs`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                invoice_ref: ref,
+                supplier_name: supplier,
+                items: items
+            })
+        });
+
+        if (res && res.status === 200) {
+            alert(`✅ Coûts financiers de la facture mis à jour avec succès !\n\nLe coût de revient des produits a été actualisé sans modifier les stocks réels.`);
+            window.closeEditInvoiceCostsModal();
+            await window.loadInvoices();
+            await window.loadStock();
+        } else {
+            const err = res ? await res.json() : { detail: 'Erreur inconnue' };
+            alert("Erreur lors de la mise à jour des coûts: " + (err.detail || JSON.stringify(err)));
+        }
+    } catch (e) {
+        console.error("Save costs error:", e);
+        alert("Erreur réseau: " + e.message);
+    } finally {
+        if (btn) btn.disabled = false;
     }
 };
 
@@ -1173,6 +1361,9 @@ window.renderLedgerTable = function() {
         } else if (action === 'DISCREPANCY_APPROVED') {
             actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>ÉCART VALIDÉ</span>`;
             qtyDisplay = `<span class="font-bold text-amber-700 text-xs num-tabular">${entry.quantity > 0 ? '+' : ''}${entry.quantity.toLocaleString()} pcs</span>`;
+        } else if (action === 'IMPORT_CANCELLED') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>ANNULATION IMPORT</span>`;
+            qtyDisplay = `<span class="font-bold text-rose-700 text-xs num-tabular">-${Math.abs(entry.quantity).toLocaleString()} pcs</span>`;
         } else {
             actionBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">${action}</span>`;
             qtyDisplay = `<span class="font-bold text-slate-800 text-xs num-tabular">${entry.quantity > 0 ? '+' : ''}${entry.quantity.toLocaleString()} pcs</span>`;

@@ -179,6 +179,16 @@ def resolve_discrepancy(id: str, action: str, db: Session = Depends(get_db), cur
     db.commit()
     return {"status": "success", "discrepancy_status": disc.status}
 
+from pydantic import BaseModel
+
+class CancelInvoiceReq(BaseModel):
+    reason: Optional[str] = "Erreur de saisie / doublon"
+
+class UpdateInvoiceCostsReq(BaseModel):
+    invoice_ref: Optional[str] = None
+    supplier_name: Optional[str] = None
+    items: Optional[List[dict]] = None
+
 @router.get("/invoices")
 def list_invoices(db: Session = Depends(get_db)):
     shipments = db.query(InboundShipment).order_by(InboundShipment.created_at.desc()).all()
@@ -194,6 +204,11 @@ def list_invoices(db: Session = Depends(get_db)):
             "supplier_name": s.supplier_name or "Fournisseur non spécifié",
             "status": status_str,
             "created_at": s.created_at.isoformat() if s.created_at else None,
+            "received_at": s.received_at.isoformat() if s.received_at else None,
+            "received_by": s.received_by,
+            "cancellation_reason": s.cancellation_reason,
+            "cancellation_requested_by": s.cancellation_requested_by,
+            "cancellation_requested_at": s.cancellation_requested_at.isoformat() if s.cancellation_requested_at else None,
             "total_skus": len(items),
             "total_quantity": total_qty,
             "total_amount_mad": round(total_mad, 2),
@@ -207,6 +222,25 @@ def delete_invoice(id: str, db: Session = Depends(get_db), current_user: User = 
     if not shipment:
         raise HTTPException(status_code=404, detail="Facture introuvable")
 
+    # Protection: Bloquer la suppression si la facture a déjà été réceptionnée
+    if shipment.status == ShipmentStatusEnum.RECEPTIONNE:
+        raise HTTPException(
+            status_code=400,
+            detail="Action verrouillée : Cette facture a déjà été réceptionnée et intégrée au stock physique par Karime au quai. La suppression directe est impossible pour préserver l'intégrité de l'inventaire. Utilisez 'Demander l'annulation' pour lancer la vérification conjointe."
+        )
+
+    if shipment.status == ShipmentStatusEnum.DEMANDE_ANNULATION:
+        raise HTTPException(
+            status_code=400,
+            detail="Une demande d'annulation conjointe est déjà en cours d'instruction par Karime au quai."
+        )
+
+    if shipment.status == ShipmentStatusEnum.ANNULEE:
+        raise HTTPException(
+            status_code=400,
+            detail="Cette facture a déjà été annulée et retirée du flux actif."
+        )
+
     items = shipment.items_json if isinstance(shipment.items_json, list) else []
     reverted_items = []
     total_deducted = 0
@@ -219,14 +253,14 @@ def delete_invoice(id: str, db: Session = Depends(get_db), current_user: User = 
 
         product = db.query(Product).filter(Product.sku == sku).first()
         if product:
-            # Automatically remove added quantity from stock
+            # Revert pre-allocated stock before warehouse confirmation
             product.global_stock = max(0, product.global_stock - qty)
             
-            # Log reversal in StockLedger
+            # Log reversal in StockLedger (Garde-fou C)
             ledger_entry = StockLedger(
                 product_sku=sku,
                 user_id=str(current_user.id),
-                action=StockActionEnum.IMPORT,
+                action=StockActionEnum.IMPORT_CANCELLED,
                 quantity=-qty
             )
             db.add(ledger_entry)
@@ -239,10 +273,82 @@ def delete_invoice(id: str, db: Session = Depends(get_db), current_user: User = 
 
     return {
         "status": "success",
-        "message": f"Facture {invoice_ref} supprimée avec succès. {total_deducted} unités ont été retirées du stock.",
+        "message": f"Facture {invoice_ref} supprimée avec succès avant réception quai. {total_deducted} unités ont été retirées du stock.",
         "deleted_invoice_ref": invoice_ref,
         "total_deducted": total_deducted,
         "reverted_items": reverted_items
+    }
+
+@router.post("/invoices/{id}/request-cancellation")
+def request_invoice_cancellation(id: str, payload: CancelInvoiceReq, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Option 1: Othmane demande l'annulation d'une facture déjà réceptionnée par Karime"""
+    shipment = db.query(InboundShipment).filter(InboundShipment.id == id).first()
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Facture introuvable")
+
+    if shipment.status != ShipmentStatusEnum.RECEPTIONNE:
+        status_name = shipment.status.value if hasattr(shipment.status, "value") else str(shipment.status)
+        raise HTTPException(
+            status_code=400,
+            detail=f"La demande d'annulation n'est possible que pour une facture réceptionnée (statut actuel: {status_name})."
+        )
+
+    reason_text = payload.reason.strip() if (payload.reason and payload.reason.strip()) else "Erreur de saisie / doublon"
+    shipment.status = ShipmentStatusEnum.DEMANDE_ANNULATION
+    shipment.cancellation_reason = reason_text
+    shipment.cancellation_requested_by = current_user.username
+    shipment.cancellation_requested_at = datetime.utcnow()
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Demande d'annulation transmise à Karime au quai pour la facture {shipment.invoice_ref}.",
+        "invoice_ref": shipment.invoice_ref,
+        "reason": reason_text
+    }
+
+@router.put("/invoices/{id}/costs")
+def update_invoice_costs(id: str, req: UpdateInvoiceCostsReq, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Suggestion 1: Modifier les métadonnées et coûts sans impacter le stock physique"""
+    shipment = db.query(InboundShipment).filter(InboundShipment.id == id).first()
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Facture introuvable")
+
+    if req.invoice_ref and req.invoice_ref.strip():
+        shipment.invoice_ref = req.invoice_ref.strip().upper()
+    if req.supplier_name is not None:
+        shipment.supplier_name = req.supplier_name.strip() or None
+
+    items = list(shipment.items_json) if isinstance(shipment.items_json, list) else []
+    
+    if req.items:
+        cost_map = {}
+        for it in req.items:
+            s = it.get("sku")
+            if s and "landed_cost" in it:
+                cost_map[s] = float(it["landed_cost"])
+
+        updated_items = []
+        for itm in items:
+            sku = itm.get("sku")
+            if sku in cost_map:
+                new_c = cost_map[sku]
+                itm["landed_cost"] = new_c
+                # Update product landed cost without touching physical quantities
+                prod = db.query(Product).filter(Product.sku == sku).first()
+                if prod:
+                    prod.landed_cost = new_c
+            updated_items.append(itm)
+
+        shipment.items_json = updated_items
+
+    db.commit()
+    return {
+        "status": "success",
+        "message": f"Coûts financiers de la facture {shipment.invoice_ref} mis à jour avec succès sans modifier les stocks physiques.",
+        "invoice_ref": shipment.invoice_ref,
+        "supplier_name": shipment.supplier_name,
+        "items": shipment.items_json
     }
 
 @router.get("/returns")

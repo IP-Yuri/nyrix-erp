@@ -1,76 +1,96 @@
 import uuid
 import re
-from sqlalchemy.orm import Session
+from typing import Optional, Dict, Any, List
+from datetime import datetime
+from sqlalchemy.orm import Session, joinedload
 from backend.app.models.models import (
     Order, OrderItem, Product, OrderTypeEnum, OrderStatusEnum, 
     PaymentMethodEnum, PaymentStatusEnum
 )
-from backend.app.services.digylog_client import digylog_client
 from backend.app.services.sheets_reader import fetch_confirmed_orders
 
 CANONICAL_SKU_MAP = {
-    "air wallet": "AW-01",
+    "air-wallet-mag/marron": "AW-MAG-BRN",
+    "air-wallet-mag marron": "AW-MAG-BRN",
+    "air-wallet-mag/noir": "AW-MAG-BLK",
+    "air-wallet-mag noir": "AW-MAG-BLK",
+    "air-wallet-mag": "AW-MAG-BLK",
     "air wallet 299-1": "AW-01",
     "air wallet 349": "AW-01",
     "air wallet 399": "AW-01",
-    "air-wallet-mag": "AW-01",
+    "air wallet": "AW-01",
+    "nyrix-fit-pro": "NYRIX-FIT-PRO",
+    "nyrix fit pro": "NYRIX-FIT-PRO",
+    "nyrix fit band": "NYRIX-FIT-BAND",
+    "nyrix-grip": "NYRIX-GRIP",
+    "nyrix grip": "NYRIX-GRIP",
+    "nyrix air keychain": "NYRIX-KEYCHAIN",
+    "keychain": "NYRIX-KEYCHAIN",
     "nyrix bifold": "WL-CUIR-001",
     "portefeuille slim cuir": "WL-CUIR-001",
     "porte-cartes rfid": "WL-RFID-089",
-    "nyrix air keychain": "WL-RFID-089"
+    "nyrix edge": "NYRIX-EDGE",
 }
 
-def resolve_product_sku(db: Session, raw_product_name: str) -> str:
-    """Maps free-text product names from Google Sheet to a database SKU."""
+def resolve_sku_fast(raw_product_name: str) -> str:
     raw_lower = (raw_product_name or "").lower().strip()
-    
-    # Try exact / substring match in mapping
-    matched_sku = None
     for pattern, sku in CANONICAL_SKU_MAP.items():
         if pattern in raw_lower:
-            matched_sku = sku
-            break
-            
-    if not matched_sku:
-        # Generate a slug SKU for unseen items
-        slug = re.sub(r'[^a-zA-Z0-9]+', '-', raw_lower).strip('-').upper()[:30]
-        matched_sku = slug or "AW-01"
+            return sku
+    slug = re.sub(r'[^a-zA-Z0-9]+', '-', raw_lower).strip('-').upper()[:30]
+    return slug or "AW-01"
 
-    # Ensure product exists in database to prevent FK violation
-    product = db.query(Product).filter(Product.sku == matched_sku).first()
-    if not product:
-        product = Product(
-            sku=matched_sku,
-            name=raw_product_name[:255] or matched_sku,
-            landed_cost=0.0,
-            global_stock=0,
-            packer_stock=0
-        )
-        db.add(product)
-        db.flush()
-        
-    return matched_sku
+def map_sheet_status(status_str: str) -> tuple:
+    if not status_str:
+        return OrderStatusEnum.PENDING_PACKING, PaymentStatusEnum.UNPAID
+    
+    s = status_str.strip().lower()
+    if "livr" in s:
+        return OrderStatusEnum.DELIVERED, PaymentStatusEnum.PAID
+    if any(k in s for k in ["retour", "refus", "annul", "supprim", "ramassage"]):
+        return OrderStatusEnum.RETURNED, PaymentStatusEnum.UNPAID
+    if any(k in s for k in ["expéd", "exped", "cours", "transit", "hub", "reçu", "recu", "network", "transfert"]):
+        return OrderStatusEnum.SHIPPED, PaymentStatusEnum.UNPAID
+    return OrderStatusEnum.PENDING_PACKING, PaymentStatusEnum.UNPAID
 
-def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 250):
+def resolve_carrier_for_order(item: Dict[str, Any], tracking: str, order_type: OrderTypeEnum = OrderTypeEnum.B2C) -> str:
+    if order_type == OrderTypeEnum.B2B:
+        return "Digylog Fret"
+    note = str(item.get("note") or "").lower()
+    city = str(item.get("city") or "").lower()
+    trk = str(tracking or "").upper()
+    carrier_field = str(item.get("carrier") or item.get("transporteur") or "").strip()
+    if carrier_field:
+        if "au" in carrier_field.lower() or "ah" in carrier_field.lower() or "hub" in carrier_field.lower():
+            return "Au Hub Network"
+        return carrier_field
+    if "au" in note or "ah" in note or "hub network" in note or "au-hub" in trk.lower() or "ah-hub" in trk.lower() or trk.startswith("AU") or trk.startswith("AH") or "au hub" in city or "ah hub" in city:
+        return "Au Hub Network"
+    return "Digylog Express"
+
+
+def sync_b2c_orders(db: Session, simulate: bool = False, limit: Optional[int] = None):
     """
-    The Matchmaker Engine:
-    Reads B2C orders from Fatima Zahra's Google Sheet (rows flagged 'Envoyer au SL')
-    and reconciles them with Digylog logistics tracking.
+    High-Performance Matchmaker Engine:
+    Reads B2C orders from Fatima Zahra's Google Sheet and synchronizes in bulk with zero round-trip overhead.
     """
     if simulate:
-        # Standard fast test simulator for CI/E2E test suite
-        tracking_number = f"DL-{uuid.uuid4().hex[:6].upper()}"
+        # Alternate between Digylog Express and Au Hub Network for realistic testing
+        sim_carrier = "Au Hub Network" if db.query(Order).count() % 2 == 1 else "Digylog Express"
+        tracking_prefix = "AU" if sim_carrier == "Au Hub Network" else "DL"
+        tracking_number = f"{tracking_prefix}-{uuid.uuid4().hex[:6].upper()}"
         existing = db.query(Order).filter(Order.tracking_number == tracking_number).first()
         if not existing:
             order = Order(
                 tracking_number=tracking_number,
                 type=OrderTypeEnum.B2C,
-                client_name="Client Casablanca (Digylog Simulé)",
+                client_name="Client Casablanca (Simulé)",
                 city="Casablanca",
                 status=OrderStatusEnum.PENDING_PACKING,
                 payment_method=PaymentMethodEnum.COD,
                 payment_status=PaymentStatusEnum.UNPAID,
-                cod_amount=350.0
+                cod_amount=350.0,
+                carrier=sim_carrier
             )
             db.add(order)
             item = OrderItem(
@@ -90,49 +110,66 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 250):
         print(f"Error reading Google Sheets: {e}")
         return {"status": "error", "message": f"Could not fetch Google Sheet: {e}"}
 
+    orders_to_process = sheet_orders[:limit] if limit else sheet_orders
+
+    # 1. Bulk prefetch existing products to eliminate DB roundtrips
+    existing_products = {p.sku: p for p in db.query(Product).all()}
+
+    # 2. Bulk prefetch existing orders
+    existing_orders = db.query(Order).options(joinedload(Order.items)).all()
+    orders_by_trk: Dict[str, Order] = {o.tracking_number: o for o in existing_orders}
+    orders_by_sheet_id: Dict[str, Order] = {o.sheet_order_id: o for o in existing_orders if o.sheet_order_id}
+
     synced_count = 0
     updated_count = 0
-    skipped_count = 0
 
-    from datetime import datetime
-
-    for item in sheet_orders[:limit]:
-        sheet_id = item["sheet_order_id"]
-        raw_tracking = item["tracking"]
+    for item in orders_to_process:
+        sheet_id = str(item["sheet_order_id"]).strip() if item.get("sheet_order_id") else None
+        raw_tracking = str(item.get("tracking") or "").strip()
         
-        # Determine tracking number
-        if raw_tracking:
-            tracking_number = raw_tracking
-            existing_order = db.query(Order).filter(Order.tracking_number == tracking_number).first()
-        else:
-            tracking_number = f"B2C-{sheet_id}-{uuid.uuid4().hex[:4].upper()}" if sheet_id else f"B2C-{uuid.uuid4().hex[:6].upper()}"
-            existing_order = None
+        # Check by tracking number or by sheet_order_id in memory
+        existing_order = None
+        if raw_tracking and raw_tracking in orders_by_trk:
+            existing_order = orders_by_trk[raw_tracking]
+        elif sheet_id and sheet_id in orders_by_sheet_id:
+            existing_order = orders_by_sheet_id[sheet_id]
 
-        status_str = item.get("status_livraison", "")
-        if "Livr" in status_str:
-            order_status = OrderStatusEnum.DELIVERED
-            payment_status = PaymentStatusEnum.PAID
-        elif "Retourn" in status_str:
-            order_status = OrderStatusEnum.RETURNED
-            payment_status = PaymentStatusEnum.UNPAID
-        else:
-            order_status = OrderStatusEnum.PENDING_PACKING
-            payment_status = PaymentStatusEnum.UNPAID
-
-        sku = resolve_product_sku(db, item["product_raw"])
+        order_status, payment_status = map_sheet_status(item.get("status_livraison", ""))
+        
+        # Resolve SKU
+        sku = resolve_sku_fast(item["product_raw"])
+        if sku not in existing_products:
+            new_prod = Product(
+                sku=sku,
+                name=(item["product_raw"] or sku)[:255],
+                landed_cost=0.0,
+                global_stock=0,
+                packer_stock=0
+            )
+            db.add(new_prod)
+            existing_products[sku] = new_prod
 
         # Parse date if available
-        created_dt = datetime.utcnow()
+        created_dt = None
         date_str = item.get("date")
         if date_str:
             try:
                 created_dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
             except Exception:
                 pass
+        if not created_dt:
+            created_dt = existing_order.created_at if existing_order and existing_order.created_at else datetime.utcnow()
 
         if not existing_order:
+            final_tracking = raw_tracking or (f"B2C-{sheet_id}" if sheet_id else f"B2C-{uuid.uuid4().hex[:6].upper()}")
+            
+            # Avoid collision in memory
+            if final_tracking in orders_by_trk:
+                final_tracking = f"{final_tracking}-{uuid.uuid4().hex[:3].upper()}"
+
+            carrier_val = resolve_carrier_for_order(item, final_tracking, OrderTypeEnum.B2C)
             order = Order(
-                tracking_number=tracking_number,
+                tracking_number=final_tracking,
                 sheet_order_id=sheet_id,
                 type=OrderTypeEnum.B2C,
                 client_name=item["client_name"],
@@ -141,29 +178,46 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 250):
                 payment_method=PaymentMethodEnum.COD,
                 payment_status=payment_status,
                 cod_amount=item["total_price"],
-                created_at=created_dt
+                created_at=created_dt,
+                carrier=carrier_val
             )
             db.add(order)
-            db.flush()
 
             order_item = OrderItem(
-                tracking_number=tracking_number,
+                tracking_number=final_tracking,
                 product_sku=sku,
                 quantity=item["quantity"],
                 unit_price=item["total_price"]
             )
             db.add(order_item)
+
+            orders_by_trk[final_tracking] = order
+            if sheet_id:
+                orders_by_sheet_id[sheet_id] = order
+
             synced_count += 1
         else:
-            # Update tracking or status or date if changed
+            # Update order in memory
             if raw_tracking and existing_order.tracking_number != raw_tracking:
+                old_trk = existing_order.tracking_number
+                for itm in existing_order.items:
+                    itm.tracking_number = raw_tracking
                 existing_order.tracking_number = raw_tracking
+                orders_by_trk[raw_tracking] = existing_order
+                if old_trk in orders_by_trk:
+                    del orders_by_trk[old_trk]
+
             existing_order.status = order_status
             existing_order.payment_status = payment_status
-            if date_str:
+            existing_order.client_name = item["client_name"]
+            existing_order.city = item["city"]
+            existing_order.cod_amount = item["total_price"]
+            existing_order.carrier = resolve_carrier_for_order(item, existing_order.tracking_number, existing_order.type)
+            if date_str and created_dt:
                 existing_order.created_at = created_dt
             updated_count += 1
 
+    # Single atomic commit for entire batch
     db.commit()
 
     return {
@@ -171,5 +225,5 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: int = 250):
         "total_sheet_confirmed": len(sheet_orders),
         "synced_new": synced_count,
         "updated": updated_count,
-        "processed_limit": limit
+        "total_processed": len(orders_to_process)
     }

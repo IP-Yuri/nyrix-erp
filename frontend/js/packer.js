@@ -279,10 +279,18 @@ async function loadOrdersToPack() {
         const res = await apiCall('/packer/orders');
         if (res && res.status === 200) {
             const orders = await res.json();
-            window.allOrdersToPack = orders || [];
-            
             const badge = document.getElementById('badge-preparer');
             if (badge) badge.innerText = `${orders.length}`;
+
+            // Check if tracking numbers changed before clearing DOM to prevent UI flicker
+            const currentTrackings = (window.allOrdersToPack || []).map(o => o.tracking_number).join(',');
+            const newTrackings = (orders || []).map(o => o.tracking_number).join(',');
+
+            window.allOrdersToPack = orders || [];
+
+            if (currentTrackings === newTrackings && container.children.length > 0) {
+                return;
+            }
 
             container.innerHTML = '';
             if (orders.length === 0) {
@@ -447,6 +455,58 @@ window.completePacking = async function(trackingNumber, btnElement) {
 // ----------------------------------------------------
 // TAB 3: HISTORIQUE DES COLIS PRÉPARÉS
 // ----------------------------------------------------
+function getOrderDateStr(o) {
+    const raw = o.packed_at || o.created_at;
+    if (!raw) return '';
+    try {
+        const d = new Date(raw);
+        if (isNaN(d.getTime())) return String(raw).substring(0, 10);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    } catch (e) {
+        return String(raw).substring(0, 10);
+    }
+}
+
+function getTodayDateStr() {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function formatFrenchDate(isoDateStr) {
+    if (!isoDateStr) return '';
+    try {
+        const parts = isoDateStr.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return isoDateStr;
+    } catch (e) {
+        return isoDateStr;
+    }
+}
+
+window.setHistoryDateToday = function() {
+    const dateInput = document.getElementById('packer-history-date');
+    if (dateInput) {
+        dateInput.value = getTodayDateStr();
+    }
+    window.filterHistoryTable();
+};
+
+window.clearHistoryDate = function() {
+    const dateInput = document.getElementById('packer-history-date');
+    if (dateInput) {
+        dateInput.value = '';
+    }
+    window.filterHistoryTable();
+};
+
 async function loadPackingHistory() {
     try {
         const res = await apiCall('/packer/history');
@@ -457,32 +517,64 @@ async function loadPackingHistory() {
             const badge = document.getElementById('badge-historique');
             if (badge) badge.innerText = `${history.length}`;
 
-            renderHistoryTable(history);
+            // Initialize default date to today if empty
+            const dateInput = document.getElementById('packer-history-date');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = getTodayDateStr();
+            }
+
+            window.filterHistoryTable();
         }
     } catch (e) {
         console.error("History error:", e);
     }
 }
 
-function renderHistoryTable(items) {
+function renderHistoryTable(items, activeDate = null) {
     const tbody = document.getElementById('packer-history-tbody');
     const counter = document.getElementById('packer-history-count');
     if (!tbody) return;
 
     tbody.innerHTML = '';
     if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-on-surface-variant italic">Aucun colis préparé enregistré pour le moment.</td></tr>`;
+        const dateNote = activeDate ? ` pour le ${formatFrenchDate(activeDate)}` : '';
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-on-surface-variant italic">Aucun colis préparé trouvé${dateNote}.</td></tr>`;
         if (counter) counter.innerText = '0 colis préparé enregistré';
         return;
     }
 
-    if (counter) counter.innerText = `${items.length} colis préparé(s) enregistré(s)`;
+    if (counter) {
+        if (activeDate) {
+            counter.innerText = `${items.length} colis préparé(s) le ${formatFrenchDate(activeDate)}`;
+        } else {
+            counter.innerText = `${items.length} colis préparé(s) enregistré(s)`;
+        }
+    }
+
+    const todayStr = getTodayDateStr();
 
     items.forEach(o => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-surface-container-low transition-colors";
         
-        const dateStr = o.packed_at ? new Date(o.packed_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : (o.created_at ? new Date(o.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'Aujourd\'hui');
+        const rawDate = o.packed_at || o.created_at;
+        let dateStr = 'Aujourd\'hui';
+        if (rawDate) {
+            try {
+                const d = new Date(rawDate);
+                const itemDateStr = d.toLocaleDateString('en-CA');
+                const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                if (itemDateStr === todayStr) {
+                    dateStr = timeStr;
+                } else {
+                    const shortDate = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                    dateStr = `${shortDate} ${timeStr}`;
+                }
+            } catch (err) {
+                dateStr = String(rawDate).substring(11, 19) || 'Pointé';
+            }
+        }
+        
         const itemsSummary = (o.items && o.items.length > 0) ? o.items.map(it => `${it.quantity}x ${it.product_sku}`).join(', ') : 'Contenu standard';
 
         tr.innerHTML = `
@@ -520,17 +612,31 @@ function renderHistoryTable(items) {
 
 window.filterHistoryTable = function() {
     const q = (document.getElementById('history-search')?.value || '').toLowerCase().trim();
+    const dateVal = document.getElementById('packer-history-date')?.value || '';
     const items = window.allPackedHistory || [];
-    if (!q) {
-        renderHistoryTable(items);
-        return;
-    }
+
     const filtered = items.filter(o => {
-        return (o.tracking_number && o.tracking_number.toLowerCase().includes(q)) ||
-               (o.client_name && o.client_name.toLowerCase().includes(q)) ||
-               (o.city && o.city.toLowerCase().includes(q));
+        // Match date if specified
+        if (dateVal) {
+            const orderDate = getOrderDateStr(o);
+            if (orderDate !== dateVal) return false;
+        }
+
+        // Match search query if specified
+        if (q) {
+            const matchTracking = o.tracking_number && o.tracking_number.toLowerCase().includes(q);
+            const matchClient = o.client_name && o.client_name.toLowerCase().includes(q);
+            const matchCity = o.city && o.city.toLowerCase().includes(q);
+            const matchItems = o.items && o.items.some(it => it.product_sku && it.product_sku.toLowerCase().includes(q));
+            if (!matchTracking && !matchClient && !matchCity && !matchItems) {
+                return false;
+            }
+        }
+
+        return true;
     });
-    renderHistoryTable(filtered);
+
+    renderHistoryTable(filtered, dateVal);
 };
 
 // Excel Export for Packer Production History
@@ -547,8 +653,8 @@ window.exportPackingHistoryToExcel = function() {
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.table_to_sheet(table);
         XLSX.utils.book_append_sheet(wb, ws, "Colis_Prepares");
-        const today = new Date().toISOString().split('T')[0];
-        XLSX.writeFile(wb, `NYRIX_Packer_Production_${today}.xlsx`);
+        const dateVal = document.getElementById('packer-history-date')?.value || getTodayDateStr();
+        XLSX.writeFile(wb, `NYRIX_Packer_Production_${dateVal}.xlsx`);
     } catch (e) {
         console.error("Export error:", e);
         alert("Erreur lors de l'exportation Excel: " + e.message);
@@ -557,12 +663,57 @@ window.exportPackingHistoryToExcel = function() {
 
 // Print Function for Packer Manifest
 window.printPackingHistory = function() {
+    const dateVal = document.getElementById('packer-history-date')?.value;
+    const printDateEl = document.getElementById('print-doc-date');
+    const printTotalEl = document.getElementById('print-doc-total');
+    
+    // Check if empty message row is showing
+    const isEmpty = document.querySelector('#packer-history-tbody td[colspan="6"]');
+    const rowCount = document.querySelectorAll('#packer-history-tbody tr').length;
+    const count = isEmpty ? 0 : rowCount;
+
+    if (printDateEl) {
+        if (dateVal) {
+            const todayStr = getTodayDateStr();
+            if (dateVal === todayStr) {
+                printDateEl.innerText = `Aujourd'hui (${formatFrenchDate(dateVal)})`;
+            } else {
+                printDateEl.innerText = formatFrenchDate(dateVal);
+            }
+        } else {
+            printDateEl.innerText = 'Historique Général';
+        }
+    }
+
+    if (printTotalEl) {
+        printTotalEl.innerText = `${count} colis prêt(s)`;
+    }
+
     window.print();
 };
+
+// Live Background Heartbeat for Station Tablet (Continuous Sync)
+let packerLiveSyncInterval = null;
+
+function initPackerLiveSync() {
+    if (packerLiveSyncInterval) clearInterval(packerLiveSyncInterval);
+    packerLiveSyncInterval = setInterval(async () => {
+        try {
+            if (window.currentPackerTab === 'preparer') {
+                await loadOrdersToPack();
+            } else if (window.currentPackerTab === 'receptionner') {
+                await loadTransfers();
+            }
+        } catch (e) {
+            console.warn("Packer background poll note:", e);
+        }
+    }, 15000); // Polls every 15s so new orders appear immediately
+}
 
 // Initial Execution on Load
 window.onload = async function() {
     await loadTransfers();
     await loadOrdersToPack();
     await loadPackingHistory();
+    initPackerLiveSync();
 };

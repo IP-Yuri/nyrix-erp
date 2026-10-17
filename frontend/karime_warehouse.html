@@ -68,29 +68,77 @@
         input[type=number] { -moz-appearance: textfield; }
 
         @media print {
-            /* 1. Strictly hide everything outside the Bordereau table */
-            aside, 
-            header, 
-            #modal-discrepancy, 
-            #modal-returns, 
-            #modal-ledger,
-            #view-inbound, 
-            #view-operations, 
-            .no-print,
-            #view-prepares > div:first-child,
-            #view-prepares > div.grid,
-            #searchPreparesInput,
-            #prepares-pagination-container,
-            #prepares-footer-count {
+            /* ============================================================ */
+            /* 1. RECEIPT PRINTING MODE (body.printing-receipt)            */
+            /* ============================================================ */
+            body.printing-receipt {
+                background: white !important;
+                color: #0f172a !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Hide everything that is a direct child of body EXCEPT the receipt modal */
+            body.printing-receipt > :not(#modal-print-cash-receipt) {
                 display: none !important;
             }
 
-            @page {
-                size: A4 landscape;
-                margin: 8mm 10mm;
+            body.printing-receipt #modal-print-cash-receipt {
+                display: block !important;
+                position: static !important;
+                inset: auto !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 auto !important;
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 650px !important;
+                height: auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow: visible !important;
             }
 
-            html, body {
+            body.printing-receipt #modal-print-cash-receipt > div {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 auto !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+                background: transparent !important;
+            }
+
+            body.printing-receipt #modal-print-cash-receipt .no-print {
+                display: none !important;
+            }
+
+            body.printing-receipt #cash-receipt-printable-content {
+                border: 2px solid #0f172a !important;
+                border-radius: 12px !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 650px !important;
+                margin: 0 auto !important;
+                padding: 24px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                background: white !important;
+            }
+
+            /* ============================================================ */
+            /* 2. MANIFEST PRINTING MODE (body:not(.printing-receipt))     */
+            /* ============================================================ */
+            body:not(.printing-receipt) {
                 background: white !important;
                 color: #0f172a !important;
                 margin: 0 !important;
@@ -101,20 +149,39 @@
                 print-color-adjust: exact !important;
             }
 
-            /* Unset sidebar layout offset */
-            div.pl-\[240px\] {
+            body:not(.printing-receipt) aside, 
+            body:not(.printing-receipt) header, 
+            body:not(.printing-receipt) #modal-discrepancy, 
+            body:not(.printing-receipt) #modal-returns, 
+            body:not(.printing-receipt) #modal-ledger,
+            body:not(.printing-receipt) #modal-cash-invoices,
+            body:not(.printing-receipt) #modal-print-cash-receipt,
+            body:not(.printing-receipt) #modal-digylog-track,
+            body:not(.printing-receipt) #view-inbound, 
+            body:not(.printing-receipt) #view-operations, 
+            body:not(.printing-receipt) .no-print,
+            body:not(.printing-receipt) #view-prepares > div:first-child,
+            body:not(.printing-receipt) #view-prepares > div.grid,
+            body:not(.printing-receipt) #searchPreparesInput,
+            body:not(.printing-receipt) #prepares-pagination-container,
+            body:not(.printing-receipt) #prepares-footer-count {
+                display: none !important;
+            }
+
+            body:not(.printing-receipt) div.pl-\[240px\] {
                 padding-left: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
+                min-height: 0 !important;
             }
 
-            main {
+            body:not(.printing-receipt) main {
                 padding-top: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
             }
 
-            #view-prepares {
+            body:not(.printing-receipt) #view-prepares {
                 display: block !important;
                 padding: 0 !important;
                 margin: 0 !important;
@@ -122,7 +189,7 @@
                 width: 100% !important;
             }
 
-            #view-prepares section {
+            body:not(.printing-receipt) #view-prepares section {
                 border: none !important;
                 box-shadow: none !important;
                 padding: 0 !important;
@@ -132,7 +199,7 @@
             }
 
             /* Official clean document header printed at the top of the table */
-            .print-manifest-header {
+            body:not(.printing-receipt) .print-manifest-header {
                 display: flex !important;
                 justify-content: space-between !important;
                 align-items: flex-end !important;
@@ -141,7 +208,7 @@
                 border-bottom: 2px solid #0f172a !important;
             }
 
-            .print-manifest-signatures {
+            body:not(.printing-receipt) .print-manifest-signatures {
                 display: grid !important;
                 page-break-inside: avoid !important;
             }
@@ -231,15 +298,19 @@
 
                 <span class="text-[11px] font-bold uppercase text-slate-400 tracking-wider block px-space-xs mt-6 mb-2">Actions &amp; Contrôles</span>
                 <nav class="flex flex-col gap-1">
-                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.openModal('modal-returns')">
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg cursor-pointer" onclick="window.openCashInvoicesModal()">
+                        <span class="material-symbols-outlined text-[19px] text-emerald-600">receipt_long</span>
+                        <span>Factures Livre de Caisse</span>
+                    </button>
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg cursor-pointer" onclick="window.openModal('modal-returns')">
                         <span class="material-symbols-outlined text-[19px] text-indigo-600">assignment_return</span>
                         <span>Contrôle des Retours</span>
                     </button>
-                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.openModal('modal-ledger')">
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg cursor-pointer" onclick="window.openModal('modal-ledger')">
                         <span class="material-symbols-outlined text-[19px] text-slate-500 group-hover:text-slate-700">history</span>
                         <span>Historique (Ledger)</span>
                     </button>
-                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg" onclick="window.syncCarrier(this)">
+                    <button type="button" class="group flex items-center gap-2.5 w-full text-left px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors border-l-4 border-transparent rounded-r-lg cursor-pointer" onclick="window.syncCarrier(this)">
                         <span class="material-symbols-outlined text-[19px] text-brand-600">cloud_sync</span>
                         <span>Sync Transporteur</span>
                     </button>
@@ -275,6 +346,10 @@
                 <span id="breadcrumb-active" class="font-semibold text-slate-800">Opérations Quai &amp; Expéditions</span>
             </div>
             <div class="flex items-center gap-3">
+                <button id="header-btn-sync" type="button" onclick="window.syncCarrier(this)" class="inline-flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-colors cursor-pointer" title="Synchroniser les commandes réelles depuis Google Sheets et DigyLog">
+                    <span class="material-symbols-outlined text-[16px]">sync</span>
+                    <span>Synchroniser Données Réelles</span>
+                </button>
                 <div class="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span>Terminal Quai #04 Actif</span>
@@ -293,6 +368,9 @@
         <!-- STATE 1: TABLEAU DE BORD DE RÉCEPTION INBOUND -->
         <!-- ========================================== -->
         <div id="view-inbound" class="hidden flex flex-col w-full max-w-7xl mx-auto px-6 py-6 pb-12">
+            <!-- Top Priority Cancellation Alert Container (Option 1: Demande d'annulation d'Othmane) -->
+            <div id="inbound-cancellation-alert-container" class="hidden flex flex-col gap-3 mb-6"></div>
+
             <!-- Top Operational Banner / Arrival Dashboard Card -->
             <div class="w-full bg-white rounded-xl shadow-xs border border-slate-200 p-6 mb-6">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
@@ -303,19 +381,18 @@
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">Tableau de Bord de Réception</h1>
-                                <span id="inbound-arrival-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                <span id="inbound-arrival-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                                     <span class="material-symbols-outlined text-[14px]">local_shipping</span>
-                                    Arrivage #ARR-2025-098 • Quai Tit Mellil Quai A-04
+                                    Quai Tit Mellil • Quai A-04
                                 </span>
                             </div>
                             <div class="flex items-center gap-2 mt-1 text-xs">
                                 <span class="relative flex h-2 w-2">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-slate-400"></span>
                                 </span>
-                                <span class="text-emerald-700 font-semibold">En attente de pointage physique &amp; déchargement</span>
+                                <span class="text-slate-600 font-semibold" id="inbound-status-text">Contrôle des réceptions quai</span>
                                 <span class="text-slate-300">•</span>
-                                <span class="text-slate-500">Arrivée quai: Aujourd'hui</span>
+                                <span class="text-slate-500">Poste Quai A-04</span>
                             </div>
                         </div>
                     </div>
@@ -337,17 +414,17 @@
                     <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
                         <span class="material-symbols-outlined text-[15px] text-brand-600">corporate_fare</span>
                         <span class="text-slate-400">Fournisseur:</span>
-                        <span class="font-bold text-slate-800" id="inbound-supplier">Global Trade Logistics SARL</span>
+                        <span class="font-bold text-slate-800" id="inbound-supplier">—</span>
                     </div>
                     <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
                         <span class="material-symbols-outlined text-[15px] text-brand-600">receipt_long</span>
                         <span class="text-slate-400">BL / Facture:</span>
-                        <span class="font-mono font-bold text-slate-800" id="inbound-invoice-ref">FAC-2025-0984</span>
+                        <span class="font-mono font-bold text-slate-800" id="inbound-invoice-ref">—</span>
                     </div>
                     <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
                         <span class="material-symbols-outlined text-[15px] text-brand-600">package_2</span>
                         <span class="text-slate-400">Articles / Lignes:</span>
-                        <span class="font-bold text-emerald-700" id="inbound-items-count">0 lignes</span>
+                        <span class="font-bold text-slate-600" id="inbound-items-count">0 lignes</span>
                     </div>
                     <div class="inline-flex items-center gap-1.5 font-medium text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs sm:ml-auto">
                         <span class="material-symbols-outlined text-[15px] text-slate-400">badge</span>
@@ -362,15 +439,16 @@
                         <thead>
                             <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                                 <th class="py-2.5 px-4">SKU</th>
-                                <th class="py-2.5 px-4 min-w-[240px]">Désignation &amp; Spécifications</th>
+                                <th class="py-2.5 px-4 min-w-[220px]">Désignation &amp; Spécifications</th>
                                 <th class="py-2.5 px-4 text-right">Quantité Importée</th>
                                 <th class="py-2.5 px-4">Conditionnement</th>
                                 <th class="py-2.5 px-4 text-center">Statut Physique</th>
+                                <th class="py-2.5 px-4 text-center">Écart Quai</th>
                             </tr>
                         </thead>
                         <tbody id="inbound-table-body" class="divide-y divide-slate-200 text-slate-700">
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-slate-400 italic">Aucun arrivage en attente de vérification physique.</td>
+                                <td colspan="6" class="py-8 text-center text-slate-400 italic">Aucun arrivage en attente de vérification physique.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -396,6 +474,44 @@
                             <span>Signaler un manque</span>
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Historique Récent des Réceptions Quai & Rollback (Garde-fou B) -->
+            <div class="w-full bg-white rounded-xl shadow-xs border border-slate-200 p-6">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700">
+                            <span class="material-symbols-outlined text-[20px]">history_toggle_off</span>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">Dernières Réceptions Quai &amp; Historique</h2>
+                            <p class="text-[11px] text-slate-500">Contrôle interne et possibilité d'annuler une validation quai erronée (Garde-fou B)</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="window.loadInboundHistory()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer">
+                        <span class="material-symbols-outlined text-[15px]">refresh</span>
+                        <span>Actualiser</span>
+                    </button>
+                </div>
+                <div class="overflow-x-auto rounded-lg border border-slate-200 mt-4">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-2.5 px-4">BL / Facture</th>
+                                <th class="py-2.5 px-4">Fournisseur</th>
+                                <th class="py-2.5 px-4">Date Réception</th>
+                                <th class="py-2.5 px-4 text-right">Volume</th>
+                                <th class="py-2.5 px-4 text-center">Statut Quai</th>
+                                <th class="py-2.5 px-4 text-center">Actions Contrôle</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inbound-history-table-body" class="divide-y divide-slate-200 text-slate-700">
+                            <tr>
+                                <td colspan="6" class="py-6 text-center text-slate-400 italic">Chargement de l'historique des réceptions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -446,7 +562,17 @@
                     </div>
 
                     <!-- Metric micro-badges -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <!-- 10-minute auto-sync timer badge -->
+                        <div class="inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1.5 rounded-lg text-xs shadow-2xs" id="auto-sync-status-badge" title="Synchronisation automatique toutes les 10 minutes">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[11px] text-slate-500 font-medium">Auto-sync :</span>
+                            <span id="auto-sync-countdown" class="font-mono font-bold text-slate-800">10:00</span>
+                        </div>
+                        <button type="button" onclick="window.syncCarrier(this)" class="inline-flex items-center gap-1.5 bg-brand-50 hover:bg-brand-100 border border-brand-200 text-brand-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs" title="Synchroniser immédiatement les commandes réelles">
+                            <span class="material-symbols-outlined text-[16px] text-brand-600">cloud_sync</span>
+                            <span>Synchroniser Réel</span>
+                        </button>
                         <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-center min-w-[85px]">
                             <span class="block text-[10px] font-bold uppercase text-slate-400">Total Jour</span>
                             <span id="metric-total-orders" class="font-bold text-xs text-slate-800 num-tabular">0 commandes</span>
@@ -454,10 +580,6 @@
                         <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-center min-w-[85px]">
                             <span class="block text-[10px] font-bold uppercase text-slate-400">En Transit</span>
                             <span id="metric-transit-orders" class="font-bold text-xs text-brand-700 num-tabular">0 colis</span>
-                        </div>
-                        <div class="bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-center min-w-[85px]">
-                            <span class="block text-[10px] font-bold uppercase text-slate-400">Taux Succès</span>
-                            <span class="font-bold text-xs text-emerald-700 num-tabular">98.6%</span>
                         </div>
                     </div>
                 </div>
@@ -469,6 +591,7 @@
                         <button type="button" class="filter-pill active px-3 py-1.5 rounded-lg font-bold bg-white text-slate-900 border border-slate-200 shadow-2xs transition-all" data-filter="all">Tous (0)</button>
                         <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="B2B">B2B (0)</button>
                         <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="B2C">B2C (0)</button>
+                        <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="au_hub_network">Au Hub Network (0)</button>
                         <button type="button" class="filter-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900 transition-all" data-filter="encours">En cours (0)</button>
                     </div>
 
@@ -486,8 +609,12 @@
                             <label class="text-[11px] text-slate-500 font-semibold mr-1.5" for="dateEndInput">Au</label>
                             <input class="bg-transparent text-xs font-mono text-slate-800 focus:outline-none cursor-pointer w-28" id="dateEndInput" type="date">
                         </div>
+                        <!-- Date Shortcuts -->
+                        <button type="button" id="btn-date-today" onclick="window.setDateFilterToday()" class="h-8 px-2.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer" title="Afficher uniquement les commandes d'aujourd'hui">Aujourd'hui</button>
+                        <button type="button" id="btn-date-latest" onclick="window.setDateFilterLatest()" class="h-8 px-2.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-2xs transition-colors cursor-pointer" title="Afficher les commandes du dernier arrivage (dernière date enregistrée)">Dernier arrivage</button>
+                        <button type="button" onclick="window.clearDateFilter()" class="h-8 px-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 rounded-lg text-xs font-medium shadow-2xs transition-colors cursor-pointer" title="Afficher toutes les dates"><span class="material-symbols-outlined text-[16px] leading-none">restart_alt</span></button>
                         <!-- Search Bar -->
-                        <div class="relative flex-1 min-w-[200px] md:w-64">
+                        <div class="relative flex-1 min-w-[200px] md:w-60">
                             <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-slate-400">search</span>
                             <input id="orderSearchInput" class="w-full h-8 pl-8 pr-3 text-xs bg-white text-slate-900 placeholder:text-slate-400 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-brand-500 shadow-2xs" placeholder="Rechercher N° commande, client ou ville..." type="text">
                         </div>
@@ -648,7 +775,13 @@
                                 </div>
                                 <p class="text-xs text-slate-500 mt-0.5">Enregistrement des recettes espèces remises par les livreurs au retour de tournée</p>
                             </div>
-                            <span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">COD / Espèces</span>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="window.openCashInvoicesModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-all cursor-pointer shadow-2xs" title="Consulter toutes les factures et reçus du livre de caisse">
+                                    <span class="material-symbols-outlined text-[16px]">receipt_long</span>
+                                    <span>Voir Factures</span>
+                                </button>
+                                <span class="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">COD / Espèces</span>
+                            </div>
                         </div>
 
                         <!-- Cash Collection Form -->
@@ -657,13 +790,8 @@
                             <div class="flex flex-col gap-1">
                                 <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="livreurInput">Nom du Livreur</label>
                                 <div class="relative">
-                                    <input class="w-full h-9 px-3 pr-8 rounded-lg bg-slate-50 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 font-medium" id="livreurInput" list="livreursList" placeholder="Sélectionnez ou recherchez le livreur..." value="Karim Benjelloun — Tournée Casablanca Centre">
-                                    <datalist id="livreursList">
-                                        <option value="Karim Benjelloun — Tournée Casablanca Centre"></option>
-                                        <option value="Youssef Amrani — Tournée Mohammedia"></option>
-                                        <option value="Tariq Mansouri — Tournée Ain Sebaa"></option>
-                                        <option value="Mehdi El Fassi — Tournée Rabat Sud"></option>
-                                    </datalist>
+                                    <input class="w-full h-9 px-3 pr-8 rounded-lg bg-slate-50 text-slate-900 text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 font-medium" id="livreurInput" list="livreursList" placeholder="Sélectionnez ou recherchez le livreur...">
+                                    <datalist id="livreursList"></datalist>
                                     <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-[17px]">person</span>
                                 </div>
                             </div>
@@ -690,7 +818,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div class="flex flex-col gap-1">
                                     <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="bordereauInput">N° Tournée / Bordereau</label>
-                                    <input class="w-full h-9 px-3 rounded-lg bg-slate-50 text-slate-900 text-xs font-mono font-bold uppercase focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 shadow-2xs" id="bordereauInput" type="text" value="DIG-TR-88219">
+                                    <input class="w-full h-9 px-3 rounded-lg bg-slate-50 text-slate-900 text-xs font-mono font-bold uppercase focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500 border border-slate-200 shadow-2xs" id="bordereauInput" type="text" placeholder="ex: DIG-TR-88219">
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <label class="text-[11px] uppercase tracking-wider text-slate-500 font-bold" for="modeReglementSelect">Mode de Règlement</label>
@@ -711,7 +839,7 @@
                                     <span class="text-[11px] text-emerald-700 font-bold">Comptage physique validé</span>
                                 </div>
                                 <div class="relative">
-                                    <input class="w-full h-11 pl-3 pr-16 text-xl font-extrabold num-tabular text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" id="montantInput" step="10.00" type="number" value="4850.00">
+                                    <input class="w-full h-11 pl-3 pr-16 text-xl font-extrabold num-tabular text-slate-900 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-1 focus:ring-emerald-500" id="montantInput" step="10.00" type="number" placeholder="0.00">
                                     <span class="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-slate-400">MAD</span>
                                 </div>
                             </div>
@@ -738,6 +866,11 @@
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col gap-1.5 text-xs" id="recentCashList">
                             <span class="text-slate-400 italic text-center py-2">Aucun encaissement pour le moment.</span>
                         </div>
+
+                        <button type="button" onclick="window.openCashInvoicesModal()" class="w-full text-center text-xs text-emerald-700 hover:text-emerald-900 font-bold hover:underline py-1 transition-colors cursor-pointer flex items-center justify-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px]">list_alt</span>
+                            <span>Consulter tout le journal des factures de caisse →</span>
+                        </button>
                     </div>
                 </section>
             </div>
@@ -773,6 +906,7 @@
                         <option value="all">Tous transporteurs</option>
                         <option value="Digylog Express">Digylog Express (B2C)</option>
                         <option value="Digylog Fret">Digylog Fret (B2B)</option>
+                        <option value="Au Hub Network">Au Hub Network</option>
                     </select>
                     <button type="button" onclick="window.exportPreparedOrdersToExcel()" class="h-9 px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer">
                         <span class="material-symbols-outlined text-[17px]">download</span>
@@ -1134,6 +1268,188 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL 5: Factures & Quittances du Livre de Caisse -->
+    <div id="modal-cash-invoices" class="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl p-6 flex flex-col gap-4 max-h-[90vh]">
+            <div class="flex items-start justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-base font-extrabold text-slate-900">Factures &amp; Reçus du Livre de Caisse</h3>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wide">COD &amp; Tournées</span>
+                        </div>
+                        <p class="text-xs text-slate-500">Registre officiel des quittances d'encaissement remises par les livreurs au quai</p>
+                    </div>
+                </div>
+                <button type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100" onclick="window.closeModal('modal-cash-invoices')">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <!-- KPI Mini Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Total Encaissé</span>
+                    <span id="cash-modal-kpi-total" class="text-base font-black text-emerald-700 font-mono">0.00 MAD</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Nb. Quittances</span>
+                    <span id="cash-modal-kpi-count" class="text-base font-black text-slate-800 font-mono">0 factures</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Espèces (Cash)</span>
+                    <span id="cash-modal-kpi-especes" class="text-base font-black text-slate-800 font-mono">0.00 MAD</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Virements</span>
+                    <span id="cash-modal-kpi-virement" class="text-base font-black text-blue-700 font-mono">0.00 MAD</span>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs">
+                <div class="relative flex-1 min-w-[180px]">
+                    <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[17px] text-slate-400">search</span>
+                    <input id="cash-modal-search" class="w-full h-8 pl-8 pr-3 text-xs bg-white text-slate-900 placeholder:text-slate-400 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-2xs" placeholder="Rechercher livreur, bordereau, n° reçu..." type="text">
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg px-2 h-8 shadow-2xs">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Du</span>
+                        <input id="cash-modal-date-start" type="date" class="bg-transparent text-xs font-mono text-slate-800 focus:outline-none cursor-pointer w-24">
+                    </div>
+                    <div class="flex items-center bg-white border border-slate-200 rounded-lg px-2 h-8 shadow-2xs">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase mr-1">Au</span>
+                        <input id="cash-modal-date-end" type="date" class="bg-transparent text-xs font-mono text-slate-800 focus:outline-none cursor-pointer w-24">
+                    </div>
+                    <select id="cash-modal-mode-filter" class="h-8 px-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-2xs cursor-pointer">
+                        <option value="ALL">Tous modes</option>
+                        <option value="ESPECES">Espèces</option>
+                        <option value="VIREMENT">Virement</option>
+                    </select>
+                    <button type="button" onclick="window.exportCashInvoicesToExcel()" class="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer">
+                        <span class="material-symbols-outlined text-[15px]">download</span>
+                        <span>Excel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Invoices Table -->
+            <div class="overflow-y-auto flex-1 rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 uppercase font-bold tracking-wider border-b border-slate-200 sticky top-0">
+                            <th class="py-2.5 px-3">Réf. Quittance</th>
+                            <th class="py-2.5 px-3">Date &amp; Heure</th>
+                            <th class="py-2.5 px-3">Livreur &amp; Tournée</th>
+                            <th class="py-2.5 px-3">Bordereau</th>
+                            <th class="py-2.5 px-3">Mode</th>
+                            <th class="py-2.5 px-3 text-right">Montant Encaissé</th>
+                            <th class="py-2.5 px-3 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cash-modal-tbody" class="divide-y divide-slate-200 text-slate-700">
+                        <tr>
+                            <td colspan="7" class="py-8 text-center text-slate-400 italic">Chargement des factures de caisse...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <span id="cash-modal-footer-count" class="text-xs text-slate-500 font-medium">0 quittance affichée</span>
+                <button type="button" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer" onclick="window.closeModal('modal-cash-invoices')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 6: Reçu / Facture de Caisse Imprimable -->
+    <div id="modal-print-cash-receipt" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 flex flex-col gap-4 max-h-[90vh]">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 no-print">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Aperçu Facture / Quittance de Caisse</span>
+                <button type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer" onclick="window.closeModal('modal-print-cash-receipt')">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <!-- Receipt Card Document -->
+            <div id="cash-receipt-printable-content" class="bg-white p-5 rounded-xl border border-slate-200 flex flex-col gap-4 text-xs font-sans text-slate-800">
+                <!-- Header -->
+                <div class="flex items-start justify-between pb-3 border-b-2 border-slate-900">
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-lg font-black tracking-tight text-slate-900">NYRIX</span>
+                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-white">LOGISTICS</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Centre Logistique &amp; Quai Tit Mellil, Casablanca</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-900">REÇU DE CAISSE (COD)</div>
+                        <div id="receipt-doc-ref" class="text-xs font-mono font-bold text-brand-700">FAC-CAISSE-2026-0001</div>
+                        <div id="receipt-doc-date" class="text-[10px] text-slate-400 mt-0.5">17/10/2026 10:30</div>
+                    </div>
+                </div>
+
+                <!-- Driver & Slip Details Box -->
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1.5">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Livreur :</span>
+                        <strong id="receipt-doc-driver" class="text-slate-900">--</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">N° Bordereau / Tournée :</span>
+                        <span id="receipt-doc-slip" class="font-mono font-bold text-slate-800">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Mode de Règlement :</span>
+                        <span id="receipt-doc-mode" class="font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">Espèces</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500 font-medium">Superviseur Réceptionnaire :</span>
+                        <span class="font-medium text-slate-700">Karime (Poste Quai #04)</span>
+                    </div>
+                </div>
+
+                <!-- Financial Highlight Box -->
+                <div class="p-4 rounded-xl bg-emerald-50 border-2 border-emerald-500/30 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 block">Montant Total Encaissé</span>
+                        <span class="text-[10px] text-emerald-700">Comptage physique &amp; contrôle conformité validé</span>
+                    </div>
+                    <div id="receipt-doc-amount" class="text-2xl font-black font-mono text-emerald-800">
+                        0.00 MAD
+                    </div>
+                </div>
+
+                <!-- Signatures Row -->
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+                    <div class="border border-dashed border-slate-300 rounded-lg p-2.5 text-center min-h-[70px] flex flex-col justify-between">
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Émargement Livreur</span>
+                        <span class="text-[9px] text-slate-400 italic">Mention bon pour versement</span>
+                    </div>
+                    <div class="border border-dashed border-slate-300 rounded-lg p-2.5 text-center min-h-[70px] flex flex-col justify-between">
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Visa Caisse / Karime</span>
+                        <span class="text-[9px] text-emerald-700 font-bold">✓ Encaissé au Quai NYRIX</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="flex items-center justify-end gap-2 pt-1 no-print">
+                <button type="button" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs cursor-pointer" onclick="window.closeModal('modal-print-cash-receipt')">Fermer</button>
+                <button type="button" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer" onclick="window.printCashReceipt()">
+                    <span class="material-symbols-outlined text-[16px]">print</span>
+                    <span>Imprimer la Quittance</span>
+                </button>
+        </div>
+    </div>
+
+    <!-- Toast Feedback Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>

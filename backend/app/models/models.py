@@ -44,10 +44,13 @@ class StockActionEnum(str, enum.Enum):
     QUARANTINE = "QUARANTINE"
     RETURN_RESTORED = "RETURN_RESTORED"
     DISCREPANCY_APPROVED = "DISCREPANCY_APPROVED"
+    IMPORT_CANCELLED = "IMPORT_CANCELLED"
 
 class ShipmentStatusEnum(str, enum.Enum):
     EN_ATTENTE_RECEPTION = "EN_ATTENTE_RECEPTION"
     RECEPTIONNE = "RECEPTIONNE"
+    DEMANDE_ANNULATION = "DEMANDE_ANNULATION"
+    ANNULEE = "ANNULEE"
 
 class DiscrepancyReasonEnum(str, enum.Enum):
     DOUANE = "DOUANE"
@@ -95,6 +98,7 @@ class Order(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     packed_at = Column(DateTime, nullable=True)
     packed_by = Column(String(255), nullable=True)
+    carrier = Column(String(255), nullable=True, default="Digylog Express")
 
     items = relationship("OrderItem", back_populates="order")
 
@@ -152,6 +156,11 @@ class InboundShipment(Base):
     status = Column(Enum(ShipmentStatusEnum), nullable=False)
     items_json = Column(JSON, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    received_at = Column(DateTime, nullable=True)
+    received_by = Column(String(255), nullable=True)
+    cancellation_reason = Column(String(500), nullable=True)
+    cancellation_requested_by = Column(String(255), nullable=True)
+    cancellation_requested_at = Column(DateTime, nullable=True)
 
 class ProductReturn(Base):
     __tablename__ = "product_returns"

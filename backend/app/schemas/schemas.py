@@ -62,6 +62,7 @@ class OrderLogisticsOut(BaseModel):
     created_at: Optional[datetime] = None
     packed_at: Optional[datetime] = None
     packed_by: Optional[str] = None
+    carrier: Optional[str] = "Digylog Express"
     items: List[OrderItemLogisticsOut] = []
 
     model_config = {"from_attributes": True}
@@ -102,9 +103,15 @@ class StockLedgerOut(BaseModel):
 class InboundShipmentOut(BaseModel):
     id: str
     invoice_ref: str
+    supplier_name: Optional[str] = None
     status: str
     items_json: Any
-    created_at: datetime
+    created_at: Optional[datetime] = None
+    received_at: Optional[datetime] = None
+    received_by: Optional[str] = None
+    cancellation_reason: Optional[str] = None
+    cancellation_requested_by: Optional[str] = None
+    cancellation_requested_at: Optional[datetime] = None
     
     model_config = {"from_attributes": True}
 
@@ -139,7 +146,12 @@ class InboundInvoiceOut(BaseModel):
     invoice_ref: str
     supplier_name: Optional[str] = None
     status: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
+    received_at: Optional[datetime] = None
+    received_by: Optional[str] = None
+    cancellation_reason: Optional[str] = None
+    cancellation_requested_by: Optional[str] = None
+    cancellation_requested_at: Optional[datetime] = None
     total_skus: int
     total_quantity: int
     total_amount_mad: float

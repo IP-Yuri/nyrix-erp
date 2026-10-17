@@ -26,8 +26,13 @@ def fetch_confirmed_orders(sheet_id: Optional[str] = None) -> List[Dict[str, Any
 
     reader = csv.DictReader(StringIO(csv_text))
     confirmed_orders = []
+    last_seen_date = ""
 
     for row in reader:
+        raw_date = (row.get("date") or "").strip()
+        if raw_date:
+            last_seen_date = raw_date
+
         confirmation = (row.get("Confirmation") or "").strip()
         if confirmation == "Envoyer au SL":
             num = (row.get("Num") or "").strip()
@@ -48,7 +53,7 @@ def fetch_confirmed_orders(sheet_id: Optional[str] = None) -> List[Dict[str, Any
             except ValueError:
                 price = 0.0
 
-            date_str = (row.get("date") or "").strip()
+            date_str = raw_date or last_seen_date
 
             confirmed_orders.append({
                 "sheet_order_id": num,

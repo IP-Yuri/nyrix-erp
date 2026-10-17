@@ -13,7 +13,7 @@ from backend.app.schemas.schemas import (
     ProductOperationalOut, OrderLogisticsOut, TransferOut, CODCashBookOut, StockLedgerOut
 )
 
-router = APIRouter(prefix="/api/warehouse", tags=["warehouse"], dependencies=[Depends(require_role(["WAREHOUSE"]))])
+router = APIRouter(prefix="/api/warehouse", tags=["warehouse"], dependencies=[Depends(require_role(["WAREHOUSE", "ADMIN"]))])
 
 class TransferReq(BaseModel):
     product_sku: str
@@ -33,31 +33,209 @@ class ReturnReq(BaseModel):
     tracking_number: Optional[str] = None
     reason: Optional[str] = None
 
+from datetime import datetime
+
 class CODReq(BaseModel):
     driver_ref: str
     amount_mad: float
 
+class ProcessCancellationReq(BaseModel):
+    action: str  # "APPROVE" or "REJECT"
+    rejection_reason: Optional[str] = None
+
 @router.get("/inbound")
 def get_inbound(db: Session = Depends(get_db)):
-    shipments = db.query(InboundShipment).filter(InboundShipment.status == ShipmentStatusEnum.EN_ATTENTE_RECEPTION).all()
-    return shipments
+    # Returns active pending receipts and cancellation requests for Karime's dock
+    shipments = db.query(InboundShipment).filter(
+        InboundShipment.status.in_([ShipmentStatusEnum.EN_ATTENTE_RECEPTION, ShipmentStatusEnum.DEMANDE_ANNULATION])
+    ).order_by(InboundShipment.created_at.desc()).all()
+    result = []
+    for s in shipments:
+        result.append({
+            "id": str(s.id),
+            "invoice_ref": s.invoice_ref,
+            "supplier_name": s.supplier_name or "Fournisseur non spécifié",
+            "status": s.status.value if hasattr(s.status, "value") else str(s.status),
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+            "received_at": s.received_at.isoformat() if s.received_at else None,
+            "received_by": s.received_by,
+            "cancellation_reason": s.cancellation_reason,
+            "cancellation_requested_by": s.cancellation_requested_by,
+            "cancellation_requested_at": s.cancellation_requested_at.isoformat() if s.cancellation_requested_at else None,
+            "items_json": s.items_json if isinstance(s.items_json, list) else []
+        })
+    return result
+
+@router.get("/inbound/history")
+def get_inbound_history(db: Session = Depends(get_db)):
+    # Returns recent dock receipts and completed cancellations
+    shipments = db.query(InboundShipment).filter(
+        InboundShipment.status.in_([ShipmentStatusEnum.RECEPTIONNE, ShipmentStatusEnum.ANNULEE])
+    ).order_by(InboundShipment.created_at.desc()).limit(25).all()
+    result = []
+    for s in shipments:
+        result.append({
+            "id": str(s.id),
+            "invoice_ref": s.invoice_ref,
+            "supplier_name": s.supplier_name or "Fournisseur non spécifié",
+            "status": s.status.value if hasattr(s.status, "value") else str(s.status),
+            "created_at": s.created_at.isoformat() if s.created_at else None,
+            "received_at": s.received_at.isoformat() if s.received_at else None,
+            "received_by": s.received_by,
+            "cancellation_reason": s.cancellation_reason,
+            "cancellation_requested_by": s.cancellation_requested_by,
+            "cancellation_requested_at": s.cancellation_requested_at.isoformat() if s.cancellation_requested_at else None,
+            "items_json": s.items_json if isinstance(s.items_json, list) else []
+        })
+    return result
 
 @router.put("/inbound/{id}/verify")
-def verify_inbound(id: str, db: Session = Depends(get_db)):
+def verify_inbound(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     shipment = db.query(InboundShipment).filter(InboundShipment.id == id).first()
     if not shipment:
-        raise HTTPException(status_code=404)
+        raise HTTPException(status_code=404, detail="Arrivage introuvable")
     shipment.status = ShipmentStatusEnum.RECEPTIONNE
+    shipment.received_at = datetime.utcnow()
+    shipment.received_by = current_user.username
     db.commit()
-    return {"status": "success"}
+    return {"status": "success", "received_at": shipment.received_at.isoformat()}
 
 @router.post("/inbound/accept")
-def accept_inbound_latest(db: Session = Depends(get_db)):
+def accept_inbound_latest(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     shipments = db.query(InboundShipment).filter(InboundShipment.status == ShipmentStatusEnum.EN_ATTENTE_RECEPTION).all()
+    now = datetime.utcnow()
     for s in shipments:
         s.status = ShipmentStatusEnum.RECEPTIONNE
+        s.received_at = now
+        s.received_by = current_user.username
     db.commit()
     return {"status": "success", "count": len(shipments)}
+
+@router.post("/inbound/{id}/process-cancellation")
+def process_cancellation(id: str, req: ProcessCancellationReq, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Option 1: Karime approuve ou refuse la demande d'annulation soumise par Othmane avec Stock Guard"""
+    shipment = db.query(InboundShipment).filter(InboundShipment.id == id).first()
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Arrivage introuvable")
+
+    if shipment.status != ShipmentStatusEnum.DEMANDE_ANNULATION:
+        raise HTTPException(status_code=400, detail="Cette facture n'est pas en attente d'annulation conjointe.")
+
+    if req.action.upper() == "REJECT":
+        shipment.status = ShipmentStatusEnum.RECEPTIONNE
+        reason_text = req.rejection_reason.strip() if (req.rejection_reason and req.rejection_reason.strip()) else "Marchandise déjà ventilée ou transférée"
+        shipment.cancellation_reason = f"Refusée par {current_user.username}: {reason_text}"
+        db.commit()
+        return {
+            "status": "success",
+            "action": "REJECTED",
+            "message": f"Demande d'annulation rejetée pour {shipment.invoice_ref}. Le stock physique est maintenu au quai."
+        }
+
+    elif req.action.upper() == "APPROVE":
+        items = shipment.items_json if isinstance(shipment.items_json, list) else []
+        
+        # GARDE-FOU A : Contrôle d'intégrité du stock (Stock Guard)
+        insufficient_stock_errors = []
+        for itm in items:
+            sku = itm.get("sku")
+            qty = int(itm.get("quantity", 0))
+            if not sku or qty <= 0:
+                continue
+            prod = db.query(Product).filter(Product.sku == sku).first()
+            if not prod:
+                insufficient_stock_errors.append(f"Le produit SKU '{sku}' n'existe plus dans le catalogue.")
+            elif prod.global_stock < qty:
+                deficit = qty - prod.global_stock
+                insufficient_stock_errors.append(
+                    f"Produit '{prod.name}' (SKU: {sku}) : Stock quai disponible ({prod.global_stock} U) < Quantité facture ({qty} U). "
+                    f"Il manque {deficit} U (déjà transférées au conditionnement ou sorties). "
+                    f"Veuillez d'abord réintégrer ces {deficit} U au quai."
+                )
+
+        if insufficient_stock_errors:
+            raise HTTPException(
+                status_code=400,
+                detail="Échec du Contrôle d'Intégrité Stock Guard :\n\n" + "\n".join(insufficient_stock_errors)
+            )
+
+        # Application de la déduction de stock et écriture dans le Grand Livre (Garde-fou C)
+        deducted_details = []
+        for itm in items:
+            sku = itm.get("sku")
+            qty = int(itm.get("quantity", 0))
+            if not sku or qty <= 0:
+                continue
+            prod = db.query(Product).filter(Product.sku == sku).first()
+            prod.global_stock -= qty
+
+            # Piste d'audit inviolable : Écriture de contre-passation
+            ledger = StockLedger(
+                product_sku=sku,
+                user_id=str(current_user.id),
+                action=StockActionEnum.IMPORT_CANCELLED,
+                quantity=-qty
+            )
+            db.add(ledger)
+            deducted_details.append({"sku": sku, "deducted": qty, "new_stock": prod.global_stock})
+
+        shipment.status = ShipmentStatusEnum.ANNULEE
+        shipment.cancellation_reason = f"Annulée et validée par {current_user.username} au quai"
+        db.commit()
+
+        return {
+            "status": "success",
+            "action": "APPROVED",
+            "message": f"Annulation de la facture {shipment.invoice_ref} validée par Karime. Les stocks ont été déduits proprement et tracés dans le Grand Livre.",
+            "deducted_details": deducted_details
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Action inconnue. Utilisez 'APPROVE' ou 'REJECT'.")
+
+@router.post("/inbound/{id}/rollback-reception")
+def rollback_reception(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Garde-fou B : Bouton direct pour Karime 'Annuler la réception (Erreur de validation quai)'"""
+    shipment = db.query(InboundShipment).filter(InboundShipment.id == id).first()
+    if not shipment:
+        raise HTTPException(status_code=404, detail="Arrivage introuvable")
+
+    if shipment.status != ShipmentStatusEnum.RECEPTIONNE:
+        raise HTTPException(status_code=400, detail="Seule une facture actuellement au statut 'RECEPTIONNE' peut être remise en attente.")
+
+    items = shipment.items_json if isinstance(shipment.items_json, list) else []
+    
+    # GARDE-FOU A : Stock Guard
+    insufficient_stock_errors = []
+    for itm in items:
+        sku = itm.get("sku")
+        qty = int(itm.get("quantity", 0))
+        if not sku or qty <= 0:
+            continue
+        prod = db.query(Product).filter(Product.sku == sku).first()
+        if not prod:
+            insufficient_stock_errors.append(f"SKU '{sku}' introuvable.")
+        elif prod.global_stock < qty:
+            deficit = qty - prod.global_stock
+            insufficient_stock_errors.append(
+                f"SKU '{sku}' ({prod.name}) : Stock quai ({prod.global_stock} U) < Arrivage ({qty} U). {deficit} U ont déjà bougé vers le packaging."
+            )
+
+    if insufficient_stock_errors:
+        raise HTTPException(
+            status_code=400,
+            detail="Annulation impossible (Stock Guard) :\n" + "\n".join(insufficient_stock_errors)
+        )
+
+    # Remise en attente de pointage au quai
+    shipment.status = ShipmentStatusEnum.EN_ATTENTE_RECEPTION
+    shipment.received_at = None
+    shipment.received_by = None
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": f"Réception {shipment.invoice_ref} remise en attente de pointage quai. Karime peut repointer les cartons ou Othmane peut ajuster la facture."
+    }
 
 @router.get("/inventory", response_model=List[ProductOperationalOut])
 def get_inventory(db: Session = Depends(get_db)):
@@ -163,7 +341,7 @@ def log_cod(req: CODReq, db: Session = Depends(get_db), current_user: User = Dep
 
 @router.get("/cod", response_model=List[CODCashBookOut])
 def list_cod(db: Session = Depends(get_db)):
-    return db.query(CODCashBook).all()
+    return db.query(CODCashBook).order_by(CODCashBook.created_at.desc()).all()
 
 @router.get("/ledger", response_model=List[StockLedgerOut])
 def view_ledger(db: Session = Depends(get_db), sku: str = None):

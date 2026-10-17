@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
@@ -67,13 +67,15 @@ def claim_transfer(id: str, req: TransferClaimReq, db: Session = Depends(get_db)
 
 @router.get("/orders", response_model=List[OrderLogisticsOut])
 def get_orders(db: Session = Depends(get_db)):
-    return db.query(Order).filter(Order.status == OrderStatusEnum.PENDING_PACKING).all()
+    return db.query(Order).options(joinedload(Order.items)).filter(
+        Order.status == OrderStatusEnum.PENDING_PACKING
+    ).order_by(Order.created_at.desc()).all()
 
 @router.get("/history", response_model=List[OrderLogisticsOut])
 def get_packing_history(db: Session = Depends(get_db)):
-    return db.query(Order).filter(
+    return db.query(Order).options(joinedload(Order.items)).filter(
         Order.status.in_([OrderStatusEnum.READY, OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED])
-    ).order_by(Order.packed_at.desc().nullslast(), Order.created_at.desc()).all()
+    ).order_by(Order.packed_at.desc().nullslast(), Order.created_at.desc()).limit(150).all()
 
 @router.put("/orders/{tracking_number}/pack")
 def pack_order(tracking_number: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

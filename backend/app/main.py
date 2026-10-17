@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -5,8 +7,24 @@ from pathlib import Path
 
 from backend.app.api import routes_auth, routes_finance, routes_warehouse, routes_packer, routes_b2b, routes_digylog
 from backend.app.core.dependencies import require_role
+from backend.app.core.database import SessionLocal
+from backend.app.services.matchmaker import sync_b2c_orders
 
-app = FastAPI(title="NYRIX ERP System")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Background sync on startup so today's Google Sheet orders are immediately populated
+    def run_initial_sync():
+        try:
+            with SessionLocal() as db:
+                sync_b2c_orders(db, simulate=False)
+        except Exception as e:
+            print(f"Startup initial sync note: {e}")
+    
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(None, run_initial_sync)
+    yield
+
+app = FastAPI(title="NYRIX ERP System", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
