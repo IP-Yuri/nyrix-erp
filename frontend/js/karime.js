@@ -122,7 +122,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (dateStartInput && !dateStartInput.value) dateStartInput.value = today;
     if (dateEndInput && !dateEndInput.value) dateEndInput.value = today;
     const datePreparesInput = document.getElementById('datePreparesInput');
-    if (datePreparesInput && !datePreparesInput.value) datePreparesInput.value = today;
+    if (datePreparesInput) {
+        datePreparesInput.addEventListener('change', () => {
+            window._userChangedDatePrepares = true;
+        });
+    }
 
     // Initial data loading
     await checkInboundShipments();
@@ -697,6 +701,17 @@ async function loadOrders() {
                 dateEndInput.value = '';
             }
 
+            // Smart Date Handling for Prepared Orders Tab:
+            // If user hasn't manually selected a specific date, default to today IF today has prepared orders;
+            // Otherwise, leave empty so Karime supervisor immediately sees the finished orders ready on dock!
+            const datePreparesInput = document.getElementById('datePreparesInput');
+            if (!window._userChangedDatePrepares && datePreparesInput) {
+                const hasTodayPrepared = window.allOrders.some(o => 
+                    ['READY', 'SHIPPED'].includes(o.status) && window.getPreparedOrderDateStr(o) === today
+                );
+                datePreparesInput.value = hasTodayPrepared ? today : '';
+            }
+
             updateLogisticsMetrics();
             window.renderLogisticsTable();
         }
@@ -841,6 +856,27 @@ window.getOrderCarrier = function(o) {
 window.getOrderDateStr = function(o) {
     if (!o) return '';
     const raw = o.created_at || o.packed_at;
+    if (!raw) return '';
+    try {
+        if (typeof raw === 'string') {
+            if (raw.length >= 10 && raw[4] === '-' && raw[7] === '-') {
+                return raw.substring(0, 10);
+            }
+        }
+        const d = new Date(raw);
+        if (!isNaN(d.getTime())) {
+            return d.toISOString().split('T')[0];
+        }
+    } catch (e) {
+        // fallback
+    }
+    return String(raw).substring(0, 10);
+};
+
+window.getPreparedOrderDateStr = function(o) {
+    if (!o) return '';
+    // For prepared/packed orders, prioritize the actual preparation date (packed_at) over order creation date
+    const raw = o.packed_at || o.created_at;
     if (!raw) return '';
     try {
         if (typeof raw === 'string') {
@@ -1237,16 +1273,40 @@ window.renderPreparedOrdersTable = function() {
 
         let matchesDate = true;
         if (dateFilter) {
-            const orderDate = window.getOrderDateStr(o);
+            const orderDate = window.getPreparedOrderDateStr(o);
             matchesDate = (orderDate === dateFilter);
         }
 
         return matchesQuery && matchesCarrier && matchesDate;
     });
 
+    const kpiSub = document.getElementById('kpi-prepares-sub');
+    if (kpiSub) {
+        if (dateFilter) {
+            kpiSub.innerText = `${filtered.length} affiché(s) pour le ${dateFilter}`;
+        } else {
+            kpiSub.innerText = `Tous les colis disponibles`;
+        }
+    }
+
     tbody.innerHTML = '';
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400 italic">Aucun colis préparé ne correspond à votre filtre.</td></tr>`;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="py-10 text-center text-slate-500">
+                    <div class="flex flex-col items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-3xl text-slate-300">inventory_2</span>
+                        <p class="font-medium text-slate-600">Aucun colis préparé ne correspond à votre filtre${dateFilter ? ` pour la date du ${dateFilter}` : ''}.</p>
+                        ${dateFilter ? `
+                            <button type="button" onclick="window.clearDatePreparesFilter()" class="mt-1 px-3 py-1.5 text-xs font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg transition-colors border border-teal-200 flex items-center gap-1 cursor-pointer">
+                                <span class="material-symbols-outlined text-[15px]">event_busy</span>
+                                <span>Afficher tous les colis prêts (${prepared.length} au total)</span>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
         updatePreparesPaginationUI(0, 15, 1, 0, 0);
         return;
     }
@@ -1362,6 +1422,46 @@ function updatePreparesPaginationUI(totalFiltered, pageSize, totalPages, startIn
     if (btnPrev) btnPrev.disabled = isFirst;
     if (btnNext) btnNext.disabled = isLast;
 }
+
+// Effacer le filtre de date pour afficher tous les colis prêts
+window.clearDatePreparesFilter = function() {
+    const dateInput = document.getElementById('datePreparesInput');
+    if (dateInput) dateInput.value = '';
+    window._userChangedDatePrepares = true;
+    window.currentPreparesPage = 1;
+    window.renderPreparedOrdersTable();
+};
+
+// Bouton dédié de supervision : actualise les commandes emballées/préparées par le packer
+window.refreshPreparedOrders = async function() {
+    const btn = document.getElementById('btn-refresh-prepares');
+    const icon = document.getElementById('icon-refresh-prepares');
+    if (icon) icon.classList.add('animate-spin');
+    if (btn) btn.disabled = true;
+
+    try {
+        const res = await apiCall('/warehouse/orders');
+        if (res && res.status === 200) {
+            const orders = await res.json();
+            window.allOrders = orders || [];
+            window.renderPreparedOrdersTable();
+
+            if (typeof window.showToast === 'function') {
+                window.showToast("Colis Préparés", "Données actualisées depuis le poste emballage", "success");
+            }
+        }
+    } catch (err) {
+        console.error("Erreur actualisation colis préparés:", err);
+        if (typeof window.showToast === 'function') {
+            window.showToast("Erreur", "Impossible d'actualiser les colis", "error");
+        }
+    } finally {
+        setTimeout(() => {
+            if (icon) icon.classList.remove('animate-spin');
+            if (btn) btn.disabled = false;
+        }, 400);
+    }
+};
 
 // Export Excel for Karime Prepared Orders Manifest
 window.exportPreparedOrdersToExcel = function() {
