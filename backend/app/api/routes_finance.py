@@ -9,7 +9,7 @@ from datetime import datetime
 from backend.app.core.database import get_db
 from backend.app.core.dependencies import require_role, get_current_user
 from backend.app.models.models import User, Product, StockLedger, InboundShipment, Discrepancy, Order, ProductReturn
-from backend.app.models.models import StockActionEnum, ShipmentStatusEnum, DiscrepancyStatusEnum
+from backend.app.models.models import StockActionEnum, ShipmentStatusEnum, DiscrepancyStatusEnum, OrderStatusEnum
 from backend.app.schemas.schemas import ProductAdminOut, DiscrepancyOut, InboundInvoiceOut, ProductReturnOut
 from backend.app.services.landed_cost import calculate_landed_costs
 import pandas as pd
@@ -120,7 +120,13 @@ def get_valuation(db: Session = Depends(get_db)):
     total_stock = total_karime + total_packer
     total_val = sum((p.landed_cost * (p.global_stock + p.packer_stock)) for p in products)
     avg_cost = (total_val / total_stock) if total_stock > 0 else 0.0
-    orders_count = db.query(Order).count()
+    
+    # Accurate orders of today calculation
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    orders_today_count = db.query(Order).filter(Order.created_at >= today_start).count()
+    orders_pending_count = db.query(Order).filter(Order.status == OrderStatusEnum.PENDING_PACKING).count()
+    orders_shipped_count = db.query(Order).filter(Order.status.in_([OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED])).count()
+    total_orders_count = db.query(Order).count()
     
     inventory_data = []
     for p in products:
@@ -141,12 +147,21 @@ def get_valuation(db: Session = Depends(get_db)):
             "karime_stock": total_karime,
             "packer_stock": total_packer,
             "avg_unit_cost": round(avg_cost, 2),
-            "orders_today_count": orders_count,
+            "orders_today_count": orders_today_count,
+            "orders_pending_count": orders_pending_count,
+            "orders_shipped_count": orders_shipped_count,
+            "total_orders_count": total_orders_count,
             "last_sync": datetime.utcnow().strftime("%H:%M:%S")
         },
         "invoices": invoices,
         "inventory": inventory_data
     }
+
+@router.post("/sync-orders")
+def sync_orders_for_finance(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Allows Othmane to trigger live matchmaker sync directly from Finance dashboard."""
+    from backend.app.services.matchmaker import sync_b2c_orders
+    return sync_b2c_orders(db, simulate=False)
 
 @router.get("/discrepancies", response_model=List[DiscrepancyOut])
 def list_discrepancies(db: Session = Depends(get_db)):
@@ -175,6 +190,13 @@ def resolve_discrepancy(id: str, action: str, db: Session = Depends(get_db), cur
         disc.status = DiscrepancyStatusEnum.APPROVED
     else:
         disc.status = DiscrepancyStatusEnum.REJECTED
+        ledger = StockLedger(
+            product_sku=disc.product_sku,
+            user_id=str(current_user.id),
+            action=StockActionEnum.DISCREPANCY_REJECTED,
+            quantity=0
+        )
+        db.add(ledger)
         
     db.commit()
     return {"status": "success", "discrepancy_status": disc.status}

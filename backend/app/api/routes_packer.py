@@ -105,6 +105,7 @@ def pack_order(tracking_number: str, db: Session = Depends(get_db), current_user
     order.status = OrderStatusEnum.READY
     order.packed_at = datetime.utcnow()
     order.packed_by = current_user.username
+    order.stock_deducted = True
     db.commit()
     return {
         "status": "success", 

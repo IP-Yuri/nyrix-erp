@@ -44,6 +44,7 @@ class OrderItemLogisticsOut(BaseModel):
     id: str
     product_sku: str
     quantity: int
+    product_name: Optional[str] = None
     
     model_config = {"from_attributes": True}
 

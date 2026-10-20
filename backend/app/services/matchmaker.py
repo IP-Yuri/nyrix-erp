@@ -8,6 +8,7 @@ from backend.app.models.models import (
     PaymentMethodEnum, PaymentStatusEnum
 )
 from backend.app.services.sheets_reader import fetch_confirmed_orders
+from backend.app.services.inventory_service import deduct_order_stock_if_needed
 
 CANONICAL_SKU_MAP = {
     "air-wallet-mag/marron": "AW-MAG-BRN",
@@ -195,6 +196,9 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: Optional[int] = 
             if sheet_id:
                 orders_by_sheet_id[sheet_id] = order
 
+            if order.status in [OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED]:
+                deduct_order_stock_if_needed(db, order, "system-sync")
+
             synced_count += 1
         else:
             # Update order in memory
@@ -215,6 +219,10 @@ def sync_b2c_orders(db: Session, simulate: bool = False, limit: Optional[int] = 
             existing_order.carrier = resolve_carrier_for_order(item, existing_order.tracking_number, existing_order.type)
             if date_str and created_dt:
                 existing_order.created_at = created_dt
+
+            if existing_order.status in [OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED]:
+                deduct_order_stock_if_needed(db, existing_order, "system-sync")
+
             updated_count += 1
 
     # Single atomic commit for entire batch

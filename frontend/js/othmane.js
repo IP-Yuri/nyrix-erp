@@ -472,6 +472,14 @@ window.loadStock = async function() {
             const kpiOrders = document.getElementById('kpi-orders');
             if (kpiOrders) kpiOrders.innerText = (data.kpis.orders_today_count || 0).toLocaleString();
 
+            const kpiOrdersSub = document.getElementById('kpi-orders-sub');
+            if (kpiOrdersSub) {
+                const pend = data.kpis.orders_pending_count || 0;
+                const ship = data.kpis.orders_shipped_count || 0;
+                const tot = data.kpis.total_orders_count || 0;
+                kpiOrdersSub.innerText = `${pend} à préparer • ${ship} expédiées (Total: ${tot})`;
+            }
+
             // Progress bar and details in top KPI 2
             const karimeStock = data.kpis.karime_stock ?? data.kpis.total_global_stock;
             const packerStock = data.kpis.packer_stock ?? 0;
@@ -1361,6 +1369,12 @@ window.renderLedgerTable = function() {
         } else if (action === 'DISCREPANCY_APPROVED') {
             actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>ÉCART VALIDÉ</span>`;
             qtyDisplay = `<span class="font-bold text-amber-700 text-xs num-tabular">${entry.quantity > 0 ? '+' : ''}${entry.quantity.toLocaleString()} pcs</span>`;
+        } else if (action === 'DISCREPANCY_REJECTED') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>ÉCART REJETÉ</span>`;
+            qtyDisplay = `<span class="font-bold text-slate-500 text-xs num-tabular">0 pcs (Rejet)</span>`;
+        } else if (action === 'CANCELLATION_REJECTED') {
+            actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>REFUS ANNULATION</span>`;
+            qtyDisplay = `<span class="font-bold text-slate-500 text-xs num-tabular">0 pcs (Refus)</span>`;
         } else if (action === 'IMPORT_CANCELLED') {
             actionBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>ANNULATION IMPORT</span>`;
             qtyDisplay = `<span class="font-bold text-rose-700 text-xs num-tabular">-${Math.abs(entry.quantity).toLocaleString()} pcs</span>`;
@@ -1418,5 +1432,34 @@ window.exportLedgerToExcel = function() {
     } catch (e) {
         console.error("Export ledger error:", e);
         alert("Erreur lors de l'exportation du Grand Livre: " + e.message);
+    }
+};
+
+window.syncOrdersNow = async function(btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[13px] animate-spin">sync</span><span>Sync...</span>`;
+    }
+    showToast("Synchronisation des commandes réelles lancée...", "info");
+
+    try {
+        const resp = await apiCall('/finance/sync-orders', { method: 'POST' });
+        if (!resp || !resp.ok) throw new Error("Erreur de connexion au serveur");
+        const data = await resp.json();
+        
+        showToast(
+            `Synchronisation réussie ! ${data.synced_new || 0} nouvelle(s), ${data.updated || 0} mise(s) à jour.`,
+            "success"
+        );
+        // Refresh dashboard valuation & KPIs
+        await window.loadValuation();
+    } catch (err) {
+        console.error("Erreur sync orders:", err);
+        showToast(`Erreur de synchronisation : ${err.message || 'Réseau'}`, "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span class="material-symbols-outlined text-[13px]">sync</span><span>Sync</span>`;
+        }
     }
 };

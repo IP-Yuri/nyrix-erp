@@ -18,20 +18,23 @@ window.logout = function() {
     window.location.href = '/';
 };
 
-// Tab Switcher between Inbound, Operations, and Colis Préparés
+// Tab Switcher between Inbound, Operations, Colis Préparés, and État des Stocks
 window.switchTab = function(tab) {
     const inboundView = document.getElementById('view-inbound');
     const opsView = document.getElementById('view-operations');
     const preparesView = document.getElementById('view-prepares');
+    const stockView = document.getElementById('view-stock');
 
     const btnOps = document.getElementById('nav-btn-ops');
     const btnInbound = document.getElementById('nav-btn-inbound');
     const btnPrepares = document.getElementById('nav-btn-prepares');
+    const btnStock = document.getElementById('nav-btn-stock');
     const breadcrumb = document.getElementById('breadcrumb-active');
 
     if (inboundView) inboundView.classList.add('hidden');
     if (opsView) opsView.classList.add('hidden');
     if (preparesView) preparesView.classList.add('hidden');
+    if (stockView) stockView.classList.add('hidden');
 
     const setInactive = (btn) => {
         if (!btn) return;
@@ -50,6 +53,7 @@ window.switchTab = function(tab) {
     setInactive(btnOps);
     setInactive(btnInbound);
     setInactive(btnPrepares);
+    setInactive(btnStock);
 
     if (tab === 'inbound') {
         if (inboundView) inboundView.classList.remove('hidden');
@@ -69,6 +73,13 @@ window.switchTab = function(tab) {
                 window.renderPreparedOrdersTable();
             }
         });
+    } else if (tab === 'stock') {
+        if (stockView) stockView.classList.remove('hidden');
+        setActive(btnStock);
+        if (breadcrumb) breadcrumb.innerText = "État des Stocks Quai & Entrepôt (Lecture Seule)";
+        if (typeof window.loadStockSummary === 'function') {
+            window.loadStockSummary();
+        }
     } else {
         if (opsView) opsView.classList.remove('hidden');
         setActive(btnOps);
@@ -103,6 +114,80 @@ window.closeModal = function(id) {
     const modal = document.getElementById(id);
     if (modal) modal.classList.add('hidden');
 };
+
+window.allLedgerHistory = [];
+window.activeLedgerModalFilter = 'ALL';
+
+async function loadLedgerHistory() {
+    const tbody = document.getElementById('ledger-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Chargement du journal...</td></tr>`;
+
+    try {
+        const resp = await apiCall('/warehouse/ledger');
+        if (!resp || !resp.ok) throw new Error("Erreur ledger");
+        window.allLedgerHistory = await resp.json() || [];
+        renderLedgerTable();
+    } catch (e) {
+        console.error("Erreur chargement ledger:", e);
+        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-rose-500 font-medium">Impossible de charger le journal.</td></tr>`;
+    }
+}
+
+function renderLedgerTable() {
+    const tbody = document.getElementById('ledger-table-body');
+    if (!tbody) return;
+
+    const list = window.allLedgerHistory || [];
+    const filter = window.activeLedgerModalFilter || 'ALL';
+
+    const filtered = list.filter(l => {
+        if (filter !== 'ALL' && l.action !== filter) return false;
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Aucun mouvement enregistré pour ce filtre.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(l => {
+        const dateStr = l.created_at ? new Date(l.created_at).toLocaleString('fr-FR', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : '--';
+
+        let badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${l.action}</span>`;
+        if (l.action === 'IMPORT') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">Arrivage Facture</span>`;
+        } else if (l.action === 'TRANSFER_ACCEPTED') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">Quai -> Tablette</span>`;
+        } else if (l.action === 'PACKED_OUT') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">Expédition Commande</span>`;
+        } else if (l.action === 'RETURN_RESTORED') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">Retour Sain Réintégré</span>`;
+        } else if (l.action === 'QUARANTINE') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">Isolement Avarie</span>`;
+        } else if (l.action === 'DISCREPANCY_APPROVED') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200">Écart Approuvé</span>`;
+        } else if (l.action === 'DISCREPANCY_REJECTED') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">Écart Rejeté</span>`;
+        } else if (l.action === 'CANCELLATION_REJECTED') {
+            badge = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-800 border border-rose-200">Refus Annulation</span>`;
+        }
+
+        const qtyColor = l.quantity > 0 ? 'text-emerald-600 font-bold' : (l.quantity < 0 ? 'text-rose-600 font-bold' : 'text-slate-500 font-semibold');
+        const qtyDisplay = l.quantity > 0 ? `+${l.quantity}` : `${l.quantity}`;
+
+        return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">${dateStr}</td>
+                <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${l.product_sku}</td>
+                <td class="py-2.5 px-3">${badge}</td>
+                <td class="py-2.5 px-3 text-right num-tabular ${qtyColor}">${qtyDisplay}</td>
+            </tr>
+        `;
+    }).join('');
+}
 
 // Initial Load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -982,7 +1067,6 @@ function updateLogisticsMetrics() {
     const b2bCount = targetPool.filter(o => o.type === 'B2B').length;
     const b2cCount = targetPool.filter(o => o.type === 'B2C').length;
     const encoursCount = targetPool.filter(o => ['PENDING_PACKING', 'READY', 'SHIPPED'].includes(o.status)).length;
-    const auHubCount = targetPool.filter(o => window.getOrderCarrier(o) === 'Au Hub Network').length;
 
     const pills = document.querySelectorAll('.filter-pill');
     pills.forEach(p => {
@@ -990,7 +1074,6 @@ function updateLogisticsMetrics() {
         if (filter === 'all') p.innerText = `Tous (${targetPool.length})`;
         else if (filter === 'B2B') p.innerText = `B2B (${b2bCount})`;
         else if (filter === 'B2C') p.innerText = `B2C (${b2cCount})`;
-        else if (filter === 'au_hub_network' || filter === 'au_hub' || filter === 'ah_hub_network' || filter === 'ah_hub') p.innerText = `Au Hub Network (${auHubCount})`;
         else if (filter === 'encours') p.innerText = `En cours (${encoursCount})`;
     });
 
@@ -1094,7 +1177,14 @@ window.renderLogisticsTable = function() {
         }
         else if (filter === 'encours') matchesFilter = ['PENDING_PACKING', 'READY', 'SHIPPED'].includes(o.status);
 
-        return matchesDate && matchesQuery && matchesFilter;
+        // 4. Status filter match (Item 3 Requirement)
+        let matchesStatus = true;
+        const statusFilter = window.activeStatusFilter || 'ALL';
+        if (statusFilter !== 'ALL') {
+            matchesStatus = (o.status === statusFilter);
+        }
+
+        return matchesDate && matchesQuery && matchesFilter && matchesStatus;
     });
 
     tbody.innerHTML = '';
@@ -1246,6 +1336,7 @@ window.renderPreparedOrdersTable = function() {
 
     // Update KPI counters
     const kpiTotal = document.getElementById('kpi-prepares-total');
+    const kpiToday = document.getElementById('kpi-prepares-today');
     const kpiB2C = document.getElementById('kpi-prepares-b2c');
     const kpiB2B = document.getElementById('kpi-prepares-b2b');
     const totalCountBadge = document.getElementById('badge-prepares-total-count');
@@ -1253,7 +1344,11 @@ window.renderPreparedOrdersTable = function() {
     const totalB2C = prepared.filter(o => o.type !== 'B2B').length;
     const totalB2B = prepared.filter(o => o.type === 'B2B').length;
 
+    const todayDateStr = new Date().toISOString().split('T')[0];
+    const totalToday = prepared.filter(o => window.getPreparedOrderDateStr(o) === todayDateStr).length;
+
     if (kpiTotal) kpiTotal.innerText = `${prepared.length}`;
+    if (kpiToday) kpiToday.innerText = `${totalToday}`;
     if (kpiB2C) kpiB2C.innerText = `${totalB2C}`;
     if (kpiB2B) kpiB2B.innerText = `${totalB2B}`;
     if (totalCountBadge) totalCountBadge.innerText = `${prepared.length} enregistrements`;
@@ -2111,6 +2206,41 @@ window.openDigylogModal = async function(trackingNumber) {
         document.getElementById('digylog-modal-cash').innerText = cashStatus;
         document.getElementById('digylog-modal-hub').innerText = hub;
 
+        // Render ordered products breakdown (Feedback Item 7)
+        const items = data.items || local.items || [];
+        const itemsTbody = document.getElementById('digylog-modal-items-tbody');
+        const itemsCount = document.getElementById('digylog-modal-items-count');
+
+        if (itemsTbody) {
+            if (items && items.length > 0) {
+                if (itemsCount) itemsCount.innerText = `${items.length} article${items.length > 1 ? 's' : ''}`;
+                itemsTbody.innerHTML = items.map(it => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-2 px-3 font-semibold text-slate-900">${it.name || it.product_name || it.sku}</td>
+                        <td class="py-2 px-3 font-mono text-slate-500">${it.sku || it.product_sku}</td>
+                        <td class="py-2 px-3 text-right font-black text-brand-600 num-tabular">${it.quantity}</td>
+                    </tr>
+                `).join('');
+            } else {
+                // Check in memory orders
+                const foundOrder = (window.allOrders || []).find(o => o.tracking_number === trackingNumber);
+                const localItems = foundOrder?.items || [];
+                if (localItems.length > 0) {
+                    if (itemsCount) itemsCount.innerText = `${localItems.length} article${localItems.length > 1 ? 's' : ''}`;
+                    itemsTbody.innerHTML = localItems.map(it => `
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-2 px-3 font-semibold text-slate-900">${it.product_name || it.name || it.product_sku || it.sku}</td>
+                            <td class="py-2 px-3 font-mono text-slate-500">${it.product_sku || it.sku}</td>
+                            <td class="py-2 px-3 text-right font-black text-brand-600 num-tabular">${it.quantity}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    if (itemsCount) itemsCount.innerText = "0 article";
+                    itemsTbody.innerHTML = `<tr><td colspan="3" class="py-2.5 px-3 text-slate-400 text-center italic">Aucun détail produit disponible pour ce colis.</td></tr>`;
+                }
+            }
+        }
+
         const isDelivered = String(status).toLowerCase().includes("livr") || local.status === "DELIVERED";
         const isReturned = String(status).toLowerCase().includes("retour") || local.status === "RETURNED";
 
@@ -2166,4 +2296,157 @@ window.openDigylogModal = async function(trackingNumber) {
             </div>
         `;
     }
+};
+
+// ----------------------------------------------------
+// STATE 5: GESTION & SUPERVISION DES STOCKS (LECTURE SEULE - KARIME)
+// ----------------------------------------------------
+window.allStockSummary = [];
+window.activeStockFilter = 'ALL';
+window.activeStatusFilter = 'ALL';
+
+window.onStatusFilterChange = function(statusVal) {
+    window.activeStatusFilter = statusVal;
+    window.currentLogisticsPage = 1;
+    window.renderLogisticsTable();
+};
+
+window.loadStockSummary = async function() {
+    const tbody = document.getElementById('stock-table-body');
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="py-8 text-center text-slate-400 italic">
+                    <span class="inline-flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px] animate-spin text-brand-600">progress_activity</span>
+                        <span>Chargement des stocks physiques en cours...</span>
+                    </span>
+                </td>
+            </tr>
+        `;
+    }
+
+    try {
+        const resp = await apiCall('/warehouse/stock-summary');
+        if (!resp || !resp.ok) throw new Error("Erreur de chargement des stocks");
+        const list = await resp.json();
+        window.allStockSummary = list || [];
+
+        // Update KPIs
+        const totalStock = list.reduce((s, p) => s + (p.total_stock || 0), 0);
+        const karimeStock = list.reduce((s, p) => s + (p.global_stock || 0), 0);
+        const packerStock = list.reduce((s, p) => s + (p.packer_stock || 0), 0);
+
+        const mTotal = document.getElementById('metric-stock-total');
+        const mKarime = document.getElementById('metric-stock-karime');
+        const mPacker = document.getElementById('metric-stock-packer');
+        const mSkus = document.getElementById('metric-stock-skus');
+        const bNav = document.getElementById('badge-nav-stock');
+
+        if (mTotal) mTotal.innerText = totalStock.toLocaleString();
+        if (mKarime) mKarime.innerText = karimeStock.toLocaleString();
+        if (mPacker) mPacker.innerText = packerStock.toLocaleString();
+        if (mSkus) mSkus.innerText = list.length.toString();
+        if (bNav) bNav.innerText = `${list.length} SKU`;
+
+        // Update pill counts
+        const inStock = list.filter(p => p.status === 'IN_STOCK').length;
+        const lowStock = list.filter(p => p.status === 'LOW_STOCK').length;
+        const outStock = list.filter(p => p.status === 'OUT_OF_STOCK').length;
+
+        const cAll = document.getElementById('stock-count-all');
+        const cIn = document.getElementById('stock-count-in');
+        const cLow = document.getElementById('stock-count-low');
+        const cOut = document.getElementById('stock-count-out');
+
+        if (cAll) cAll.innerText = list.length;
+        if (cIn) cIn.innerText = inStock;
+        if (cLow) cLow.innerText = lowStock;
+        if (cOut) cOut.innerText = outStock;
+
+        window.renderStockTable();
+    } catch (e) {
+        console.error("Erreur stock summary:", e);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-rose-500 font-medium">Impossible de récupérer les niveaux de stocks.</td></tr>`;
+        }
+    }
+};
+
+window.filterStockTable = function(filterVal, btn) {
+    window.activeStockFilter = filterVal;
+    const container = document.getElementById('stockFilterPills');
+    if (container) {
+        container.querySelectorAll('.stock-pill').forEach(b => {
+            b.className = "stock-pill px-3 py-1.5 rounded-lg font-medium text-slate-600 hover:text-slate-900";
+        });
+    }
+    if (btn) {
+        btn.className = "stock-pill active px-3 py-1.5 rounded-lg font-bold bg-white text-slate-900 border border-slate-200 shadow-2xs";
+    }
+    window.renderStockTable();
+};
+
+window.renderStockTable = function() {
+    const tbody = document.getElementById('stock-table-body');
+    if (!tbody) return;
+
+    const query = (document.getElementById('stockSearchInput')?.value || '').toLowerCase().trim();
+    const filter = window.activeStockFilter || 'ALL';
+
+    const list = window.allStockSummary || [];
+    const filtered = list.filter(p => {
+        if (filter !== 'ALL' && p.status !== filter) return false;
+        if (query) {
+            const matchesQuery = (p.sku && p.sku.toLowerCase().includes(query)) ||
+                (p.name && p.name.toLowerCase().includes(query));
+            if (!matchesQuery) return false;
+        }
+        return true;
+    });
+
+    const footerInfo = document.getElementById('stock-footer-info');
+    if (footerInfo) {
+        footerInfo.innerText = `${filtered.length} référence(s) affichée(s) (sur ${list.length} au total)`;
+    }
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Aucun article ne correspond à vos filtres.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(p => {
+        let statusBadge = '';
+        if (p.status === 'IN_STOCK') {
+            statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>En Stock</span>`;
+        } else if (p.status === 'LOW_STOCK') {
+            statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Stock Bas</span>`;
+        } else {
+            statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Rupture</span>`;
+        }
+
+        return `
+            <tr class="hover:bg-slate-50/70 transition-colors">
+                <td class="py-3 px-4 font-mono font-bold text-slate-900">${p.sku}</td>
+                <td class="py-3 px-4 font-medium text-slate-800">${p.name}</td>
+                <td class="py-3 px-4 text-center font-bold text-brand-700 num-tabular text-sm">${(p.global_stock || 0).toLocaleString()}</td>
+                <td class="py-3 px-4 text-center font-bold text-teal-700 num-tabular text-sm">${(p.packer_stock || 0).toLocaleString()}</td>
+                <td class="py-3 px-4 text-center font-black text-slate-900 num-tabular text-sm bg-slate-50/50">${(p.total_stock || 0).toLocaleString()}</td>
+                <td class="py-3 px-4 text-center">${statusBadge}</td>
+            </tr>
+        `;
+    }).join('');
+};
+
+window.openTransferModalForSku = function(sku) {
+    window.openModal('modal-transfer');
+    const sel = document.getElementById('transfer-sku');
+    if (sel) {
+        sel.value = sku;
+    }
+};
+
+window.filterLedgerModal = function(val) {
+    window.activeLedgerModalFilter = val;
+    window.renderLedgerTable();
 };

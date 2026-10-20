@@ -9,6 +9,7 @@ from backend.app.models.models import (
     Order, OrderStatusEnum, PaymentStatusEnum, CODCashBook, User
 )
 from backend.app.services.digylog_client import digylog_client
+from backend.app.services.inventory_service import deduct_order_stock_if_needed
 from backend.app.core.dependencies import get_current_user, require_role
 
 logger = logging.getLogger("digylog")
@@ -84,6 +85,11 @@ async def digylog_webhook(request: Request, db: Session = Depends(get_db)):
                 order.payment_status = PaymentStatusEnum.PAID
                 status_changed = True
 
+        # Deduct stock if order reached Digylog's warehouse (SHIPPED / DELIVERED)
+        if order.status in [OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED]:
+            if deduct_order_stock_if_needed(db, order, "digylog-webhook"):
+                status_changed = True
+
         if status_changed:
             db.commit()
             db.refresh(order)
@@ -133,8 +139,21 @@ def get_live_tracking(
             order.status = new_status
             if new_status == OrderStatusEnum.DELIVERED:
                 order.payment_status = PaymentStatusEnum.PAID
+            if order.status in [OrderStatusEnum.SHIPPED, OrderStatusEnum.DELIVERED]:
+                deduct_order_stock_if_needed(db, order, "digylog-track")
             db.commit()
             db.refresh(order)
+
+    # Prepare item details with full product names
+    items_list = []
+    if order and order.items:
+        for itm in order.items:
+            items_list.append({
+                "sku": itm.product_sku,
+                "name": itm.product.name if itm.product else itm.product_sku,
+                "quantity": itm.quantity,
+                "unit_price": itm.unit_price or 0.0
+            })
 
     return {
         "tracking_number": tracking_number,
@@ -144,8 +163,10 @@ def get_live_tracking(
             "status": order.status.value if order else None,
             "payment_status": order.payment_status.value if order else None,
             "cod_amount": order.cod_amount if order else 0.0,
-            "type": order.type.value if order else None
+            "type": order.type.value if order else None,
+            "items": items_list
         } if order else None,
+        "items": items_list,
         "digylog_live": info,
         "history": history.get(tracking_number, []) if isinstance(history, dict) else []
     }

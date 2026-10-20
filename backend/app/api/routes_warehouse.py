@@ -125,6 +125,20 @@ def process_cancellation(id: str, req: ProcessCancellationReq, db: Session = Dep
         shipment.status = ShipmentStatusEnum.RECEPTIONNE
         reason_text = req.rejection_reason.strip() if (req.rejection_reason and req.rejection_reason.strip()) else "Marchandise déjà ventilée ou transférée"
         shipment.cancellation_reason = f"Refusée par {current_user.username}: {reason_text}"
+
+        # Audit ledger logging for refused cancellation
+        items = shipment.items_json if isinstance(shipment.items_json, list) else []
+        for itm in items:
+            sku = itm.get("sku")
+            if sku:
+                ledger = StockLedger(
+                    product_sku=sku,
+                    user_id=str(current_user.id),
+                    action=StockActionEnum.CANCELLATION_REJECTED,
+                    quantity=0
+                )
+                db.add(ledger)
+
         db.commit()
         return {
             "status": "success",
@@ -356,3 +370,26 @@ from backend.app.services.matchmaker import sync_b2c_orders
 def trigger_matchmaker_sync(db: Session = Depends(get_db)):
     result = sync_b2c_orders(db, simulate=False)
     return result
+
+@router.get("/stock-summary")
+def get_warehouse_stock(db: Session = Depends(get_db)):
+    """
+    Operational stock view for Karime (Warehouse Lead).
+    Returns real physical quantities without any landed cost, margin, or financial valuation.
+    """
+    products = db.query(Product).order_by(Product.sku).all()
+    results = []
+    for p in products:
+        g_stock = p.global_stock or 0
+        p_stock = p.packer_stock or 0
+        tot = g_stock + p_stock
+        st = "IN_STOCK" if tot > 15 else ("LOW_STOCK" if tot > 0 else "OUT_OF_STOCK")
+        results.append({
+            "sku": p.sku,
+            "name": p.name,
+            "global_stock": g_stock,
+            "packer_stock": p_stock,
+            "total_stock": tot,
+            "status": st
+        })
+    return results

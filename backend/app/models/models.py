@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Enum, JSON, DateTime
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, Enum, JSON, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from backend.app.core.database import Base
 from datetime import datetime
@@ -44,6 +44,8 @@ class StockActionEnum(str, enum.Enum):
     QUARANTINE = "QUARANTINE"
     RETURN_RESTORED = "RETURN_RESTORED"
     DISCREPANCY_APPROVED = "DISCREPANCY_APPROVED"
+    DISCREPANCY_REJECTED = "DISCREPANCY_REJECTED"
+    CANCELLATION_REJECTED = "CANCELLATION_REJECTED"
     IMPORT_CANCELLED = "IMPORT_CANCELLED"
 
 class ShipmentStatusEnum(str, enum.Enum):
@@ -99,8 +101,9 @@ class Order(Base):
     packed_at = Column(DateTime, nullable=True)
     packed_by = Column(String(255), nullable=True)
     carrier = Column(String(255), nullable=True, default="Digylog Express")
+    stock_deducted = Column(Boolean, default=False, nullable=True)
 
-    items = relationship("OrderItem", back_populates="order")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
     @property
     def total_amount_ht(self) -> float:
