@@ -946,7 +946,7 @@
             </div>
 
             <!-- KPI Summary Cards (Hidden on Print) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 no-print">
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
                     <div>
                         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Colis Prêts</span>
@@ -965,6 +965,16 @@
                     </div>
                     <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                         <span class="material-symbols-outlined text-[22px]">today</span>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Colis Livrés</span>
+                        <div class="text-2xl font-extrabold text-emerald-600 num-tabular mt-0.5" id="kpi-prepares-delivered">0</div>
+                        <p id="kpi-delivered-sub" class="text-[10px] text-slate-500 mt-0.5 font-medium">Historique livrés</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[22px]">task_alt</span>
                     </div>
                 </div>
                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">

@@ -94,7 +94,7 @@ class Order(Base):
     client_name = Column(String(255), nullable=False)
     city = Column(String(255), nullable=False)
     status = Column(Enum(OrderStatusEnum), nullable=False)
-    payment_method = Column(Enum(PaymentMethodEnum), nullable=False)
+    payment_method = Column(String(255), nullable=False, default="VIREMENT")
     payment_status = Column(Enum(PaymentStatusEnum), nullable=False)
     cod_amount = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)

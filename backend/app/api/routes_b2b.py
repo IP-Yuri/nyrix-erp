@@ -35,22 +35,16 @@ def create_b2b_order(req: B2BOrderReq, db: Session = Depends(get_db), current_us
 
     tracking_number = f"B2B-{uuid.uuid4().hex[:4].upper()}"
     
-    # Resolve payment method enum safely
-    pm = PaymentMethodEnum.VIREMENT
-    if req.payment_method:
-        try:
-            pm = PaymentMethodEnum(req.payment_method)
-        except ValueError:
-            pm = PaymentMethodEnum.VIREMENT
+    payment_method_str = (req.payment_method or "Virement à 30 jours").strip()
 
     order = Order(
         tracking_number=tracking_number,
         type=OrderTypeEnum.B2B,
         owner_id=str(current_user.id),
         client_name=req.client_name.strip(),
-        city=(req.city or "Casablanca").strip(),
+        city=(req.city or "Casablanca Port").strip(),
         status=OrderStatusEnum.PENDING_PACKING,
-        payment_method=pm,
+        payment_method=payment_method_str,
         payment_status=PaymentStatusEnum.UNPAID
     )
     db.add(order)

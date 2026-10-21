@@ -259,17 +259,10 @@
 
                             <!-- Ville / Hub -->
                             <div class="flex flex-col gap-space-xs">
-                                <label class="font-label-md text-label-md text-on-surface font-semibold">Ville / Hub Régional</label>
-                                <div class="relative">
-                                    <select id="client-city" class="w-full h-10 bg-surface-container-low text-on-surface font-body-md px-space-md rounded-lg outline-none appearance-none cursor-pointer pr-9 font-medium border border-outline-variant/40 focus:border-primary focus:bg-surface-container-lowest transition-all">
-                                        <option value="Casablanca Port" selected>Casablanca Port (Hub Central)</option>
-                                        <option value="Tanger Free Zone">Tanger Free Zone (Nord)</option>
-                                        <option value="Fès Sidi Brahim">Fès Sidi Brahim (Centre)</option>
-                                        <option value="Tanger Med 2">Tanger Med 2 (Plateforme Logistique)</option>
-                                        <option value="Rabat Agdal">Rabat Agdal</option>
-                                        <option value="Marrakech Guéliz">Marrakech Guéliz (Sud)</option>
-                                    </select>
-                                    <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-on-surface-variant pointer-events-none text-base">arrow_drop_down</span>
+                                <label class="font-label-md text-label-md text-on-surface font-semibold" for="client-city">Ville / Hub Régional</label>
+                                <div class="relative flex items-center">
+                                    <input id="client-city" class="w-full h-10 bg-surface-container-low text-on-surface font-body-md pl-space-md pr-10 rounded-lg outline-none font-medium border border-outline-variant/40 focus:border-primary focus:bg-surface-container-lowest transition-all" type="text" placeholder="Ex: Casablanca Port, Tanger, Rabat..." value="Casablanca Port">
+                                    <span class="material-symbols-outlined text-on-surface-variant absolute right-3 pointer-events-none text-lg">location_city</span>
                                 </div>
                                 <span class="font-label-sm text-label-sm text-on-surface-variant">Destination de livraison entrepôt</span>
                             </div>
@@ -278,17 +271,12 @@
                         <!-- Modalités de Paiement -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mt-4">
                             <div class="flex flex-col gap-space-xs">
-                                <label class="font-label-md text-label-md text-on-surface font-semibold">Modalité de Paiement Négociée</label>
-                                <div class="relative">
-                                    <select id="payment-method-select" class="w-full h-10 bg-surface-container-low text-on-surface font-body-md px-space-md rounded-lg outline-none appearance-none cursor-pointer pr-9 font-medium border border-outline-variant/40 focus:border-primary focus:bg-surface-container-lowest transition-all">
-                                        <option value="VIREMENT" selected>Virement à 30 jours (Accrédité B2B)</option>
-                                        <option value="VIREMENT_45J">Virement à 45 jours Fin de Mois</option>
-                                        <option value="LETTRE_CREDIT">Lettre de Crédit Irrévocable (LC)</option>
-                                        <option value="COMPTANT">Paiement Comptant (Escompte 2%)</option>
-                                    </select>
-                                    <span class="material-symbols-outlined absolute right-2.5 top-2.5 text-on-surface-variant pointer-events-none text-base">arrow_drop_down</span>
+                                <label class="font-label-md text-label-md text-on-surface font-semibold" for="payment-method-select">Modalité de Paiement Négociée</label>
+                                <div class="relative flex items-center">
+                                    <input id="payment-method-select" class="w-full h-10 bg-surface-container-low text-on-surface font-body-md pl-space-md pr-10 rounded-lg outline-none font-medium border border-outline-variant/40 focus:border-primary focus:bg-surface-container-lowest transition-all" type="text" placeholder="Ex: Virement à 30 jours, Comptant, Chèque..." value="Virement à 30 jours">
+                                    <span class="material-symbols-outlined text-on-surface-variant absolute right-3 pointer-events-none text-lg">payments</span>
                                 </div>
-                                <span class="font-label-sm text-label-sm text-on-surface-variant">Ligne de crédit d'assurance-crédit Euler Hermes • Rapprochement EBICS</span>
+                                <span class="font-label-sm text-label-sm text-on-surface-variant">Ligne de crédit accordée / modalité convenue avec le client</span>
                             </div>
 
                             <div class="flex flex-col gap-space-xs">

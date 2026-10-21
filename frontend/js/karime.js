@@ -1337,6 +1337,8 @@ window.renderPreparedOrdersTable = function() {
     // Update KPI counters
     const kpiTotal = document.getElementById('kpi-prepares-total');
     const kpiToday = document.getElementById('kpi-prepares-today');
+    const kpiDelivered = document.getElementById('kpi-prepares-delivered');
+    const kpiDeliveredSub = document.getElementById('kpi-delivered-sub');
     const kpiB2C = document.getElementById('kpi-prepares-b2c');
     const kpiB2B = document.getElementById('kpi-prepares-b2b');
     const totalCountBadge = document.getElementById('badge-prepares-total-count');
@@ -1346,6 +1348,23 @@ window.renderPreparedOrdersTable = function() {
 
     const todayDateStr = new Date().toISOString().split('T')[0];
     const totalToday = prepared.filter(o => window.getPreparedOrderDateStr(o) === todayDateStr).length;
+
+    // Delivered orders calculation (filtered by date if date filter is active)
+    const allDelivered = orders.filter(o => o.status === 'DELIVERED');
+    if (kpiDelivered) {
+        if (dateFilter) {
+            const deliveredOnDate = allDelivered.filter(o => window.getOrderDateStr(o) === dateFilter).length;
+            kpiDelivered.innerText = `${deliveredOnDate}`;
+            if (kpiDeliveredSub) {
+                kpiDeliveredSub.innerText = `Livrés le ${dateFilter}`;
+            }
+        } else {
+            kpiDelivered.innerText = `${allDelivered.length}`;
+            if (kpiDeliveredSub) {
+                kpiDeliveredSub.innerText = `Total historique livrés`;
+            }
+        }
+    }
 
     if (kpiTotal) kpiTotal.innerText = `${prepared.length}`;
     if (kpiToday) kpiToday.innerText = `${totalToday}`;
@@ -1517,6 +1536,18 @@ function updatePreparesPaginationUI(totalFiltered, pageSize, totalPages, startIn
     if (btnPrev) btnPrev.disabled = isFirst;
     if (btnNext) btnNext.disabled = isLast;
 }
+
+// Handlers pour les filtres de la vue Colis Préparés
+window.onDatePreparesChange = function(val) {
+    window._userChangedDatePrepares = true;
+    window.currentPreparesPage = 1;
+    window.renderPreparedOrdersTable();
+};
+
+window.onCarrierPreparesChange = function(val) {
+    window.currentPreparesPage = 1;
+    window.renderPreparedOrdersTable();
+};
 
 // Effacer le filtre de date pour afficher tous les colis prêts
 window.clearDatePreparesFilter = function() {

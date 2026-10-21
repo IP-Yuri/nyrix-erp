@@ -385,8 +385,8 @@ async function generateB2BOrder() {
     const discountSelect = document.getElementById('discount-select');
 
     const clientName = clientNameInput ? clientNameInput.value.trim() : "";
-    const clientCity = clientCitySelect ? clientCitySelect.value : "Casablanca Port";
-    const paymentMethod = paymentMethodSelect ? paymentMethodSelect.value : "VIREMENT";
+    const clientCity = clientCitySelect ? (clientCitySelect.value.trim() || "Casablanca Port") : "Casablanca Port";
+    const paymentMethod = paymentMethodSelect ? (paymentMethodSelect.value.trim() || "Virement à 30 jours") : "Virement à 30 jours";
     const discountPct = parseFloat(discountSelect ? discountSelect.value : 0);
 
     if (!clientName) {
@@ -682,7 +682,8 @@ window.viewInvoice = function(trackingNumber) {
     document.getElementById('inv-payment-method').textContent = order.payment_method === 'VIREMENT_45J' ? 'Virement à 45 jours FdM' :
                                                                 order.payment_method === 'LETTRE_CREDIT' ? 'Lettre de Crédit Irrévocable' :
                                                                 order.payment_method === 'COMPTANT' ? 'Paiement Comptant' :
-                                                                'Virement Bancaire (30 jours)';
+                                                                order.payment_method === 'VIREMENT' ? 'Virement Bancaire (30 jours)' :
+                                                                (order.payment_method || 'Virement Bancaire (30 jours)');
 
     // Items table in invoice
     const invItemsBody = document.getElementById('inv-items-body');
@@ -850,12 +851,17 @@ function setupEventListeners() {
     const pmSelect = document.getElementById('payment-method-select');
     const dueLabel = document.getElementById('due-date-label');
     if (pmSelect && dueLabel) {
-        pmSelect.addEventListener('change', () => {
-            const v = pmSelect.value;
-            if (v === 'VIREMENT_45J') dueLabel.textContent = "Échéance nette 45 jours fin de mois (Virement bancaire)";
-            else if (v === 'LETTRE_CREDIT') dueLabel.textContent = "Échéance à vue sur présentation LC conforme";
-            else if (v === 'COMPTANT') dueLabel.textContent = "Paiement immédiat comptant (Escompte déduit)";
+        const updateDueLabel = () => {
+            const v = (pmSelect.value || '').toLowerCase();
+            if (v.includes('45')) dueLabel.textContent = "Échéance nette 45 jours fin de mois (Virement bancaire)";
+            else if (v.includes('crédit') || v.includes('credit') || v.includes('lc')) dueLabel.textContent = "Échéance à vue sur présentation LC conforme";
+            else if (v.includes('comptant') || v.includes('escompte')) dueLabel.textContent = "Paiement immédiat comptant (Escompte déduit)";
+            else if (v.includes('60')) dueLabel.textContent = "Échéance nette 60 jours";
+            else if (v.trim()) dueLabel.textContent = `Modalité : ${pmSelect.value.trim()}`;
             else dueLabel.textContent = "Échéance nette 30 jours (Virement accrédité)";
-        });
+        };
+        pmSelect.addEventListener('input', updateDueLabel);
+        pmSelect.addEventListener('change', updateDueLabel);
     }
 }
+
