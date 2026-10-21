@@ -1,6 +1,12 @@
+"""
+NYRIX ERP Core System
+Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
+Licensed under the On-Premise Proprietary Software License Agreement.
+"""
+
 import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -24,7 +30,20 @@ async def lifespan(app: FastAPI):
     loop.run_in_executor(None, run_initial_sync)
     yield
 
-app = FastAPI(title="NYRIX ERP System", lifespan=lifespan)
+app = FastAPI(
+    title="NYRIX ERP System — Powered by AVYR Digital",
+    version="1.0",
+    description="Enterprise ERP Platform engineered by AVYR Digital (Salaheddine CHIKHI). All Rights Reserved.",
+    lifespan=lifespan
+)
+
+@app.middleware("http")
+async def add_avyr_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Powered-By"] = "AVYR Digital"
+    response.headers["X-Engineered-By"] = "Salaheddine CHIKHI (AVYR Digital)"
+    response.headers["X-Copyright"] = "Copyright (c) 2026 AVYR Digital. All Rights Reserved."
+    return response
 
 app.add_middleware(
     CORSMiddleware,

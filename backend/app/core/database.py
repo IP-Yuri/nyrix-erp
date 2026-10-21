@@ -1,3 +1,9 @@
+"""
+NYRIX ERP Core System - Database Engine & Session Management
+Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
+Proprietary and confidential.
+"""
+
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base

@@ -1,3 +1,9 @@
+"""
+NYRIX ERP Core System - Relational Data Models
+Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
+Proprietary and confidential.
+"""
+
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, Enum, JSON, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from backend.app.core.database import Base
