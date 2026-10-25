@@ -30,7 +30,7 @@ def deduct_order_stock_if_needed(db: Session, order: Order, user_id: str = "syst
             valid_user_id = str(fallback_user.id)
 
     for item in (order.items or []):
-        prod = item.product or db.query(Product).filter(Product.sku == item.product_sku).first()
+        prod = db.query(Product).filter(Product.sku == item.product_sku).with_for_update().first()
         if prod:
             qty = int(item.quantity or 1)
             # Deduct from packer_stock if available, else from global_stock

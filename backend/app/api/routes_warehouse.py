@@ -156,7 +156,7 @@ def process_cancellation(id: str, req: ProcessCancellationReq, db: Session = Dep
             qty = int(itm.get("quantity", 0))
             if not sku or qty <= 0:
                 continue
-            prod = db.query(Product).filter(Product.sku == sku).first()
+            prod = db.query(Product).filter(Product.sku == sku).with_for_update().first()
             if not prod:
                 insufficient_stock_errors.append(f"Le produit SKU '{sku}' n'existe plus dans le catalogue.")
             elif prod.global_stock < qty:
@@ -180,7 +180,7 @@ def process_cancellation(id: str, req: ProcessCancellationReq, db: Session = Dep
             qty = int(itm.get("quantity", 0))
             if not sku or qty <= 0:
                 continue
-            prod = db.query(Product).filter(Product.sku == sku).first()
+            prod = db.query(Product).filter(Product.sku == sku).with_for_update().first()
             prod.global_stock -= qty
 
             # Piste d'audit inviolable : Écriture de contre-passation
@@ -225,7 +225,7 @@ def rollback_reception(id: str, db: Session = Depends(get_db), current_user: Use
         qty = int(itm.get("quantity", 0))
         if not sku or qty <= 0:
             continue
-        prod = db.query(Product).filter(Product.sku == sku).first()
+        prod = db.query(Product).filter(Product.sku == sku).with_for_update().first()
         if not prod:
             insufficient_stock_errors.append(f"SKU '{sku}' introuvable.")
         elif prod.global_stock < qty:
@@ -258,7 +258,7 @@ def get_inventory(db: Session = Depends(get_db)):
 
 @router.post("/transfers", response_model=TransferOut)
 def create_transfer(req: TransferReq, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    product = db.query(Product).filter(Product.sku == req.product_sku).first()
+    product = db.query(Product).filter(Product.sku == req.product_sku).with_for_update().first()
     if not product or product.global_stock < req.quantity:
         raise HTTPException(status_code=400, detail="Insufficient stock")
     
@@ -297,7 +297,7 @@ def report_discrepancy(req: DiscrepancyReq, db: Session = Depends(get_db), curre
 
 @router.post("/returns")
 def process_return(req: ReturnReq, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    product = db.query(Product).filter(Product.sku == req.product_sku).first()
+    product = db.query(Product).filter(Product.sku == req.product_sku).with_for_update().first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 

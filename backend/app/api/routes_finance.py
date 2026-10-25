@@ -65,16 +65,16 @@ async def import_stock(
         new_lc = float(item["landed_cost_mad"])
         item_name = item.get("name") or item.get("designation") or sku
         
-        product = db.query(Product).filter(Product.sku == sku).first()
+        product = db.query(Product).filter(Product.sku == sku).with_for_update().first()
         if not product:
             product = Product(sku=sku, name=item_name, landed_cost=new_lc, global_stock=qty, packer_stock=0)
             db.add(product)
         else:
             if item_name and (not product.name or product.name == sku):
                 product.name = item_name
-            total_value = (product.global_stock * product.landed_cost) + (qty * new_lc)
+            total_value = (product.global_stock * float(product.landed_cost or 0.0)) + (qty * new_lc)
             new_total_stock = product.global_stock + qty
-            product.landed_cost = total_value / new_total_stock if new_total_stock > 0 else 0
+            product.landed_cost = round(total_value / new_total_stock, 2) if new_total_stock > 0 else 0.0
             product.global_stock = new_total_stock
             
         import_items.append({"sku": sku, "name": item_name, "quantity": qty, "landed_cost": new_lc})
@@ -118,7 +118,7 @@ def get_valuation(db: Session = Depends(get_db)):
     total_karime = sum(p.global_stock for p in products)
     total_packer = sum(p.packer_stock for p in products)
     total_stock = total_karime + total_packer
-    total_val = sum((p.landed_cost * (p.global_stock + p.packer_stock)) for p in products)
+    total_val = sum((float(p.landed_cost or 0.0) * (p.global_stock + p.packer_stock)) for p in products)
     avg_cost = (total_val / total_stock) if total_stock > 0 else 0.0
     
     # Accurate orders of today calculation
@@ -135,7 +135,7 @@ def get_valuation(db: Session = Depends(get_db)):
             "name": p.name,
             "global_stock": p.global_stock,
             "packer_stock": p.packer_stock,
-            "landed_cost": round(p.landed_cost, 2),
+            "landed_cost": round(float(p.landed_cost or 0.0), 2),
             "last_invoice_ref": sku_to_invoice.get(p.sku, "STOCK-INITIAL")
         }
         inventory_data.append(p_dict)
@@ -177,7 +177,7 @@ def resolve_discrepancy(id: str, action: str, db: Session = Depends(get_db), cur
         raise HTTPException(status_code=400, detail="Already resolved")
         
     if action == "APPROVE":
-        product = db.query(Product).filter(Product.sku == disc.product_sku).first()
+        product = db.query(Product).filter(Product.sku == disc.product_sku).with_for_update().first()
         if product:
             product.global_stock -= disc.quantity_missing
             ledger = StockLedger(
@@ -273,7 +273,7 @@ def delete_invoice(id: str, db: Session = Depends(get_db), current_user: User = 
         if not sku or qty <= 0:
             continue
 
-        product = db.query(Product).filter(Product.sku == sku).first()
+        product = db.query(Product).filter(Product.sku == sku).with_for_update().first()
         if product:
             # Revert pre-allocated stock before warehouse confirmation
             product.global_stock = max(0, product.global_stock - qty)
@@ -357,7 +357,7 @@ def update_invoice_costs(id: str, req: UpdateInvoiceCostsReq, db: Session = Depe
                 new_c = cost_map[sku]
                 itm["landed_cost"] = new_c
                 # Update product landed cost without touching physical quantities
-                prod = db.query(Product).filter(Product.sku == sku).first()
+                prod = db.query(Product).filter(Product.sku == sku).with_for_update().first()
                 if prod:
                     prod.landed_cost = new_c
             updated_items.append(itm)

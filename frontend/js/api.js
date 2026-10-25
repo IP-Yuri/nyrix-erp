@@ -17,11 +17,11 @@ async function apiCall(endpoint, options = {}) {
 
     try {
         const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-        if (response.status === 401 && endpoint !== "/auth/login") {
+        if (response.status === 401 && !endpoint.startsWith("/auth/")) {
             window.location.href = "/";
             return null;
         }
-        if (response.status === 403) {
+        if (response.status === 403 && !endpoint.startsWith("/auth/")) {
             alert("403 Forbidden: Access Denied");
             window.location.href = "/";
             return null;

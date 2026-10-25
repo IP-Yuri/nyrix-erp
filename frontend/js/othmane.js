@@ -25,18 +25,20 @@ window.logout = function() {
     window.location.href = '/';
 };
 
-// View Switcher (Importation vs Factures vs Stock vs Ledger)
+// View Switcher (Importation vs Factures vs Stock vs Ledger vs Users)
 window.switchView = function(view, element) {
     const importView = document.getElementById('view-importation');
     const facturesView = document.getElementById('view-factures');
     const stockView = document.getElementById('view-stock');
     const ledgerView = document.getElementById('view-ledger');
+    const usersView = document.getElementById('view-users');
     const breadcrumb = document.getElementById('breadcrumb-active');
     
     if (importView) importView.classList.add('hidden');
     if (facturesView) facturesView.classList.add('hidden');
     if (stockView) stockView.classList.add('hidden');
     if (ledgerView) ledgerView.classList.add('hidden');
+    if (usersView) usersView.classList.add('hidden');
 
     if (view === 'importation') {
         if (importView) importView.classList.remove('hidden');
@@ -53,6 +55,10 @@ window.switchView = function(view, element) {
         if (ledgerView) ledgerView.classList.remove('hidden');
         if (breadcrumb) breadcrumb.innerText = 'Grand Livre de Stock (Ledger)';
         window.loadLedger();
+    } else if (view === 'users') {
+        if (usersView) usersView.classList.remove('hidden');
+        if (breadcrumb) breadcrumb.innerText = 'Gestion des Accès Collaborateurs';
+        window.loadUsers();
     }
     
     document.querySelectorAll('.nav-link').forEach(el => {
@@ -1460,6 +1466,215 @@ window.syncOrdersNow = async function(btn) {
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = `<span class="material-symbols-outlined text-[13px]">sync</span><span>Sync</span>`;
+        }
+    }
+};
+
+// ==========================================
+// USER MANAGEMENT & SECURITY CORE (OPTION B)
+// ==========================================
+window.currentUsersList = [];
+window.selectedTargetUserForReset = null;
+
+window.loadUsers = async function() {
+    const tbody = document.getElementById('users-table-body');
+    const badge = document.getElementById('users-count-badge');
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Chargement des utilisateurs autorisés...</td></tr>`;
+    }
+
+    try {
+        const res = await apiCall('/auth/users');
+        if (!res || !res.ok) throw new Error("Impossible de récupérer la liste des utilisateurs");
+        const users = await res.json();
+        window.currentUsersList = users;
+
+        if (badge) badge.innerText = `${users.length} comptes`;
+
+        if (!tbody) return;
+        if (!users || users.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Aucun utilisateur trouvé.</td></tr>`;
+            return;
+        }
+
+        const roleMeta = {
+            'ADMIN': {
+                label: 'Administrateur DSI',
+                color: 'bg-purple-50 text-purple-700 border-purple-200',
+                scope: 'Direction Logistique, Finances & Administration',
+                policy: 'E-mail OTP (Option C)',
+                policyColor: 'text-purple-600 font-semibold'
+            },
+            'WAREHOUSE': {
+                label: 'Responsable Entrepôt',
+                color: 'bg-blue-50 text-blue-700 border-blue-200',
+                scope: 'Quai Arrivages, Stock Palettes & Litiges',
+                policy: 'Réinitialisation DSI Déléguée (Option B)',
+                policyColor: 'text-emerald-700 font-medium'
+            },
+            'PACKER': {
+                label: 'Opérateur Conditionnement',
+                color: 'bg-amber-50 text-amber-700 border-amber-200',
+                scope: 'Tablette Tactile, Picking & Colisage',
+                policy: 'Réinitialisation DSI Déléguée (Option B)',
+                policyColor: 'text-emerald-700 font-medium'
+            },
+            'B2B': {
+                label: 'Commercial Comptes B2B',
+                color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                scope: 'Commandes de Gros & Facturation Clients',
+                policy: 'Réinitialisation DSI Déléguée (Option B)',
+                policyColor: 'text-emerald-700 font-medium'
+            }
+        };
+
+        tbody.innerHTML = users.map(u => {
+            const meta = roleMeta[u.role] || {
+                label: u.role,
+                color: 'bg-slate-100 text-slate-700 border-slate-200',
+                scope: 'Accès Système',
+                policy: 'Réinitialisation DSI Déléguée (Option B)',
+                policyColor: 'text-slate-600'
+            };
+
+            const isSelf = u.username.toLowerCase() === 'othmane';
+
+            return `
+                <tr class="hover:bg-slate-50/75 transition-colors">
+                    <td class="py-3 px-6">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-xs">
+                                ${u.username.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-900 font-mono">${u.username}</span>
+                                <span class="text-[11px] text-slate-400">UID: ${u.id ? u.id.substring(0, 8) : '--'}...</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-6">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold border ${meta.color}">
+                            ${meta.label}
+                        </span>
+                    </td>
+                    <td class="py-3 px-6 text-slate-600 text-xs">
+                        ${meta.scope}
+                    </td>
+                    <td class="py-3 px-6 text-xs">
+                        <span class="${meta.policyColor}">
+                            ${meta.policy}
+                        </span>
+                    </td>
+                    <td class="py-3 px-6 text-right">
+                        ${isSelf ? `
+                            <span class="inline-flex items-center gap-1 text-[11px] text-slate-400 font-medium px-2 py-1 bg-slate-50 rounded">
+                                <span class="material-symbols-outlined text-[14px]">lock</span>
+                                Compte Maître
+                            </span>
+                        ` : `
+                            <button type="button" onclick="window.openAdminResetModal('${u.username}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-semibold shadow-2xs transition-colors cursor-pointer">
+                                <span class="material-symbols-outlined text-[15px]">lock_reset</span>
+                                <span>Réinitialiser Mot de Passe</span>
+                            </button>
+                        `}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Erreur loadUsers:", err);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-red-500">Erreur de chargement des utilisateurs.</td></tr>`;
+        }
+    }
+};
+
+window.openAdminResetModal = function(username) {
+    window.selectedTargetUserForReset = username;
+    const targetLabel = document.getElementById('admin-reset-target-user');
+    const inputPwd = document.getElementById('admin-reset-input-pwd');
+    const msg = document.getElementById('admin-reset-msg');
+    const modal = document.getElementById('admin-reset-modal');
+
+    if (targetLabel) targetLabel.innerText = username;
+    if (inputPwd) inputPwd.value = '';
+    if (msg) {
+        msg.className = 'hidden p-2.5 rounded-lg text-xs leading-relaxed';
+        msg.innerHTML = '';
+    }
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+    if (inputPwd) inputPwd.focus();
+};
+
+window.closeAdminResetModal = function() {
+    const modal = document.getElementById('admin-reset-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    window.selectedTargetUserForReset = null;
+};
+
+window.confirmAdminResetPassword = async function() {
+    const target = window.selectedTargetUserForReset;
+    const inputPwd = document.getElementById('admin-reset-input-pwd');
+    const msg = document.getElementById('admin-reset-msg');
+    const btn = document.getElementById('btn-confirm-admin-reset');
+    const newPwd = inputPwd ? inputPwd.value.trim() : '';
+
+    if (!target) return;
+    if (!newPwd || newPwd.length < 6) {
+        if (msg) {
+            msg.className = 'p-2.5 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+            msg.textContent = "Le mot de passe doit comporter au moins 6 caractères.";
+        }
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Mise à jour...";
+    }
+
+    try {
+        const res = await apiCall('/auth/admin/reset-user-password', {
+            method: 'POST',
+            body: JSON.stringify({
+                target_username: target,
+                new_password: newPwd
+            })
+        });
+
+        const data = await res.json();
+        if (res && res.status === 200) {
+            if (msg) {
+                msg.className = 'p-2.5 rounded-lg text-xs leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-200 block';
+                msg.innerHTML = `<strong>✓ Succès :</strong> Mot de passe mis à jour pour <code>${target}</code>. Transmettez ce mot de passe au collaborateur.`;
+            }
+            if (typeof showToast === 'function') {
+                showToast(`Mot de passe de ${target} réinitialisé avec succès !`, 'success');
+            }
+            setTimeout(() => {
+                window.closeAdminResetModal();
+            }, 1800);
+        } else {
+            if (msg) {
+                msg.className = 'p-2.5 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+                msg.textContent = data.detail || "Erreur lors de la réinitialisation.";
+            }
+        }
+    } catch (err) {
+        console.error("Erreur confirmAdminResetPassword:", err);
+        if (msg) {
+            msg.className = 'p-2.5 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+            msg.textContent = "Erreur de communication avec le serveur.";
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = "Mettre à jour";
         }
     }
 };

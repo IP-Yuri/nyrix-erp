@@ -4,7 +4,7 @@ Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
 Proprietary and confidential.
 """
 
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Enum, JSON, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, Float, Numeric, ForeignKey, Enum, JSON, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from backend.app.core.database import Base
 from datetime import datetime
@@ -42,6 +42,7 @@ class PaymentStatusEnum(str, enum.Enum):
 class TransferStatusEnum(str, enum.Enum):
     PENDING_ACCEPT = "PENDING_ACCEPT"
     ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
 
 class StockActionEnum(str, enum.Enum):
     IMPORT = "IMPORT"
@@ -82,14 +83,15 @@ class Product(Base):
     __tablename__ = "products"
     sku = Column(String(255), primary_key=True, index=True)
     name = Column(String(255), nullable=False)
-    landed_cost = Column(Float, default=0.0)
+    landed_cost = Column(Numeric(12, 2), default=0.0)
     global_stock = Column(Integer, default=0)
     packer_stock = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     @property
     def suggested_price(self) -> float:
-        return round((self.landed_cost or 0.0) * 1.25, 2) if self.landed_cost else 150.0
+        cost = float(self.landed_cost or 0.0)
+        return round(cost * 1.25, 2) if cost > 0 else 150.0
 
 class Order(Base):
     __tablename__ = "orders"
@@ -102,7 +104,7 @@ class Order(Base):
     status = Column(Enum(OrderStatusEnum), nullable=False)
     payment_method = Column(String(255), nullable=False, default="VIREMENT")
     payment_status = Column(Enum(PaymentStatusEnum), nullable=False)
-    cod_amount = Column(Float, default=0.0)
+    cod_amount = Column(Numeric(12, 2), default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
     packed_at = Column(DateTime, nullable=True)
     packed_by = Column(String(255), nullable=True)
@@ -113,7 +115,7 @@ class Order(Base):
 
     @property
     def total_amount_ht(self) -> float:
-        return sum((item.quantity * (item.unit_price or 0.0)) for item in (self.items or []))
+        return sum((item.quantity * float(item.unit_price or 0.0)) for item in (self.items or []))
 
     @property
     def total_amount_ttc(self) -> float:
@@ -122,10 +124,10 @@ class Order(Base):
 class OrderItem(Base):
     __tablename__ = "order_items"
     id = Column(String(36), primary_key=True, default=generate_uuid)
-    tracking_number = Column(String(255), ForeignKey("orders.tracking_number"), nullable=False)
+    tracking_number = Column(String(255), ForeignKey("orders.tracking_number", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     product_sku = Column(String(255), ForeignKey("products.sku"), nullable=False)
     quantity = Column(Integer, nullable=False)
-    unit_price = Column(Float, default=0.0)
+    unit_price = Column(Numeric(12, 2), default=0.0)
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product")
@@ -191,7 +193,7 @@ class Discrepancy(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     product_sku = Column(String(255), ForeignKey("products.sku"), nullable=False)
     quantity_missing = Column(Integer, nullable=False)
-    reason = Column(Enum(DiscrepancyReasonEnum), nullable=False)
+    reason = Column(String(500), nullable=False)
     status = Column(Enum(DiscrepancyStatusEnum), nullable=False)
     reported_by = Column(String(36), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -200,6 +202,6 @@ class CODCashBook(Base):
     __tablename__ = "cod_cash_book"
     id = Column(String(36), primary_key=True, default=generate_uuid)
     driver_ref = Column(String(255), nullable=False)
-    amount_mad = Column(Float, nullable=False)
+    amount_mad = Column(Numeric(12, 2), nullable=False)
     logged_by = Column(String(36), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)

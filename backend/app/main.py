@@ -4,6 +4,7 @@ Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
 Licensed under the On-Premise Proprietary Software License Agreement.
 """
 
+import os
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Request
@@ -45,9 +46,23 @@ async def add_avyr_headers(request: Request, call_next):
     response.headers["X-Copyright"] = "Copyright (c) 2026 AVYR Digital. All Rights Reserved."
     return response
 
+raw_origins = os.getenv("ALLOWED_ORIGINS", "")
+if raw_origins:
+    origins = [o.strip() for o in raw_origins.split(",") if o.strip()]
+else:
+    origins = [
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*(\.onrender\.com|\.fly\.dev|\.koyeb\.app|localhost)$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

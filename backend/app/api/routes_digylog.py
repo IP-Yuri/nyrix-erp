@@ -152,7 +152,7 @@ def get_live_tracking(
                 "sku": itm.product_sku,
                 "name": itm.product.name if itm.product else itm.product_sku,
                 "quantity": itm.quantity,
-                "unit_price": itm.unit_price or 0.0
+                "unit_price": float(itm.unit_price or 0.0)
             })
 
     return {
@@ -162,7 +162,7 @@ def get_live_tracking(
             "city": order.city if order else None,
             "status": order.status.value if order else None,
             "payment_status": order.payment_status.value if order else None,
-            "cod_amount": order.cod_amount if order else 0.0,
+            "cod_amount": float(order.cod_amount or 0.0) if order else 0.0,
             "type": order.type.value if order else None,
             "items": items_list
         } if order else None,

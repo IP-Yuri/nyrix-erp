@@ -29,8 +29,8 @@ def accept_transfer(id: str, db: Session = Depends(get_db), current_user: User =
     if transfer.status == TransferStatusEnum.ACCEPTED:
         raise HTTPException(status_code=400, detail="Already ACCEPTED")
         
-    product = db.query(Product).filter(Product.sku == transfer.product_sku).first()
-    if product.global_stock < transfer.quantity:
+    product = db.query(Product).filter(Product.sku == transfer.product_sku).with_for_update().first()
+    if not product or product.global_stock < transfer.quantity:
         raise HTTPException(status_code=400, detail="Insufficient global stock")
         
     transfer.status = TransferStatusEnum.ACCEPTED
@@ -58,7 +58,7 @@ def claim_transfer(id: str, req: TransferClaimReq, db: Session = Depends(get_db)
         quantity_missing=req.quantity_missing if req.quantity_missing > 0 else transfer.quantity,
         reason=f"[Lot Transfert {id}] {req.reason}",
         reported_by=str(current_user.id),
-        status=DiscrepancyStatusEnum.PENDING
+        status=DiscrepancyStatusEnum.PENDING_APPROVAL
     )
     db.add(discrepancy)
     transfer.status = TransferStatusEnum.REJECTED
@@ -79,21 +79,29 @@ def get_packing_history(db: Session = Depends(get_db)):
 
 @router.put("/orders/{tracking_number}/pack")
 def pack_order(tracking_number: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    order = db.query(Order).filter(Order.tracking_number == tracking_number).first()
+    order = db.query(Order).options(joinedload(Order.items)).filter(Order.tracking_number == tracking_number).first()
     if not order:
         raise HTTPException(status_code=404)
         
     if order.status == OrderStatusEnum.READY:
         raise HTTPException(status_code=400, detail="Already READY")
         
+    # Lock products with with_for_update (sorted SKUs to prevent deadlocks)
+    skus = sorted({item.product_sku for item in order.items})
+    products_map = {
+        p.sku: p for p in db.query(Product).filter(Product.sku.in_(skus)).with_for_update().all()
+    }
+
     # Verify stock
     for item in order.items:
-        if item.product.packer_stock < item.quantity:
+        prod = products_map.get(item.product_sku)
+        if not prod or prod.packer_stock < item.quantity:
             raise HTTPException(status_code=400, detail=f"Insufficient packer stock for {item.product_sku}")
             
     # Deduct stock and log
     for item in order.items:
-        item.product.packer_stock -= item.quantity
+        prod = products_map[item.product_sku]
+        prod.packer_stock -= item.quantity
         ledger = StockLedger(
             product_sku=item.product_sku,
             user_id=str(current_user.id),

@@ -1,13 +1,8 @@
 // NYRIX ERP - Authentication & Password Management Core v2.2
 
-// 1. Quick Fill Helper for Dev/Test
-window.quickFill = function(role) {
-    const u = document.getElementById('username');
-    const p = document.getElementById('password');
-    if (u) u.value = role;
-    if (p) p.value = 'nyrix2026';
-    const err = document.getElementById('error-banner');
-    if (err) err.classList.add('hidden');
+// 1. Quick Fill Helper - Disabled in Production
+window.quickFill = function() {
+    console.warn("L'auto-remplissage rapide est désactivé pour des raisons de sécurité.");
 };
 
 // 2. Toggle Password Visibility (Eye Icon)
@@ -50,6 +45,10 @@ window.openForgotModal = function() {
     }
     const rp = document.getElementById('reset-new-password');
     if (rp) rp.value = '';
+    const rotp = document.getElementById('reset-otp-code');
+    if (rotp) rotp.value = '';
+    const rk = document.getElementById('reset-recovery-key');
+    if (rk) rk.value = '';
     const msg = document.getElementById('reset-msg');
     if (msg) {
         msg.className = 'hidden mb-4 p-3 rounded-lg text-xs leading-relaxed';
@@ -64,11 +63,95 @@ window.closeForgotModal = function() {
     modal.classList.remove('flex');
 };
 
+// Monitor username for Option B (operational accounts) vs Option C (Admin OTP)
+window.onResetUsernameInput = function(val) {
+    const u = (val || '').trim().toLowerCase();
+    const msg = document.getElementById('reset-msg');
+    const otpContainer = document.getElementById('otp-container');
+    const btnRequestOtp = document.getElementById('btn-request-otp');
+
+    if (u === 'karime' || u === 'packer' || u === 'mehdi') {
+        if (msg) {
+            msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-amber-50 text-amber-800 border border-amber-200 block';
+            msg.innerHTML = `
+                <div class="font-semibold mb-0.5">ℹ️ Compte Opérationnel (Option B)</div>
+                <div>Pour des raisons de sécurité, la réinitialisation en ligne est désactivée pour les collaborateurs. Veuillez contacter directement <strong>Othmane (DSI)</strong> au Poste 4022 pour renouveler votre accès depuis son tableau de bord interne.</div>
+            `;
+        }
+        if (otpContainer) otpContainer.classList.add('hidden');
+        if (btnRequestOtp) btnRequestOtp.classList.add('hidden');
+    } else {
+        if (msg && msg.classList.contains('bg-amber-50')) {
+            msg.className = 'hidden mb-4 p-3 rounded-lg text-xs leading-relaxed';
+            msg.innerHTML = '';
+        }
+        if (otpContainer) otpContainer.classList.remove('hidden');
+        if (btnRequestOtp) btnRequestOtp.classList.remove('hidden');
+    }
+};
+
+// Request 6-digit OTP code by email for Admin (Option C)
+window.requestAdminOtp = async function() {
+    const uname = document.getElementById('reset-username')?.value.trim();
+    const msg = document.getElementById('reset-msg');
+    const btnOtp = document.getElementById('btn-request-otp');
+
+    if (!uname) {
+        if (msg) {
+            msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+            msg.textContent = "Veuillez d'abord saisir votre nom d'utilisateur (ex: othmane).";
+        }
+        return;
+    }
+
+    if (btnOtp) {
+        btnOtp.disabled = true;
+        btnOtp.innerText = "Envoi OTP...";
+    }
+
+    try {
+        const res = await apiCall('/auth/request-admin-otp', {
+            method: 'POST',
+            body: JSON.stringify({ username: uname })
+        });
+        const data = await res.json();
+        if (res && res.status === 200) {
+            if (msg) {
+                msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-blue-50 text-blue-800 border border-blue-200 block';
+                msg.innerHTML = `<div class="font-semibold mb-1">✓ ${data.message}</div>`;
+                if (data.otp_test_hint) {
+                    msg.innerHTML += `<div class="text-[11px] text-blue-600 mt-1 font-mono">Code OTP DSI : <strong>${data.otp_test_hint}</strong> (adresse e-mail en attente)</div>`;
+                    const otpInput = document.getElementById('reset-otp-code');
+                    if (otpInput) otpInput.value = data.otp_test_hint;
+                }
+            }
+        } else {
+            if (msg) {
+                msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+                msg.textContent = data.detail || "Erreur lors de la demande du code OTP.";
+            }
+        }
+    } catch (err) {
+        console.error("Erreur OTP:", err);
+        if (msg) {
+            msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+            msg.textContent = "Erreur de communication avec le serveur pour l'envoi de l'OTP.";
+        }
+    } finally {
+        if (btnOtp) {
+            btnOtp.disabled = false;
+            btnOtp.innerText = "Demander code OTP e-mail";
+        }
+    }
+};
+
 // 4. Handle Password Reset Request
 window.handleResetPassword = async function(e) {
     if (e) e.preventDefault();
     const uname = document.getElementById('reset-username')?.value.trim();
     const newPwd = document.getElementById('reset-new-password')?.value.trim();
+    const otpCode = document.getElementById('reset-otp-code')?.value.trim();
+    const recoveryKey = document.getElementById('reset-recovery-key')?.value.trim();
     const msg = document.getElementById('reset-msg');
     const btn = document.getElementById('submit-reset-btn');
 
@@ -80,15 +163,48 @@ window.handleResetPassword = async function(e) {
         return;
     }
 
+    const lowerU = uname.toLowerCase();
+    if (lowerU === 'karime' || lowerU === 'packer' || lowerU === 'mehdi') {
+        if (msg) {
+            msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-amber-50 text-amber-800 border border-amber-200 block';
+            msg.innerHTML = `
+                <div class="font-semibold mb-0.5">ℹ️ Accès Opérationnel (Option B)</div>
+                <div>La réinitialisation en ligne est désactivée pour les collaborateurs. Veuillez contacter <strong>Othmane (DSI)</strong> au Poste 4022 pour renouveler votre accès depuis son tableau de bord interne.</div>
+            `;
+        }
+        return;
+    }
+
+    if (!newPwd || newPwd.length < 6) {
+        if (msg) {
+            msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+            msg.textContent = "Le nouveau mot de passe est obligatoire (minimum 6 caractères).";
+        }
+        return;
+    }
+
+    if (!otpCode && !recoveryKey) {
+        if (msg) {
+            msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-red-50 text-red-700 border border-red-200 block';
+            msg.textContent = "Veuillez saisir le code OTP envoyé par e-mail (ou le code d'urgence DSI).";
+        }
+        return;
+    }
+
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<span class="animate-spin inline-block mr-1">⟳</span><span>Réinitialisation...</span>';
+        btn.innerHTML = '<span class="animate-spin inline-block mr-1">⟳</span><span>Validation...</span>';
     }
 
     try {
         const res = await apiCall('/auth/reset-password', {
             method: 'POST',
-            body: JSON.stringify({ username: uname, new_password: newPwd || null })
+            body: JSON.stringify({
+                username: uname,
+                new_password: newPwd,
+                otp_code: otpCode || null,
+                recovery_key: recoveryKey || null
+            })
         });
 
         if (res && res.status === 200) {
@@ -97,33 +213,26 @@ window.handleResetPassword = async function(e) {
                 msg.className = 'mb-4 p-3 rounded-lg text-xs leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-200 block';
                 msg.innerHTML = `
                     <div class="font-semibold mb-1">✓ ${data.message}</div>
-                    <div>Mot de passe d'accès : <code class="font-mono bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-900 font-bold">${data.new_password}</code></div>
-                    <div class="text-[11px] text-emerald-700 mt-1">Formulaire pré-rempli. Fermeture de la fenêtre...</div>
+                    <div class="text-[11px] text-emerald-700">Votre mot de passe a été mis à jour avec succès. Veuillez vous connecter.</div>
                 `;
             }
 
-            // Fill login form
+            // Fill username and reset password input on login form
             const loginU = document.getElementById('username');
             const loginP = document.getElementById('password');
             if (loginU) loginU.value = data.username;
             if (loginP) {
-                loginP.value = data.new_password;
-                // Leave it in clear text so user sees the newly configured password
-                loginP.type = 'text';
-                loginP.classList.remove('tracking-widest');
-                const eyeOpen = document.getElementById('eye-open-icon');
-                const eyeClosed = document.getElementById('eye-closed-icon');
-                if (eyeOpen) eyeOpen.classList.add('hidden');
-                if (eyeClosed) eyeClosed.classList.remove('hidden');
+                loginP.value = '';
+                loginP.type = 'password';
+                loginP.classList.add('tracking-widest');
             }
 
             setTimeout(() => {
                 window.closeForgotModal();
-                const btnLogin = document.getElementById('login-btn');
-                if (btnLogin) btnLogin.focus();
+                if (loginP) loginP.focus();
             }, 1800);
         } else {
-            let errorText = "Utilisateur non trouvé dans le système.";
+            let errorText = "Échec de la réinitialisation.";
             if (res) {
                 try {
                     const errJson = await res.json();
@@ -144,7 +253,7 @@ window.handleResetPassword = async function(e) {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<span>Réinitialiser</span>';
+            btn.innerHTML = '<span>Valider &amp; Réinitialiser</span>';
         }
     }
 };

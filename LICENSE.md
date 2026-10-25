@@ -4,7 +4,7 @@
 **Version:** 1.0 (Enterprise Release)  
 **Licensor:** Salaheddine CHIKHI, doing business as **AVYR Digital** ("Licensor")  
 **Headquarters / Jurisdiction:** Casablanca, Kingdom of Morocco  
-**Contact Emails:** [s.chikhi@avyrdigital.com](mailto:s.chikhi@avyrdigital.com) | [contact@avyrdigital.com](mailto:contact@avyrdigital.com)  
+**Contact Emails:** s.chikhi@avyrdigital.com | contact@avyrdigital.com  
 
 ---
 
@@ -38,7 +38,7 @@ BY INSTALLING, COPYING, DEPLOYING ON ON-PREMISE INFRASTRUCTURE, OR OTHERWISE USI
    All worldwide copyrights, intellectual property rights, moral rights, and trade secrets in and to the Software are and shall remain the sole and exclusive property of **Salaheddine CHIKHI (operating under the trade name AVYR Digital)**.
 
 3. **Client Customizations & Derivatives:**  
-   Any adaptations, customizations, configurations, bug fixes, patches, or extensions implemented in, on, or around the Software—whether developed by the Licensor or requested by the Licensee—remain the exclusive intellectual property of the Licensor and are covered under this Agreement.
+   Any adaptations, customizations, configurations, bug fixes, patches, or extensions implemented in, on, or around the Software—whether developed by the Licensor or requested by the Licensee—remain the exclusive intellectual property of the Licensor and are covered under this Agreement. **However, Licensor agrees not to license, sell, or distribute any custom business logic or proprietary operational modules specifically commissioned and paid for by the Licensee to any direct market competitors of the Licensee.**
 
 ---
 
@@ -68,13 +68,15 @@ Upon reasonable prior notice of no less than five (5) business days, the Licenso
 
 ---
 
-### 6. DISCLAIMER OF WARRANTIES ("AS IS")
+### 6. LIMITED WARRANTY & DISCLAIMERS
 
-1. **AS IS Basis:**  
-   TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED BY THE LICENSOR ON AN **"AS IS"** AND **"AS AVAILABLE"** BASIS, WITH ALL FAULTS AND DEFECTS.
-2. **No Implied Warranties:**  
-   THE LICENSOR EXPRESSLY DISCLAIMS ALL WARRANTIES, WHETHER STATUTORY, EXPRESS, OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OPERATIONAL UPTIME, FREEDOM FROM PROGRAMMING BUGS, COMPATIBILITY WITH ARBITRARY HARDWARE OR OPERATING SYSTEMS, OR NON-INFRINGEMENT.
-3. **Operational Responsibility:**  
+1. **Limited Warranty:**  
+   Licensor warrants that for a period of ninety (90) days from the initial installation date, the Software will perform substantially in accordance with its accompanying documentation. Licensor does not warrant that the Software will be completely error-free, uninterrupted, or that all non-material errors will be corrected.
+2. **Exclusive Remedy:**  
+   Licensee's sole and exclusive remedy for a breach of this limited warranty shall be, at the Licensor's discretion, either the correction of the reproducible defect or a proportional refund of the fees paid for the defective module.
+3. **Disclaimer of Implied Warranties:**  
+   EXCEPT FOR THE LIMITED WARRANTY EXPRESSED ABOVE, THE SOFTWARE IS PROVIDED ON AN **"AS IS"** AND **"AS AVAILABLE"** BASIS. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR EXPRESSLY DISCLAIMS ALL OTHER WARRANTIES, WHETHER STATUTORY, EXPRESS, OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OPERATIONAL UPTIME, OR NON-INFRINGEMENT.
+4. **Operational Responsibility:**  
    The Licensee assumes complete and exclusive responsibility for verifying the accuracy of inventory records, invoices, financial figures, customs declarations, shipping statuses, and accounting computations before relying on them for commercial, tax, or legal filings.
 
 ---
@@ -90,16 +92,22 @@ Upon reasonable prior notice of no less than five (5) business days, the Licenso
 
 ---
 
-### 8. TERMINATION
+### 8. THIRD-PARTY IP INDEMNIFICATION
+
+Licensor will defend and indemnify Licensee against any third-party claims that the Software, unmodified and used as authorized under this Agreement, infringes a valid copyright or patent, provided that Licensee notifies Licensor promptly in writing of the claim, allows Licensor sole control of the defense and settlement, and cooperates fully with Licensor in the defense.
+
+---
+
+### 9. TERMINATION
 
 1. **Termination for Breach:**  
-   This license terminates immediately and automatically without judicial notice if the Licensee violates any obligation, restriction, or copyright provision set forth in this Agreement, or fails to pay agreed licensing fees.
+   This Agreement may be terminated by Licensor if Licensee commits a material breach of this Agreement and fails to cure such breach within thirty (30) days after receiving written notice of the breach. However, any breach of intellectual property rights, confidentiality, or unauthorized deployment (Sections 2, 3, and 4) by the Licensee may result in immediate termination without a cure period.
 2. **Post-Termination Obligations:**  
    Upon termination, the Licensee must immediately cease all access, unmount, purge, and permanently erase all instances, copies, and container images of the Software from all on-premise servers, hard drives, and memory media, and provide written certification of such destruction to the Licensor.
 
 ---
 
-### 9. GOVERNING LAW & EXCLUSIVE JURISDICTION
+### 10. GOVERNING LAW & EXCLUSIVE JURISDICTION
 
 1. **Governing Law:**  
    This Agreement, its interpretation, and any dispute or claim arising out of or in connection with it or its subject matter shall be governed by, and construed in accordance with, the laws of the **Kingdom of Morocco**, without regard to conflict of law principles.
@@ -108,17 +116,17 @@ Upon reasonable prior notice of no less than five (5) business days, the Licenso
 
 ---
 
-### 10. ENTIRE AGREEMENT & CONTACT
+### 11. ENTIRE AGREEMENT & CONTACT
 
 This document constitutes the entire legal agreement between the Licensee and **Salaheddine CHIKHI / AVYR Digital** regarding the on-premise use of the Software, superseding all prior oral or written discussions or representations.
 
 For official licensing inquiries, enterprise expansion agreements, or authorized multi-tenant permits, contact:
 
-* **Licensor:** Salaheddine CHIKHI  
-* **Brand / Agency:** AVYR Digital  
-* **Location:** Casablanca, Morocco  
-* **Direct Email:** [s.chikhi@avyrdigital.com](mailto:s.chikhi@avyrdigital.com)  
-* **General Email:** [contact@avyrdigital.com](mailto:contact@avyrdigital.com)  
+- **Licensor:** Salaheddine CHIKHI  
+- **Brand / Agency:** AVYR Digital  
+- **Location:** Casablanca, Morocco  
+- **Direct Email:** s.chikhi@avyrdigital.com  
+- **General Email:** contact@avyrdigital.com  
 
 ---
 *Copyright © 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.*

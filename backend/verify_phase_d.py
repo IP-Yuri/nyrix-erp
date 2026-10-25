@@ -23,6 +23,7 @@ def run_tests():
         ("/js/othmane.js", ".js"),
         ("/js/karime.js", ".js"),
         ("/js/packer.js", ".js"),
+        ("/js/b2b.js", ".js"),
         ("/js/mehdi.js", ".js"),
     ]
     
