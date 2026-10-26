@@ -169,9 +169,9 @@
         <span>Powered by <strong class="text-slate-800">AVYR Digital</strong></span>
       </div>
       <span>•</span>
-      <a href="#" class="hover:text-slate-600 transition">Politique de Sécurité</a>
+      <button type="button" onclick="window.openSecurityPolicyModal()" class="hover:text-slate-600 transition cursor-pointer bg-transparent border-none p-0 text-xs text-slate-400">Politique de Sécurité</button>
       <span>•</span>
-      <a href="#" class="hover:text-slate-600 transition">Mentions Légales</a>
+      <button type="button" onclick="window.openLegalModal()" class="hover:text-slate-600 transition cursor-pointer bg-transparent border-none p-0 text-xs text-slate-400">Mentions Légales &amp; Responsabilité</button>
       <span>•</span>
       <button type="button" onclick="window.openForgotModal()" class="hover:text-slate-600 transition cursor-pointer bg-transparent border-none p-0 text-xs text-slate-400">Assistance DSI</button>
     </div>
@@ -270,6 +270,194 @@
       <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
         <span>Assistance DSI : support@nyrix.ma</span>
         <span>Poste interne : 4022</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 1 : Politique de Sécurité & d'Accès Système -->
+  <div id="security-policy-modal" class="fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Politique de Sécurité &amp; d'Accès Système</h3>
+            <p class="text-xs text-slate-500">Charte d'Usage Professionnel &amp; Règles de Confidentialité NYRIX ERP</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.closeSecurityPolicyModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Warning Banner -->
+      <div class="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5 shrink-0">
+        <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <span class="leading-relaxed">
+          <strong>Avertissement :</strong> Ce système est réservé aux collaborateurs dûment autorisés. Tout accès non autorisé, falsification de stocks ou divulgation de données constitue une infraction passible de sanctions disciplinaires et de poursuites judiciaires.
+        </span>
+      </div>
+
+      <!-- Scrollable Policy Articles -->
+      <div class="mt-4 overflow-y-auto pr-2 space-y-4 text-xs text-slate-600 leading-relaxed">
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 1 : Accès Strictement Restreint &amp; Nominatif
+          </h4>
+          <p>
+            L'accès à la plateforme NYRIX ERP est strictement conditionné à l'attribution préalable d'un compte individuel par l'Administrateur DSI. Chaque collaborateur (Direction, Quai &amp; Réception, Conditionnement, Ventes B2B) n'est autorisé à accéder qu'aux modules et données strictement nécessaires à l'exercice de ses fonctions.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 2 : Responsabilité Exclusive des Identifiants (Interdiction de Partage)
+          </h4>
+          <p>
+            Chaque collaborateur est l'unique gardien légal de son mot de passe. Le partage d'identifiants entre collègues, le prêt de session ainsi que l'inscription des mots de passe sur des supports matériels visibles (post-it, bureau, terminaux ou tablettes) sont formellement prohibés. <strong>Toute opération enregistrée sous la session d'un utilisateur est juridiquement et disciplinairement réputée avoir été effectuée par celui-ci.</strong>
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 3 : Traçabilité Intégrale &amp; Grand Livre d'Audit Inaltérable
+          </h4>
+          <p>
+            Toutes les transactions physiques et financières (réception d'arrivages, transferts d'articles, déductions de stock, signalements d'anomalies, annulations et modifications d'accès) sont enregistrées en temps réel dans un Grand Livre d'Audit (<code>StockLedger</code>), horodatées avec identifiant de l'opérateur et adresse IP. L'utilisateur reconnaît et accepte expressément cette journalisation technique indispensable à l'intégrité de la chaîne logistique.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 4 : Postes et Tablettes Partagés en Entrepôt
+          </h4>
+          <p>
+            Sur les postes fixes de quai et les tablettes de préparation mobiles, chaque collaborateur est tenu de verrouiller ou fermer sa session immédiatement dès la fin de ses opérations. Aucune réclamation ou contestation d'erreur matérielle résultant d'une session laissée ouverte sans surveillance ne sera recevable.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 5 : Secret Professionnel &amp; Données Commerciales
+          </h4>
+          <p>
+            Les coûts d'achat, les marges brutes, les coordonnées des fournisseurs internationaux ainsi que les coordonnées nominatives des clients finaux constituent des secrets commerciaux protégés. L'extraction, la capture d'écran, l'export non autorisé ou la transmission de ces données à des tiers est formellement interdite.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+        <span>NYRIX ERP Security Protocol • Version 1.0</span>
+        <button type="button" onclick="window.closeSecurityPolicyModal()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition cursor-pointer">
+          J'ai compris &amp; J'accepte
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2 : Mentions Légales & Limitation de Responsabilité -->
+  <div id="legal-modal" class="fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative border border-slate-200 max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shadow-sm shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-base">Mentions Légales &amp; Limitation de Responsabilité</h3>
+            <p class="text-xs text-slate-500">Propriété Intellectuelle, Conditions de Licence &amp; Décharge Opérationnelle</p>
+          </div>
+        </div>
+        <button type="button" onclick="window.closeLegalModal()" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <!-- Legal Info Strip -->
+      <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs flex items-center justify-between shrink-0">
+        <div>
+          <span class="text-slate-500 block text-[10px] uppercase font-bold tracking-wider">Éditeur &amp; Concepteur du Système</span>
+          <strong class="text-slate-900 font-semibold">Salaheddine CHIKHI / AVYR Digital</strong> • Casablanca, Royaume du Maroc
+        </div>
+        <span class="text-[11px] font-mono bg-white px-2 py-1 rounded border border-slate-200 text-slate-600">Licence On-Premise</span>
+      </div>
+
+      <!-- Scrollable Legal Clauses -->
+      <div class="mt-4 overflow-y-auto pr-2 space-y-4 text-xs text-slate-600 leading-relaxed">
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 1 : Réserve de Propriété Intellectuelle &amp; Droits d'Auteur
+          </h4>
+          <p>
+            Le système <strong>NYRIX ERP</strong> (incluant l'architecture backend FastAPI, les modèles de données PostgreSQL, les algorithmes de réconciliation, les interfaces utilisateur et la documentation) constitue une œuvre de l'esprit originale protégée par les conventions internationales et la législation relative au droit d'auteur. La propriété intellectuelle demeure la propriété exclusive et inaliénable de <strong>Salaheddine CHIKHI (AVYR Digital)</strong>. L'entreprise cliente ne dispose que d'un droit d'usage on-premise non transférable et non sous-licenciable (conformément au fichier <code class="font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-800">LICENSE.md</code>).
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 2 : Fourniture « EN L'ÉTAT » (AS IS) &amp; Décharge de Responsabilité
+          </h4>
+          <p>
+            Le logiciel est fourni « EN L'ÉTAT », sans garantie d'adéquation à un usage commercial particulier. <strong>En aucun cas l'auteur / concepteur (AVYR Digital) ne pourra être tenu responsable des dommages directs ou indirects</strong>, y compris les pertes d'exploitation, interruptions d'activité, pertes de profits ou manques à gagner commerciaux, pertes de commandes ou préjudices financiers subis par le Client ou des tiers.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 3 : Non-Responsabilité pour Erreurs Opérationnelles &amp; Fraudes Internes
+          </h4>
+          <p>
+            L'auteur décline toute responsabilité quant à l'exactitude des données saisies par les opérateurs de l'entreprise. Le concepteur n'est en aucun cas responsable :
+          </p>
+          <ul class="list-disc pl-5 mt-1 space-y-0.5 text-slate-500">
+            <li>Des erreurs matérielles de pointage, de comptage physique de conteneurs ou de saisie de factures douanières ;</li>
+            <li>Des disparitions, vols ou détériorations physiques de marchandises au sein des entrepôts ;</li>
+            <li>Des malversations, fraudes internes, usurpations de comptes ou négligences commises par le personnel du Client.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 4 : Dépendances Tiers &amp; Réseaux (Digylog, Google, Hébergement)
+          </h4>
+          <p>
+            Le système interagit avec des infrastructures tierces indépendantes (APIs du transporteur Digylog, Google Sheets, hébergement Hostinger et base de données cloud Neon). Le concepteur ne saurait être tenu responsable des pannes de réseau, interruptions de service de messagerie, retards d'actualisation de statut de colis ou modifications de formats de données imputables à ces tiers.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-800 text-[13px] flex items-center gap-1.5 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            Article 5 : Données Personnelles &amp; Conformité Loi 09-08 (Maroc)
+          </h4>
+          <p>
+            Dans le cadre du traitement des données nominatives de livraison (noms, numéros de téléphone et adresses des clients acheteurs), <strong>l'Entreprise cliente agit en qualité unique et exclusive de Responsable du Traitement</strong> au sens de la Loi marocaine n° 09-08. Il appartient au Client d'accomplir toute déclaration requise auprès de la CNDP. Le concepteur logiciel n'agit qu'en qualité de fournisseur de solution technique et ne conserve aucun droit ni usage sur ces données.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+        <span>© 2026 AVYR Digital • Propriété Intellectuelle Protégée</span>
+        <button type="button" onclick="window.closeLegalModal()" class="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition cursor-pointer">
+          Fermer
+        </button>
       </div>
     </div>
   </div>

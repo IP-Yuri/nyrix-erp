@@ -63,6 +63,35 @@ window.closeForgotModal = function() {
     modal.classList.remove('flex');
 };
 
+// 3.b Security Policy & Legal Notice Modals
+window.openSecurityPolicyModal = function() {
+    const modal = document.getElementById('security-policy-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeSecurityPolicyModal = function() {
+    const modal = document.getElementById('security-policy-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.openLegalModal = function() {
+    const modal = document.getElementById('legal-modal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeLegalModal = function() {
+    const modal = document.getElementById('legal-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
 // Monitor username for Option B (operational accounts) vs Option C (Admin OTP)
 window.onResetUsernameInput = function(val) {
     const u = (val || '').trim().toLowerCase();
@@ -301,14 +330,18 @@ function setupLoginForm() {
     }
 
     // Modal background click dismiss
-    const modal = document.getElementById('forgot-password-modal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                window.closeForgotModal();
-            }
-        });
-    }
+    ['forgot-password-modal', 'security-policy-modal', 'legal-modal'].forEach(id => {
+        const m = document.getElementById(id);
+        if (m) {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) {
+                    if (id === 'forgot-password-modal') window.closeForgotModal();
+                    else if (id === 'security-policy-modal') window.closeSecurityPolicyModal();
+                    else if (id === 'legal-modal') window.closeLegalModal();
+                }
+            });
+        }
+    });
 }
 
 // Ensure execution whether DOM is ready or loading
