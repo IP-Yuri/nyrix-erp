@@ -1,8 +1,14 @@
 // NYRIX ERP - B2B Commercial Manager JavaScript Core
 
-window.logout = function() {
-    localStorage.clear();
-    window.location.href = '/';
+window.logout = async function() {
+    try {
+        await apiCall('/auth/logout', { method: 'POST' });
+    } catch (e) {
+        console.warn("Audit logout notify error:", e);
+    } finally {
+        localStorage.clear();
+        window.location.href = '/';
+    }
 };
 
 let inventoryList = [];

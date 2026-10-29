@@ -175,3 +175,17 @@ class ProductReturnOut(BaseModel):
 
     model_config = {"from_attributes": True}
 
+class AuthAuditLogOut(BaseModel):
+    id: str
+    user_id: Optional[str] = None
+    username: str
+    role: Optional[str] = None
+    action: str
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    details: Optional[str] = None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+

@@ -1,16 +1,58 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 from backend.app.core.database import get_db
 from backend.app.core.security import verify_password, get_password_hash, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from backend.app.core.dependencies import get_current_user
-from backend.app.schemas.schemas import LoginRequest, TokenResponse, UserOut
-from backend.app.models.models import User
+from backend.app.schemas.schemas import LoginRequest, TokenResponse, UserOut, AuthAuditLogOut
+from backend.app.models.models import User, AuthAuditLog, AuthActionEnum
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+def _get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    if request.client and request.client.host:
+        return request.client.host
+    return "127.0.0.1"
+
+def _log_auth_event(
+    db: Session,
+    request: Request,
+    action: AuthActionEnum,
+    user: Optional[User] = None,
+    username: Optional[str] = None,
+    details: Optional[str] = None
+):
+    try:
+        ip = _get_client_ip(request)
+        ua = (request.headers.get("user-agent") or "")[:500]
+        role_str = None
+        u_id = None
+        u_name = username or ""
+        if user:
+            u_id = str(user.id)
+            u_name = user.username
+            role_str = user.role.value if hasattr(user.role, "value") else str(user.role)
+        
+        audit_entry = AuthAuditLog(
+            user_id=u_id,
+            username=u_name,
+            role=role_str,
+            action=action,
+            ip_address=ip,
+            user_agent=ua,
+            details=details
+        )
+        db.add(audit_entry)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"[AUTH AUDIT ERROR] Could not record auth log: {e}")
 
 def authenticate_user(db: Session, username: str, password: str):
     user = db.query(User).filter(User.username == username).first()
@@ -33,31 +75,66 @@ def _create_token_response(user):
     )
 
 @router.post("/login", response_model=TokenResponse)
-def login_json(request: LoginRequest, db: Session = Depends(get_db)):
+def login_json(request: LoginRequest, http_request: Request, db: Session = Depends(get_db)):
     user = authenticate_user(db, request.username, request.password)
     if not user:
+        _log_auth_event(db, http_request, AuthActionEnum.FAILED_LOGIN, username=request.username, details="Identifiants incorrects")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    _log_auth_event(db, http_request, AuthActionEnum.LOGIN, user=user)
     return _create_token_response(user)
 
 @router.post("/token", response_model=TokenResponse)
-def login_form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login_form(http_request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
+        _log_auth_event(db, http_request, AuthActionEnum.FAILED_LOGIN, username=form_data.username, details="Identifiants incorrects")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    _log_auth_event(db, http_request, AuthActionEnum.LOGIN, user=user)
     return _create_token_response(user)
+
+@router.post("/logout")
+def logout(
+    http_request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    _log_auth_event(db, http_request, AuthActionEnum.LOGOUT, user=current_user)
+    return {
+        "status": "success",
+        "message": f"Session fermée avec succès pour l'utilisateur '{current_user.username}'."
+    }
+
+@router.get("/audit-logs", response_model=List[AuthAuditLogOut])
+def get_auth_audit_logs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    limit: int = 100,
+    username: Optional[str] = None
+):
+    current_role = current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role)
+    if current_role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé à l'Administrateur DSI."
+        )
+    q = db.query(AuthAuditLog).order_by(AuthAuditLog.created_at.desc())
+    if username and username.strip():
+        q = q.filter(AuthAuditLog.username == username.strip())
+    return q.limit(limit).all()
 
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):
     role_str = current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role)
     return UserOut(id=str(current_user.id), username=current_user.username, role=role_str)
+
 
 from typing import Optional, List
 import os

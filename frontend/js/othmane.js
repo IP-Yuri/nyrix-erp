@@ -20,9 +20,15 @@ function formatDateTime(isoStr) {
 }
 
 // Logout
-window.logout = function() {
-    localStorage.clear();
-    window.location.href = '/';
+window.logout = async function() {
+    try {
+        await apiCall('/auth/logout', { method: 'POST' });
+    } catch (e) {
+        console.warn("Audit logout notify error:", e);
+    } finally {
+        localStorage.clear();
+        window.location.href = '/';
+    }
 };
 
 // View Switcher (Importation vs Factures vs Stock vs Ledger vs Users)
@@ -1581,6 +1587,9 @@ window.loadUsers = async function() {
                 </tr>
             `;
         }).join('');
+
+        // Also load real-time auth audit logs
+        window.loadAuthAuditLogs();
     } catch (err) {
         console.error("Erreur loadUsers:", err);
         if (tbody) {
@@ -1678,3 +1687,101 @@ window.confirmAdminResetPassword = async function() {
         }
     }
 };
+
+// -------------------------------------------------------------
+// Auth & Sessions Audit Ledger (Connexions & Déconnexions)
+// -------------------------------------------------------------
+window.loadAuthAuditLogs = async function(filterUsername = '') {
+    const tbody = document.getElementById('auth-audit-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400 italic font-sans">Chargement des journaux de sessions...</td></tr>`;
+
+    try {
+        const queryParam = filterUsername ? `?username=${encodeURIComponent(filterUsername)}` : '';
+        const res = await apiCall(`/auth/audit-logs${queryParam}`);
+        if (!res || !res.ok) throw new Error("Impossible de charger les journaux d'audit de connexion");
+        const logs = await res.json();
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400 italic font-sans">Aucun événement de session enregistré pour le moment.</td></tr>`;
+            return;
+        }
+
+        const actionMeta = {
+            'LOGIN': {
+                label: 'CONNEXION RÉUSSIE',
+                icon: 'login',
+                badge: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            },
+            'LOGOUT': {
+                label: 'DÉCONNEXION (SESSION CLOSE)',
+                icon: 'logout',
+                badge: 'bg-slate-100 text-slate-700 border-slate-200'
+            },
+            'FAILED_LOGIN': {
+                label: 'ÉCHEC D\'AUTHENTIFICATION',
+                icon: 'gpp_bad',
+                badge: 'bg-red-50 text-red-700 border-red-200'
+            }
+        };
+
+        tbody.innerHTML = logs.map(l => {
+            const meta = actionMeta[l.action] || {
+                label: l.action,
+                icon: 'shield',
+                badge: 'bg-slate-100 text-slate-700 border-slate-200'
+            };
+
+            const dateObj = new Date(l.created_at);
+            const dateStr = !isNaN(dateObj) ? dateObj.toLocaleString('fr-FR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }) : l.created_at;
+
+            const clientSummary = l.details || (l.user_agent ? (l.user_agent.length > 45 ? l.user_agent.substring(0, 45) + '...' : l.user_agent) : 'Navigateur Web');
+
+            return `
+                <tr class="hover:bg-slate-50/75 transition-colors">
+                    <td class="py-2.5 px-6 font-semibold text-slate-700 whitespace-nowrap">
+                        ${dateStr}
+                    </td>
+                    <td class="py-2.5 px-6 font-bold text-slate-900 font-mono">
+                        ${l.username || 'Inconnu'}
+                    </td>
+                    <td class="py-2.5 px-6">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                            ${l.role || 'GUEST / EXCLUS'}
+                        </span>
+                    </td>
+                    <td class="py-2.5 px-6">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold border ${meta.badge}">
+                            <span class="material-symbols-outlined text-[15px]">${meta.icon}</span>
+                            <span>${meta.label}</span>
+                        </span>
+                    </td>
+                    <td class="py-2.5 px-6 text-slate-600 font-mono">
+                        ${l.ip_address || '127.0.0.1'}
+                    </td>
+                    <td class="py-2.5 px-6 text-slate-500 font-sans text-xs truncate max-w-[240px]" title="${l.user_agent || ''}">
+                        ${clientSummary}
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (err) {
+        console.error("Erreur loadAuthAuditLogs:", err);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-red-500 font-sans">Erreur lors de la récupération des journaux d'audit.</td></tr>`;
+        }
+    }
+};
+
+window.filterAuthAuditLogs = function(username) {
+    window.loadAuthAuditLogs(username);
+};
+

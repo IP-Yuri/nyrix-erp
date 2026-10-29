@@ -237,8 +237,11 @@ The codebase includes targeted automated end-to-end and security test suites loc
 
 ## ⚖️ License & Intellectual Property
 
-**NYRIX ERP Core System** is proprietary commercial software licensed under the **On-Premise Proprietary Software License Agreement** ([LICENSE.md](file:///c:/Users/chikh/Downloads/NYRIX_ERP_Project/LICENSE.md)).
+**NYRIX ERP Core System** is commercial turnkey enterprise software governed by the **Turnkey Software Acquisition & Source Code Handover Agreement** ([LICENSE.md](file:///c:/Users/chikh/Downloads/NYRIX_ERP_Project/LICENSE.md)).
 
-* **Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.**
-* **Licensed strictly for on-premise execution by the designated licensee.**
-* **Unauthorized copying, reverse engineering, multi-tenant cloud resale, or distribution is strictly prohibited.**
+* **Architect & Developer:** Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
+* **Governing Law:** Kingdom of Morocco (*Loi n° 2-00 relative aux droits d'auteur et droits voisins*).
+* **Delivery:** Complete source code handover with perpetual, irrevocable, royalty-free operational and modification rights for the purchasing entity.
+* **Attribution:** The digital watermark **"Powered by AVYR Digital"** and author credits remain legally protected and inalienable under Moroccan copyright law.
+* **Background IP:** Core technical architecture, relational models, and generic libraries remain reusable by AVYR Digital for future non-competing platforms.
+

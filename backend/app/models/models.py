@@ -205,3 +205,23 @@ class CODCashBook(Base):
     amount_mad = Column(Numeric(12, 2), nullable=False)
     logged_by = Column(String(36), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class AuthActionEnum(str, enum.Enum):
+    LOGIN = "LOGIN"
+    LOGOUT = "LOGOUT"
+    FAILED_LOGIN = "FAILED_LOGIN"
+
+class AuthAuditLog(Base):
+    __tablename__ = "auth_audit_logs"
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    username = Column(String(255), nullable=False, index=True)
+    role = Column(String(50), nullable=True)
+    action = Column(Enum(AuthActionEnum), nullable=False)
+    ip_address = Column(String(100), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+    details = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    user = relationship("User", foreign_keys=[user_id])
+

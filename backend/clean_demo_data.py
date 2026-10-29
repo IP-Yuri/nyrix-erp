@@ -14,7 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from backend.app.core.database import SessionLocal
 from backend.app.models.models import (
     User, Product, Order, OrderItem, InboundShipment, Transfer,
-    StockLedger, Discrepancy, ProductReturn, CODCashBook, OrderTypeEnum
+    StockLedger, Discrepancy, ProductReturn, CODCashBook, OrderTypeEnum, AuthAuditLog
 )
 from sqlalchemy import or_, func
 
@@ -47,10 +47,14 @@ def clean_system():
         db.query(CODCashBook).delete(synchronize_session=False)
         print(f"[OK] Cleaned Returns & Cash Book: {returns_count} returns, {cash_count} cash book entries.")
 
-        # 5. Clean Stock Ledger
+        # 5. Clean Stock Ledger & Auth Session Audit Logs
         ledger_count = db.query(StockLedger).count()
         db.query(StockLedger).delete(synchronize_session=False)
         print(f"[OK] Cleaned Stock Ledger: {ledger_count} phantom movement entries removed.")
+
+        audit_count = db.query(AuthAuditLog).count()
+        db.query(AuthAuditLog).delete(synchronize_session=False)
+        print(f"[OK] Reset Auth Audit Log: {audit_count} session entries cleared.")
 
         # 6. Clean Fake / Demo Orders (B2B test orders + synthetic Faker/Test/Simulated orders)
         test_orders = db.query(Order).filter(
@@ -98,6 +102,7 @@ def clean_system():
         print(f"- Stock Transfers: {db.query(Transfer).count()}")
         print(f"- Discrepancies: {db.query(Discrepancy).count()}")
         print(f"- Stock Ledger Entries: {db.query(StockLedger).count()}")
+        print(f"- Auth Audit Log Entries: {db.query(AuthAuditLog).count()}")
         print("==================================================")
 
     except Exception as e:

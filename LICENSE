@@ -1,56 +1,65 @@
-ON-PREMISE PROPRIETARY SOFTWARE LICENSE AGREEMENT
-==================================================
+TURNKEY SOFTWARE ACQUISITION & SOURCE CODE HANDOVER AGREEMENT
+=============================================================
 
-Software Name: NYRIX ERP Core System
-Version: 1.0 (Enterprise Release)
-Licensor: Salaheddine CHIKHI, doing business as AVYR Digital ("Licensor")
+Software System: NYRIX ERP Core System
+Version: 1.0 (Enterprise Turnkey Release)
+Author & Lead Architect: Salaheddine CHIKHI, doing business as AVYR Digital ("Developer")
 Headquarters / Jurisdiction: Casablanca, Kingdom of Morocco
-Contact Emails: s.chikhi@avyrdigital.com | contact@avyrdigital.com
+Contact: s.chikhi@avyrdigital.com | contact@avyrdigital.com
+Governing Law: Kingdom of Morocco (Loi n° 2-00 relative aux droits d'auteur et droits voisins)
 
 Copyright (c) 2026 Salaheddine CHIKHI / AVYR Digital. All Rights Reserved.
 
-IMPORTANT LEGAL NOTICE
-----------------------
-This software and its associated source code, binaries, relational database schemas, 
-and documentation (the "Software") are the sole and exclusive proprietary intellectual 
-property of Salaheddine CHIKHI (operating as AVYR Digital).
+SUMMARY OF TERMS & CONDITIONS:
+------------------------------
 
-1. GRANT OF ON-PREMISE LICENSE
-Subject to the terms of this Agreement and full compliance with commercial payment terms, 
-the Licensor grants to the Licensee a limited, non-exclusive, non-transferable, 
-non-sublicensable, revocable license to install and execute the Software strictly in an 
-On-Premise environment on designated hardware or private servers authorized by the Licensor 
-solely for internal operations.
+1. TURNKEY SALE & FULL SOURCE CODE TRANSFER
+The Developer delivers the complete, uncompiled source code (backend, relational 
+database schemas, frontend modules, integrations, documentation) to the Client. 
+This is a one-time turnkey purchase with zero recurring software seat fees, zero 
+cloud lock-in, and zero remote disabling mechanisms.
 
-2. PROPRIETARY RIGHTS & RETENTION OF TITLE
-The Software is LICENSED, NOT SOLD. Delivery or on-premise installation does NOT transfer 
-any title, copyright, or ownership of the Software to the Licensee. All worldwide copyrights, 
-trade secrets, and intellectual property rights remain exclusively with Salaheddine CHIKHI / 
-AVYR Digital.
+2. RIGHTS CONFERRED TO THE CLIENT
+The Developer grants to the Client an exclusive-in-business, perpetual, irrevocable, 
+worldwide, royalty-free right to:
+(a) Self-host, deploy, and execute the Software on any server or private infrastructure 
+    for all internal business and logistics operations;
+(b) Freely modify, adapt, configure, maintain, and expand the source code internally 
+    or via third-party developers;
+(c) The Client shall NOT resell, sublicense, rent, or distribute the Software as an 
+    independent off-the-shelf commercial SaaS offering to external third parties.
 
-3. RESTRICTIONS
-The Licensee shall NOT:
-(a) Copy, distribute, rent, lease, sublicense, loan, or sell copies of the Software;
-(b) Reverse engineer, decompile, disassemble, or attempt to derive the source code or algorithms;
-(c) Modify, obscure, or remove any copyright notices, watermarks, or author credits;
-(d) Use the Software to provide SaaS, hosting, bureau services, or commercial offerings to third parties.
+3. PATERNITY & ATTRIBUTION (WATERMARK PRESERVATION)
+Under Article 9 of Moroccan Copyright Law (Loi n° 2-00), moral rights of paternity 
+are inalienable and perpetual:
+(a) The Client explicitly acknowledges Salaheddine CHIKHI / AVYR Digital as the 
+    sole original author and system architect of the Software.
+(b) The Client agrees to permanently preserve the visible watermark 
+    "Powered by AVYR Digital" / "Engineered by AVYR Digital (Salaheddine CHIKHI)" 
+    within software navigation headers, portal interfaces, login screen, 
+    system footers, HTTP response headers, and source code comments.
+(c) Removing, masking, or obscuring author credits without express written consent 
+    is strictly prohibited.
 
-4. DISCLAIMER OF WARRANTY & LIMITATION OF LIABILITY
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
-INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-PURPOSE, AND NON-INFRINGEMENT.
+4. BACKGROUND IP & DEVELOPER REUSE RIGHTS (TRONC COMMUN)
+The Client owns all custom proprietary business rules and specific brand data. 
+However, all underlying framework architectures, generic database schema designs, 
+authentication systems, inventory deduction algorithms, and technical libraries 
+("Background IP") remain the intellectual property of AVYR Digital.
+AVYR Digital explicitly retains the unrestricted right to reuse, adapt, and deploy 
+these core components and know-how for other past, present, or future clients and projects.
 
-IN NO EVENT SHALL SALAHEDDINE CHIKHI, AVYR DIGITAL, OR ITS AGENTS BE LIABLE FOR ANY CLAIM, 
-DAMAGES, COMMERCIAL INTERRUPTION, LOSS OF PROFITS, DATA LOSS, CUSTOMS DISCREPANCIES, 
-OR OTHER LIABILITY ARISING FROM THE INSTALLATION, USE, OR INABILITY TO USE THE SOFTWARE.
+5. NON-COMPETE ON CUSTOM CONFIGURATION
+The Developer agrees not to deliver the Client's exact tailored operational configuration 
+or proprietary custom business logic to any direct commercial competitor of the Client 
+in the Client's specific retail market niche in Morocco for a period of 12 months.
 
-5. GOVERNING LAW & JURISDICTION
-This Agreement shall be governed by and construed in accordance with the laws of the 
-Kingdom of Morocco. Any dispute arising out of or in connection with this Agreement shall 
-be submitted to the exclusive jurisdiction of the competent Commercial Court of Casablanca 
-(Tribunal de Commerce de Casablanca, Maroc).
+6. GOVERNING LAW & JURISDICTION
+This Agreement is governed by the laws of the Kingdom of Morocco. Any dispute that 
+cannot be resolved amicably shall be submitted to the exclusive jurisdiction of the 
+Commercial Court of Casablanca (Tribunal de Commerce de Casablanca, Maroc).
 
-For inquiries:
-Licensor: Salaheddine CHIKHI (AVYR Digital)
-Email: s.chikhi@avyrdigital.com / contact@avyrdigital.com
+For official inquiries:
+Salaheddine CHIKHI / AVYR Digital
 Casablanca, Morocco
+s.chikhi@avyrdigital.com | contact@avyrdigital.com

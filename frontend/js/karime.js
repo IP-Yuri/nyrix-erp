@@ -13,9 +13,15 @@ window.preparesPageSize = 15;
 window.totalPreparesPages = 1;
 
 // Logout
-window.logout = function() {
-    localStorage.clear();
-    window.location.href = '/';
+window.logout = async function() {
+    try {
+        await apiCall('/auth/logout', { method: 'POST' });
+    } catch (e) {
+        console.warn("Audit logout notify error:", e);
+    } finally {
+        localStorage.clear();
+        window.location.href = '/';
+    }
 };
 
 // Tab Switcher between Inbound, Operations, Colis Préparés, and État des Stocks
